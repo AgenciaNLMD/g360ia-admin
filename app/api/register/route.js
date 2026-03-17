@@ -1,4 +1,5 @@
 import db from "../../../lib/db";
+
 export async function POST(req) {
   try {
     const { nombre, email } = await req.json();
@@ -15,16 +16,23 @@ export async function POST(req) {
 
     // Crear usuario pendiente
     await db.query(
-  `INSERT INTO usuarios 
-  (tenant_id, nombre, email, password_hash, rol, status, activo, creado_en) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-  [
-    null,                 // tenant_id (por ahora null)
-    nombre,
-    email,
-    "",                   // password_hash vacío (porque usaremos Google después)
-    "usuario",            // rol default
-    "pending",            // status correcto
-    true                  // activo
-  ]
-);
+      `INSERT INTO usuarios 
+      (tenant_id, nombre, email, password_hash, rol, status, activo, creado_en) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [
+        null,       // tenant_id
+        nombre,
+        email,
+        "",         // password_hash (porque usaremos Google)
+        "usuario",  // rol default
+        "pending",  // status correcto
+        true        // activo
+      ]
+    );
+
+    return Response.json({ ok: true });
+
+  } catch (error) {
+    return Response.json({ ok: false, error: error.message });
+  }
+}
