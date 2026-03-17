@@ -16,7 +16,7 @@ export async function POST(req) {
     // Crear usuario pendiente
     await db.query(
       "INSERT INTO usuarios (nombre, email, status) VALUES (?, ?, ?)",
-      [nombre, email, "pendiente"]
+      [nombre, email, "pending"]
     );
 
     return Response.json({ ok: true });
