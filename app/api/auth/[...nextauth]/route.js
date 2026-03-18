@@ -14,7 +14,6 @@ const handler = NextAuth({
       authorization: {
         params: {
           prompt: "select_account",
-          display: "popup",
         },
       },
     }),
@@ -50,7 +49,7 @@ const handler = NextAuth({
       return true;
     },
 
-    async session({ session, token }) {
+    async session({ session }) {
       if (session?.user) {
         const [rows] = await db.query(
           "SELECT rol, status FROM usuarios WHERE email = ?",
@@ -65,7 +64,19 @@ const handler = NextAuth({
     },
 
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/pendiente")) return `${baseUrl}/pendiente`;
+      // Si es pendiente, ir a /pendiente
+      if (url.startsWith("/pendiente") || url.includes("/pendiente")) {
+        return `${baseUrl}/pendiente`;
+      }
+      // Si el callbackUrl apunta a /auth-callback, respetarlo
+      if (url.includes("/auth-callback")) {
+        return url.startsWith("http") ? url : `${baseUrl}${url}`;
+      }
+      // Si es una URL relativa válida del mismo dominio
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      // Default: ir a main
       return "https://www.gestion360ia.com.ar/main.html";
     },
   },
