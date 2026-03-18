@@ -1,28 +1,41 @@
+import { NextResponse } from "next/server";
 import db from "../../../lib/db";
 import nodemailer from "nodemailer";
 
 export async function POST(req) {
-  const { email } = await req.json();
+  try {
+    const { email } = await req.json();
 
-  await db.query(
-    "UPDATE usuarios SET status = 'approved' WHERE email = ?",
-    [email]
-  );
+    // 🔹 Aprobar usuario
+    await db.query(
+      "UPDATE usuarios SET status = 'approved' WHERE email = ?",
+      [email]
+    );
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+    // 🔹 Configurar email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-  await transporter.sendMail({
-    from: `"Gestión 360 iA" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Acceso aprobado",
-    text: "Tu cuenta ya fue aprobada. Ya podés ingresar.",
-  });
+    // 🔹 Enviar email
+    await transporter.sendMail({
+      from: `"Gestión 360 IA" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Acceso aprobado",
+      html: `
+        <h2>Tu acceso fue aprobado ✅</h2>
+        <p>Ya podés ingresar a la plataforma:</p>
+        <a href="https://gestion360ia.com.ar">Ingresar</a>
+      `,
+    });
 
-  return Response.json({ ok: true });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ ok: false, error: "Error" });
+  }
 }
