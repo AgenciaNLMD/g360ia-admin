@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 import db from "../../../lib/db";
 import nodemailer from "nodemailer";
 
-export async function POST(req) {
+export async function GET(req) {
   try {
-    const { email } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
+
+    if (!email) {
+      return NextResponse.json({ ok: false, error: "Falta email" });
+    }
 
     // 🔹 Aprobar usuario
     await db.query(
@@ -12,7 +17,7 @@ export async function POST(req) {
       [email]
     );
 
-    // 🔹 Configurar email
+    // 🔹 Email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -21,14 +26,12 @@ export async function POST(req) {
       },
     });
 
-    // 🔹 Enviar email
     await transporter.sendMail({
       from: `"Gestión 360 IA" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Acceso aprobado",
       html: `
         <h2>Tu acceso fue aprobado ✅</h2>
-        <p>Ya podés ingresar a la plataforma:</p>
         <a href="https://gestion360ia.com.ar">Ingresar</a>
       `,
     });
@@ -36,6 +39,6 @@ export async function POST(req) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ ok: false, error: "Error" });
+    return NextResponse.json({ ok: false });
   }
 }
