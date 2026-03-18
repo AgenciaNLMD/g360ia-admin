@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -10,9 +9,8 @@ export default function HomePage() {
   const [visible, setVisible] = useState(false);
   const [rememberedUser, setRememberedUser] = useState(null);
 
-  // Mostrar la card después de 3s (en sync con el splash del layout)
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 3000);
+    const t = setTimeout(() => setVisible(true), 7200);
     return () => clearTimeout(t);
   }, []);
 
@@ -23,20 +21,57 @@ export default function HomePage() {
     } catch (_) {}
   }, []);
 
-  const handleLogin = async () => {
+  const openAuthPopup = () => {
     setLoading(true);
-    await signIn("google", { redirect: false, callbackUrl: "/" });
-    setLoading(false);
+
+    const width = 480;
+    const height = 560;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    const popup = window.open(
+      "/api/auth/signin/google?callbackUrl=" + encodeURIComponent(window.location.origin + "/auth-callback"),
+      "g360_auth",
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=no,resizable=no`
+    );
+
+    // Escuchar mensaje del popup cuando termina el auth
+    const handler = (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === "AUTH_SUCCESS") {
+        window.removeEventListener("message", handler);
+        const user = event.data.user;
+        try {
+          localStorage.setItem("g360_last_user", JSON.stringify(user));
+        } catch (_) {}
+        setLoading(false);
+        window.location.href = "https://www.gestion360ia.com.ar/main.html";
+      }
+      if (event.data?.type === "AUTH_PENDING") {
+        window.removeEventListener("message", handler);
+        setLoading(false);
+        window.location.href = "/pendiente";
+      }
+    };
+
+    window.addEventListener("message", handler);
+
+    // Fallback: si el popup se cierra sin mensaje
+    const interval = setInterval(() => {
+      if (popup?.closed) {
+        clearInterval(interval);
+        window.removeEventListener("message", handler);
+        setLoading(false);
+      }
+    }, 500);
   };
 
-  const handleContinue = async () => {
-    setLoading(true);
+  const handleContinue = () => {
     if (status === "authenticated") {
       window.location.href = "https://www.gestion360ia.com.ar/main.html";
       return;
     }
-    await signIn("google", { redirect: false, callbackUrl: "/" });
-    setLoading(false);
+    openAuthPopup();
   };
 
   const handleForgetUser = () => {
@@ -74,7 +109,7 @@ export default function HomePage() {
                 </div>
               </div>
               <button className="btn-primary" onClick={handleContinue} disabled={loading}>
-                {loading ? "Conectando..." : "Continuar con esta cuenta"}
+                {loading ? <><Spinner /> Conectando...</> : "Continuar con esta cuenta"}
               </button>
               <button className="btn-ghost" onClick={handleForgetUser}>
                 Usar otra cuenta
@@ -83,9 +118,8 @@ export default function HomePage() {
           ) : (
             <div className="login-wrap">
               <p className="login-hint">Ingresá con tu cuenta de Google autorizada.</p>
-              <button className="btn-primary" onClick={handleLogin} disabled={loading}>
-                <GoogleIcon />
-                {loading ? "Conectando..." : "Acceder con Google"}
+              <button className="btn-primary" onClick={openAuthPopup} disabled={loading}>
+                {loading ? <><Spinner /> Conectando...</> : <><GoogleIcon /> Acceder con Google</>}
               </button>
             </div>
           )}
@@ -99,13 +133,11 @@ export default function HomePage() {
           transition: opacity .5s ease, transform .5s ease; pointer-events: none;
         }
         .main-wrap.main-show { opacity: 1; transform: translateY(0); pointer-events: all; }
-
         .card {
           background: #fff; border: 1px solid #E5E7EB; border-radius: 16px;
           padding: 28px 28px 24px; width: 100%; max-width: 420px;
           box-shadow: 0 4px 24px rgba(15,23,42,.08);
         }
-
         .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
         .logo-mark {
           width: 44px; height: 44px; background: #506886; border-radius: 11px;
@@ -115,10 +147,8 @@ export default function HomePage() {
         .gold { color: #B08A55; }
         .logo-sub { font-size: 0.68rem; color: #9CA3AF; letter-spacing: .05em; text-transform: uppercase; margin-top: 2px; }
         .divider { height: 1px; background: #F3F4F6; margin-bottom: 20px; }
-
         .login-wrap { display: flex; flex-direction: column; gap: 14px; }
         .login-hint { font-size: 0.85rem; color: #6B7280; line-height: 1.5; }
-
         .remembered-wrap { display: flex; flex-direction: column; gap: 10px; }
         .remembered-row {
           display: flex; align-items: center; gap: 12px;
@@ -133,7 +163,6 @@ export default function HomePage() {
         .remembered-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
         .remembered-name { font-size: 0.88rem; font-weight: 600; color: #1F2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .remembered-email { font-size: 0.75rem; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
         .btn-primary {
           width: 100%; background: #506886; color: white; border: none; border-radius: 10px;
           padding: 13px 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
@@ -143,13 +172,14 @@ export default function HomePage() {
         .btn-primary:hover { opacity: .9; }
         .btn-primary:active { transform: scale(.98); }
         .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
-
         .btn-ghost {
           width: 100%; background: transparent; border: 1px solid #E5E7EB; color: #6B7280;
           border-radius: 10px; padding: 11px 18px; font-size: 0.85rem;
           cursor: pointer; transition: background .15s, color .15s; font-family: inherit;
         }
         .btn-ghost:hover { background: #F9FAFB; color: #374151; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
       `}</style>
     </>
   );
@@ -177,4 +207,8 @@ function GoogleIcon() {
       <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.96L3.964 7.292C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
     </svg>
   );
+}
+
+function Spinner() {
+  return <div className="spinner" />;
 }
