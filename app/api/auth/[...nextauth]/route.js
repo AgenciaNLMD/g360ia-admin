@@ -11,6 +11,12 @@ const handler = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account",
+          display: "popup",
+        },
+      },
     }),
   ],
 
@@ -25,29 +31,18 @@ const handler = NextAuth({
         [user.email]
       );
 
-      // 🔹 Si no existe → lo creamos pendiente
       if (rows.length === 0) {
         await db.query(
           `INSERT INTO usuarios 
           (tenant_id, nombre, email, password_hash, rol, status, activo, creado_en) 
           VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-          [
-            null,
-            user.name,
-            user.email,
-            "",
-            "usuario",
-            "pending",
-            true
-          ]
+          [null, user.name, user.email, "", "usuario", "pending", true]
         );
-
         return "/pendiente";
       }
 
       const dbUser = rows[0];
 
-      // 🔹 Si no está aprobado → lo mandamos a pendiente
       if (dbUser.status !== "approved") {
         return "/pendiente";
       }
@@ -55,8 +50,23 @@ const handler = NextAuth({
       return true;
     },
 
-    async redirect() {
-      return "https://gestion360ia.com.ar/main.html";
+    async session({ session, token }) {
+      if (session?.user) {
+        const [rows] = await db.query(
+          "SELECT rol, status FROM usuarios WHERE email = ?",
+          [session.user.email]
+        );
+        if (rows.length > 0) {
+          session.user.rol = rows[0].rol;
+          session.user.status = rows[0].status;
+        }
+      }
+      return session;
+    },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/pendiente")) return `${baseUrl}/pendiente`;
+      return "https://www.gestion360ia.com.ar/main.html";
     },
   },
 
