@@ -217,7 +217,7 @@ export default function DashboardPage() {
             {view === "dashboard"      && <ViewDashboard />}
             {view === "clientes"       && <ViewClientes />}
             {view === "ventas"         && <ViewVentas session={session} />}
-{view === "conversaciones" && <ViewConversaciones session={session} onNavegar={nav} />}
+            {view === "conversaciones" && <ViewConversaciones session={session} onNavegar={nav} />}
             {view === "vendedores"     && <ViewVendedores />}
             {view === "soporte"        && <ViewSoporte session={session} />}
             {view === "modulos"        && <ViewModulos />}
@@ -225,7 +225,7 @@ export default function DashboardPage() {
             {view === "comunicaciones" && <ViewComunicaciones />}
             {view === "seguimiento"    && <ViewSeguimiento />}
             {view === "alertas"        && <ViewAlertas />}
-{view === "integraciones"  && <ViewIntegraciones onNavegar={nav} />}
+            {view === "integraciones"  && <ViewIntegraciones onNavegar={nav} />}
             {view === "auditoria"      && <ViewAuditoria />}
             {view === "configuracion"  && <ViewConfiguracion />}
             {view === "sistema"        && <ViewSistema />}
@@ -819,11 +819,24 @@ function ViewVentas({ session }) {
   );
 }
 
-/* ══ CONVERSACIONES (Ventas) ══ */
-const CANAL_ICON = { whatsapp:"bi-whatsapp", email:"bi-envelope", web:"bi-globe", instagram:"bi-instagram", facebook:"bi-facebook" };
-const CANAL_COLOR = { whatsapp:"#25D366", email:"var(--accent)", web:"var(--pr)", instagram:"#E1306C", facebook:"#1877F2" };
+/* ══ CANAL META ══ */
+const CANAL_META = {
+  whatsapp: { label:"WhatsApp",  color:"#25D366", bg:"#E8F7EE", textColor:"#1A6A35",
+    dot: () => <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#25D366",flexShrink:0}} /> },
+  instagram: { label:"Instagram", color:"#E1306C", bg:"#FDE8F5", textColor:"#8B2563",
+    dot: () => <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#E1306C",flexShrink:0}} /> },
+  facebook: { label:"Facebook",  color:"#1877F2", bg:"#E8EEF7", textColor:"#1A3A7A",
+    dot: () => <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#1877F2",flexShrink:0}} /> },
+  email: { label:"Email",     color:"#B08A55", bg:"#FBF6EE", textColor:"#7A5800",
+    dot: () => <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#B08A55",flexShrink:0}} /> },
+  web: { label:"Web / Chat", color:"#506886", bg:"#EDF1F6", textColor:"#3E5270",
+    dot: () => <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#506886",flexShrink:0}} /> },
+  tiktok: { label:"TikTok",    color:"#010101", bg:"#F0F0F0", textColor:"#333",
+    dot: () => <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#010101",flexShrink:0}} /> },
+};
 
-function ViewConversaciones({ session }) {
+/* ══ CONVERSACIONES ══ */
+function ViewConversaciones({ session, onNavegar }) {
   const [convs, setConvs] = useState([]);
   const [activa, setActiva] = useState(null);
   const [mensajes, setMensajes] = useState([]);
@@ -831,17 +844,28 @@ function ViewConversaciones({ session }) {
   const [loading, setLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState(false);
   const [enviando, setEnviando] = useState(false);
-  const [filtro, setFiltro] = useState("nueva");
+  const [filtroEstado, setFiltroEstado] = useState("nueva");
+  const [filtroCanal, setFiltroCanal] = useState("todos");
   const [vendedores, setVendedores] = useState([]);
   const [modalAsignar, setModalAsignar] = useState(false);
   const [asignandoId, setAsignandoId] = useState(null);
+  const [integraciones, setIntegraciones] = useState([]);
   const msgsRef = useRef(null);
+
+  const cargarIntegraciones = async () => {
+    try {
+      const r = await fetch("/api/integraciones");
+      const d = await r.json();
+      if (d.ok) setIntegraciones(d.integraciones);
+    } catch(_){}
+  };
 
   const cargar = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filtro && filtro !== "todas") params.append("estado", filtro);
+      if (filtroEstado && filtroEstado !== "todas") params.append("estado", filtroEstado);
+      if (filtroCanal && filtroCanal !== "todos") params.append("canal", filtroCanal);
       const r = await fetch(`/api/ventas/conversaciones?${params}`);
       const d = await r.json();
       if (Array.isArray(d)) setConvs(d);
@@ -869,7 +893,7 @@ function ViewConversaciones({ session }) {
     } catch(_){}
   };
 
-  useEffect(() => { cargar(); cargarVendedores(); }, [filtro]);
+  useEffect(() => { cargar(); cargarIntegraciones(); cargarVendedores(); }, [filtroEstado, filtroCanal]);
 
   const enviar = async () => {
     if (!texto.trim() || !activa) return;
@@ -899,135 +923,243 @@ function ViewConversaciones({ session }) {
     } catch(_){}
   };
 
+  const dismissSugerencia = async (id) => {
+    try {
+      await fetch("/api/integraciones", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, sugerencia_dismisseada: 1 }),
+      });
+      setIntegraciones(prev => prev.map(i => i.id === id ? {...i, sugerencia_dismisseada:1} : i));
+    } catch(_){}
+  };
+
+  const hayAlgoConectado = integraciones.some(i => i.activo);
+  const canalesNoConectados = integraciones.filter(i => !i.activo && !i.sugerencia_dismisseada);
   const sinAsignar = convs.filter(c => !c.asignado_a).length;
 
   return (
-    <div className="comm-wrap view-anim">
-      {/* Lista */}
-      <div className="conv-list">
-        <div className="conv-hdr">
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div className="conv-hdr-title">Conversaciones</div>
-            {sinAsignar > 0 && <span className="bdg bdg-amber">{sinAsignar} sin asignar</span>}
+    <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+
+      {/* ── BANNER MAIA ── */}
+      {!hayAlgoConectado ? (
+        <div style={{margin:"1rem 1rem 0",background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.85rem 1rem",display:"flex",alignItems:"flex-start",gap:"0.75rem"}}>
+          <div style={{width:32,height:32,borderRadius:8,background:"rgba(255,255,255,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <i className="bi bi-plug" style={{color:"#4AB880",fontSize:"0.95rem"}} />
           </div>
-          <div style={{display:"flex",gap:4,marginTop:"0.5rem"}}>
-            {[["nueva","Nuevas"],["en_curso","En curso"],["cerrada","Cerradas"],["todas","Todas"]].map(([v,l])=>(
-              <button key={v} onClick={()=>setFiltro(v)}
-                style={{flex:1,padding:"0.2rem 0",border:"none",borderRadius:"var(--r-sm)",fontSize:"0.62rem",fontWeight:filtro===v?700:500,background:filtro===v?"var(--pr)":"var(--bg)",color:filtro===v?"#fff":"var(--muted)",cursor:"pointer"}}>
-                {l}
+          <div style={{flex:1}}>
+            <div style={{fontSize:"0.7rem",fontWeight:700,color:"rgba(255,255,255,.6)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.2rem"}}>
+              Maia · Sin canales conectados
+            </div>
+            <div style={{fontSize:"0.79rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>
+              Todavía no hay canales configurados. Conectá <strong>WhatsApp, Instagram, Facebook o Email</strong> desde Integraciones para ver tus conversaciones acá.
+            </div>
+          </div>
+          <button onClick={() => onNavegar && onNavegar("integraciones")}
+            style={{flexShrink:0,padding:"0.35rem 0.8rem",borderRadius:"var(--r-sm)",border:"1px solid rgba(255,255,255,.3)",background:"rgba(255,255,255,.12)",color:"#fff",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+            Ir a Integraciones →
+          </button>
+        </div>
+      ) : canalesNoConectados.length > 0 && (
+        <div style={{margin:"1rem 1rem 0",background:"linear-gradient(135deg,#2A3F55,#3D5A78)",borderRadius:"var(--r)",padding:"0.8rem 1rem"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"0.4rem",marginBottom:"0.45rem"}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"#4AB880",boxShadow:"0 0 0 2px rgba(74,184,128,.3)"}} />
+            <div style={{fontSize:"0.7rem",fontWeight:700,color:"rgba(255,255,255,.6)",textTransform:"uppercase",letterSpacing:"0.08em"}}>Maia sugiere</div>
+          </div>
+          <div style={{fontSize:"0.77rem",color:"rgba(255,255,255,.85)",marginBottom:"0.5rem"}}>
+            Podés recibir más conversaciones conectando estos canales:
+          </div>
+          <div style={{display:"flex",gap:"0.4rem",flexWrap:"wrap"}}>
+            {canalesNoConectados.map(c => {
+              const m = CANAL_META[c.tipo];
+              if (!m) return null;
+              return (
+                <div key={c.id} style={{display:"flex",alignItems:"center",gap:"0.4rem",background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:20,padding:"0.2rem 0.6rem"}}>
+                  {m.dot()}
+                  <span style={{fontSize:"0.7rem",color:"rgba(255,255,255,.9)"}}>{m.label}</span>
+                  <button onClick={() => onNavegar && onNavegar("integraciones")}
+                    style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",fontSize:"0.65rem",cursor:"pointer",fontFamily:"inherit",padding:0,marginLeft:2,fontWeight:600}}>
+                    Conectar
+                  </button>
+                  <button onClick={() => dismissSugerencia(c.id)} title="No mostrar más"
+                    style={{background:"none",border:"none",color:"rgba(255,255,255,.4)",fontSize:"0.75rem",cursor:"pointer",fontFamily:"inherit",padding:0,lineHeight:1}}>
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── BANDEJA ── */}
+      <div className="comm-wrap view-anim" style={{flex:1,marginTop:"0.75rem"}}>
+
+        {/* Lista */}
+        <div className="conv-list">
+          <div className="conv-hdr">
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.45rem"}}>
+              <div className="conv-hdr-title">Conversaciones</div>
+              {sinAsignar > 0 && <span className="bdg bdg-amber">{sinAsignar} sin asignar</span>}
+            </div>
+
+            {/* Filtro canal */}
+            <div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:"0.35rem"}}>
+              <button onClick={()=>setFiltroCanal("todos")}
+                style={{padding:"2px 7px",borderRadius:20,border:"0.5px solid var(--border)",fontSize:"0.62rem",fontWeight:filtroCanal==="todos"?700:400,background:filtroCanal==="todos"?"var(--pr)":"var(--bg)",color:filtroCanal==="todos"?"#fff":"var(--muted)",cursor:"pointer",fontFamily:"inherit"}}>
+                Todos
               </button>
-            ))}
-          </div>
-        </div>
-        <div className="conv-search"><i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.75rem"}} /><input placeholder="Buscar…" /></div>
-        <div className="conv-items">
-          {loading ? <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando...</div>
-          : convs.length === 0 ? <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin conversaciones</div>
-          : convs.map(c => (
-            <div key={c.id} className={`conv-item${activa?.id===c.id?" on":""}`} onClick={()=>cargarMensajes(c)}>
-              <div className="conv-av" style={{position:"relative"}}>
-                {(c.contacto_nombre||"?")[0].toUpperCase()}
-                <span style={{position:"absolute",bottom:-1,right:-1,width:10,height:10,borderRadius:"50%",background:CANAL_COLOR[c.canal]||"var(--muted)",border:"1.5px solid #fff",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                </span>
-              </div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div className="conv-name">{c.contacto_nombre||"Sin nombre"}</div>
-                  <div className="conv-time">{c.ultimo_mensaje_at ? new Date(c.ultimo_mensaje_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : ""}</div>
-                </div>
-                <div className="conv-prev">{c.ultimo_mensaje||"Sin mensajes"}</div>
-                <div style={{marginTop:2,display:"flex",gap:4,alignItems:"center"}}>
-                  {!c.asignado_a ? <span style={{fontSize:"0.6rem",background:"var(--amber-bg)",color:"var(--amber)",padding:"0 5px",borderRadius:4,fontWeight:600}}>Sin asignar</span>
-                  : <span style={{fontSize:"0.6rem",color:"var(--muted)"}}>{c.vendedor_nombre}</span>}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat */}
-      <div className="chat-panel">
-        {!activa ? (
-          <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"0.5rem",color:"var(--muted)"}}>
-            <i className="bi bi-chat-dots" style={{fontSize:"2rem"}} />
-            <div style={{fontSize:"0.82rem"}}>Seleccioná una conversación</div>
-          </div>
-        ) : (
-          <>
-            <div className="chat-hdr">
-              <div className="conv-av">{(activa.contacto_nombre||"?")[0].toUpperCase()}</div>
-              <div style={{flex:1}}>
-                <div style={{fontWeight:600,fontSize:"0.82rem"}}>{activa.contacto_nombre||"Sin nombre"}</div>
-                <div style={{fontSize:"0.67rem",color:"var(--muted)",display:"flex",alignItems:"center",gap:6}}>
-                  <i className={`bi ${CANAL_ICON[activa.canal]||"bi-chat"}`} style={{color:CANAL_COLOR[activa.canal]}} />
-                  {activa.canal} · {activa.contacto_telefono||activa.contacto_email||""}
-                </div>
-              </div>
-              {/* Asignación */}
-              <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
-                {activa.asignado_a ? (
-                  <div style={{fontSize:"0.72rem",color:"var(--muted)",display:"flex",alignItems:"center",gap:4}}>
-                    <Av letra={activa.vendedor_nombre?.[0]} size={22} />
-                    <span>{activa.vendedor_nombre}</span>
-                  </div>
-                ) : (
-                  <span className="bdg bdg-amber">Sin asignar</span>
-                )}
-                <button className="btn btn-xs btn-out" onClick={()=>{ setAsignandoId(activa.id); setModalAsignar(true); }}>
-                  {activa.asignado_a ? "Reasignar" : "Asignar"}
+              {Object.entries(CANAL_META).map(([tipo,m])=>(
+                <button key={tipo} onClick={()=>setFiltroCanal(tipo)}
+                  style={{display:"flex",alignItems:"center",gap:4,padding:"2px 7px",borderRadius:20,border:`0.5px solid ${filtroCanal===tipo?m.color:"var(--border)"}`,fontSize:"0.62rem",fontWeight:filtroCanal===tipo?700:400,background:filtroCanal===tipo?m.bg:"var(--bg)",color:filtroCanal===tipo?m.textColor:"var(--muted)",cursor:"pointer",fontFamily:"inherit"}}>
+                  {m.dot()}{m.label}
                 </button>
-                <button className="btn btn-xs btn-out" onClick={()=>cargar()}>
-                  <i className="bi bi-arrow-clockwise" />
-                </button>
-              </div>
-            </div>
-
-            <div className="chat-msgs" ref={msgsRef}>
-              {loadingMsg ? <div style={{textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando mensajes...</div>
-              : mensajes.length === 0 ? <div style={{textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin mensajes todavía</div>
-              : mensajes.map(m => (
-                <div key={m.id}>
-                  <div className={`msg ${m.direccion==="saliente"?"msg-out":"msg-in"}`}>
-                    {m.contenido}
-                    <div className="msg-t">
-                      {new Date(m.creado_en).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}
-                      {m.direccion==="saliente" && <span style={{marginLeft:4}}>{m.enviado_por_nombre||"Vos"}</span>}
-                    </div>
-                  </div>
-                </div>
               ))}
             </div>
 
-            <div className="chat-input-bar">
-              <input className="chat-inp" placeholder="Escribir mensaje…" value={texto} onChange={e=>setTexto(e.target.value)}
-                onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); enviar(); } }} />
-              <button className="btn btn-em btn-sm" onClick={enviar} disabled={enviando||!texto.trim()}>
-                <i className="bi bi-send" />
-              </button>
+            {/* Filtro estado */}
+            <div style={{display:"flex",gap:3}}>
+              {[["nueva","Nuevas"],["en_curso","En curso"],["cerrada","Cerradas"],["todas","Todas"]].map(([v,l])=>(
+                <button key={v} onClick={()=>setFiltroEstado(v)}
+                  style={{flex:1,padding:"2px 0",border:"none",borderRadius:"var(--r-sm)",fontSize:"0.62rem",fontWeight:filtroEstado===v?700:500,background:filtroEstado===v?"var(--pr)":"var(--bg)",color:filtroEstado===v?"#fff":"var(--muted)",cursor:"pointer",fontFamily:"inherit"}}>
+                  {l}
+                </button>
+              ))}
             </div>
-          </>
-        )}
+          </div>
+
+          <div className="conv-search">
+            <i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.75rem"}} />
+            <input placeholder="Buscar nombre, teléfono…" />
+          </div>
+
+          <div className="conv-items">
+            {loading ? <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando...</div>
+            : convs.length === 0 ? (
+              <div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>
+                <i className="bi bi-chat-dots" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
+                {hayAlgoConectado ? "Sin conversaciones" : "Conectá un canal para empezar"}
+              </div>
+            ) : convs.map(c => {
+              const m = CANAL_META[c.canal];
+              return (
+                <div key={c.id} className={`conv-item${activa?.id===c.id?" on":""}`} onClick={()=>cargarMensajes(c)}>
+                  <div style={{position:"relative",flexShrink:0}}>
+                    <div className="conv-av">{(c.contacto_nombre||"?")[0].toUpperCase()}</div>
+                    {m && (
+                      <div style={{position:"absolute",bottom:-2,right:-2,width:13,height:13,borderRadius:"50%",background:m.color,border:"1.5px solid var(--white)",display:"flex",alignItems:"center",justifyContent:"center"}} />
+                    )}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div className="conv-name">{c.contacto_nombre||"Sin nombre"}</div>
+                      <div className="conv-time">{c.ultimo_mensaje_at ? new Date(c.ultimo_mensaje_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : ""}</div>
+                    </div>
+                    <div className="conv-prev">{c.ultimo_mensaje||"Sin mensajes"}</div>
+                    <div style={{marginTop:2,display:"flex",gap:4,alignItems:"center"}}>
+                      {m && <span style={{fontSize:"0.6rem",color:m.textColor,background:m.bg,padding:"0 5px",borderRadius:4,fontWeight:600}}>{m.label}</span>}
+                      {!c.asignado_a
+                        ? <span style={{fontSize:"0.6rem",background:"var(--amber-bg)",color:"var(--amber)",padding:"0 5px",borderRadius:4,fontWeight:600}}>Sin asignar</span>
+                        : <span style={{fontSize:"0.6rem",color:"var(--muted)"}}>→ {c.vendedor_nombre}</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Chat */}
+        <div className="chat-panel">
+          {!activa ? (
+            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"0.5rem",color:"var(--muted)"}}>
+              <i className="bi bi-chat-dots" style={{fontSize:"2rem"}} />
+              <div style={{fontSize:"0.82rem"}}>Seleccioná una conversación</div>
+            </div>
+          ) : (
+            <>
+              <div className="chat-hdr">
+                <div className="conv-av" style={{width:32,height:32,fontSize:"0.75rem"}}>
+                  {(activa.contacto_nombre||"?")[0].toUpperCase()}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:600,fontSize:"0.82rem"}}>{activa.contacto_nombre||"Sin nombre"}</div>
+                  <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{activa.contacto_telefono||activa.contacto_email||""}</div>
+                </div>
+                {/* Canal pill */}
+                {CANAL_META[activa.canal] && (
+                  <div style={{display:"flex",alignItems:"center",gap:5,padding:"2px 9px",borderRadius:20,background:CANAL_META[activa.canal].bg,color:CANAL_META[activa.canal].textColor,fontSize:"0.7rem",fontWeight:600,flexShrink:0}}>
+                    {CANAL_META[activa.canal].dot()}
+                    {CANAL_META[activa.canal].label}
+                  </div>
+                )}
+                {/* Estado */}
+                <span className={`bdg ${activa.estado==="nueva"?"bdg-blue":activa.estado==="en_curso"?"bdg-amber":"bdg-moon"}`}>
+                  {activa.estado==="nueva"?"Nueva":activa.estado==="en_curso"?"En curso":"Cerrada"}
+                </span>
+                {/* Asignación */}
+                <div style={{display:"flex",alignItems:"center",gap:"0.4rem"}}>
+                  {activa.asignado_a
+                    ? <span style={{fontSize:"0.7rem",color:"var(--muted)",display:"flex",alignItems:"center",gap:4}}><Av letra={activa.vendedor_nombre?.[0]} size={20} />{activa.vendedor_nombre}</span>
+                    : <span className="bdg bdg-amber">Sin asignar</span>
+                  }
+                  <button className="btn btn-xs btn-out" onClick={()=>{ setAsignandoId(activa.id); setModalAsignar(true); }}>
+                    {activa.asignado_a ? "Reasignar" : "Asignar"}
+                  </button>
+                </div>
+                <button className="btn btn-xs btn-out"><i className="bi bi-person-plus" /> Crear lead</button>
+              </div>
+
+              <div className="chat-msgs" ref={msgsRef}>
+                {loadingMsg ? <div style={{textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando mensajes...</div>
+                : mensajes.length === 0 ? <div style={{textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin mensajes todavía</div>
+                : mensajes.map(m => (
+                  <div key={m.id}>
+                    <div className={`msg ${m.direccion==="saliente"?"msg-out":"msg-in"}`}>
+                      {m.contenido}
+                      <div className="msg-t">
+                        {new Date(m.creado_en).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}
+                        {m.direccion==="saliente" && <span style={{marginLeft:4}}>{m.enviado_por_nombre||"Vos"}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="chat-input-bar">
+                <input className="chat-inp" placeholder="Escribir mensaje…" value={texto}
+                  onChange={e=>setTexto(e.target.value)}
+                  onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); enviar(); } }} />
+                <button className="btn btn-em btn-sm" onClick={enviar} disabled={enviando||!texto.trim()}>
+                  <i className="bi bi-send" />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Modal asignar */}
       {modalAsignar && (
         <Modal title="Asignar vendedor" onClose={()=>setModalAsignar(false)} maxWidth={360}>
           <div style={{padding:"1rem"}}>
-            {vendedores.length===0 ? <div style={{textAlign:"center",color:"var(--muted)",fontSize:"0.8rem"}}>No hay vendedores disponibles</div>
-            : vendedores.map(v=>(
-              <div key={v.id} onClick={()=>asignar(asignandoId,v.id)}
-                style={{display:"flex",alignItems:"center",gap:"0.65rem",padding:"0.55rem 0.7rem",borderRadius:"var(--r-sm)",cursor:"pointer",transition:"background .12s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <Av letra={v.nombre?.[0]} size={30} />
-                <div>
-                  <div style={{fontSize:"0.82rem",fontWeight:600,color:"var(--text)"}}>{v.nombre}</div>
-                  <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{v.rol} · {v.email}</div>
+            {vendedores.length===0
+              ? <div style={{textAlign:"center",color:"var(--muted)",fontSize:"0.8rem"}}>No hay vendedores disponibles</div>
+              : vendedores.map(v=>(
+                <div key={v.id} onClick={()=>asignar(asignandoId,v.id)}
+                  style={{display:"flex",alignItems:"center",gap:"0.65rem",padding:"0.55rem 0.7rem",borderRadius:"var(--r-sm)",cursor:"pointer",transition:"background .12s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  <Av letra={v.nombre?.[0]} size={30} />
+                  <div>
+                    <div style={{fontSize:"0.82rem",fontWeight:600,color:"var(--text)"}}>{v.nombre}</div>
+                    <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{v.rol} · {v.email}</div>
+                  </div>
+                  {activa?.asignado_a===v.id && <i className="bi bi-check2" style={{marginLeft:"auto",color:"var(--em)"}} />}
                 </div>
-                {activa?.asignado_a===v.id && <i className="bi bi-check2" style={{marginLeft:"auto",color:"var(--em)"}} />}
-              </div>
-            ))}
+              ))
+            }
           </div>
         </Modal>
       )}
@@ -1478,12 +1610,75 @@ function ViewAlertas() {
   );
 }
 
-function ViewIntegraciones() {
-  const ints = [["bi-whatsapp","#E8F7EE","#1A7A3A","Evolution API","WhatsApp Bot","Conectado"],["bi-robot","var(--accent-pale)","var(--accent)","Claude API","IA principal","Conectado"],["bi-diagram-3","var(--blue-bg)","var(--blue)","n8n","Automatizaciones","Conectado"],["bi-credit-card","var(--em-pale)","var(--em-d)","MercadoPago","Pagos ARS","Pendiente"],["bi-geo-alt","var(--pine-bg)","var(--pine-d)","Google Maps","Mapas y rutas","Pendiente"]];
+function ViewIntegraciones({ onNavegar }) {
+  const [integraciones, setIntegraciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(null);
+
+  const cargar = async () => {
+    setLoading(true);
+    try { const r=await fetch("/api/integraciones"); const d=await r.json(); if(d.ok) setIntegraciones(d.integraciones); } catch(_){}
+    setLoading(false);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const toggleActivo = async (int) => {
+    setSaving(int.id);
+    try { await fetch("/api/integraciones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:int.id,activo:int.activo?0:1})}); await cargar(); } catch(_){}
+    setSaving(null);
+  };
+
+  const EXTRA = [
+    {nombre:"Claude API",  icono:"bi-robot",      color:"var(--accent)", bg:"var(--accent-pale)",desc:"IA principal · Anthropic",   activo:true},
+    {nombre:"n8n",         icono:"bi-diagram-3",  color:"var(--blue)",   bg:"var(--blue-bg)",   desc:"Automatizaciones de flujos", activo:true},
+    {nombre:"MercadoPago", icono:"bi-credit-card",color:"var(--em-d)",   bg:"var(--em-pale)",   desc:"Pagos y suscripciones ARS",  activo:false},
+    {nombre:"Google Maps", icono:"bi-geo-alt",    color:"var(--pine-d)", bg:"var(--pine-bg)",   desc:"Mapas y geolocalización",    activo:false},
+  ];
+
+  const conectadas = integraciones.filter(i=>i.activo).length;
+
   return (
     <div className="view-anim">
-      <div className="vh"><div><div className="vh-title">Integraciones</div><div className="vh-sub">Conexiones externas</div></div></div>
-      {ints.map((it,i)=><div key={i} className="int-card"><div className="int-ico" style={{background:it[1]}}><i className={`bi ${it[0]}`} style={{color:it[2]}} /></div><div style={{flex:1}}><div style={{fontSize:"0.8rem",fontWeight:600}}>{it[3]}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{it[4]}</div></div><span className={`bdg ${it[5]==="Conectado"?"bdg-em":"bdg-moon"}`}>{it[5]}</span><button className="btn btn-out btn-sm">{it[5]==="Conectado"?"Configurar":"Conectar"}</button></div>)}
+      {conectadas===0 && (
+        <div style={{background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.85rem 1rem",marginBottom:"0.9rem",display:"flex",alignItems:"flex-start",gap:"0.75rem"}}>
+          <div style={{width:32,height:32,borderRadius:8,background:"rgba(255,255,255,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <i className="bi bi-plug" style={{color:"#4AB880",fontSize:"0.95rem"}} />
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:"0.7rem",fontWeight:700,color:"rgba(255,255,255,.6)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.2rem"}}>Maia · Acción sugerida</div>
+            <div style={{fontSize:"0.79rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>Conectá al menos un canal de comunicación para empezar a recibir conversaciones. Te recomendamos empezar por <strong>WhatsApp</strong>.</div>
+          </div>
+        </div>
+      )}
+      <div className="vh">
+        <div><div className="vh-title">Integraciones</div><div className="vh-sub">{conectadas} canales de comunicación conectados</div></div>
+        <button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /></button>
+      </div>
+      <div style={{fontSize:"0.65rem",fontWeight:700,color:"var(--muted)",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:"0.5rem"}}>Canales de comunicación</div>
+      {loading ? <Cargando texto="Cargando integraciones..." /> : integraciones.map(int=>{
+        const m=CANAL_META[int.tipo];
+        return (
+          <div key={int.id} className="int-card">
+            <div className="int-ico" style={{background:m?.bg||"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {m?m.dot():<i className="bi bi-plug" style={{color:"var(--muted)"}} />}
+            </div>
+            <div style={{flex:1}}><div style={{fontSize:"0.8rem",fontWeight:600,color:"var(--text)"}}>{int.nombre}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{int.activo?"Conectado · recibiendo mensajes":"No conectado"}</div></div>
+            <span className={`bdg ${int.activo?"bdg-em":"bdg-moon"}`}>{int.activo?"Conectado":"Desconectado"}</span>
+            <div className={`tog${int.activo?" on":""}`} onClick={()=>saving!==int.id&&toggleActivo(int)} style={{cursor:saving===int.id?"not-allowed":"pointer"}}><div className="tog-k" /></div>
+            <button className="btn btn-out btn-sm" disabled={saving===int.id}>{int.activo?"Configurar":"Conectar"}</button>
+          </div>
+        );
+      })}
+      <div style={{fontSize:"0.65rem",fontWeight:700,color:"var(--muted)",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:"0.5rem",marginTop:"1rem"}}>Plataformas y servicios</div>
+      {EXTRA.map((it,i)=>(
+        <div key={i} className="int-card">
+          <div className="int-ico" style={{background:it.bg}}><i className={`bi ${it.icono}`} style={{color:it.color}} /></div>
+          <div style={{flex:1}}><div style={{fontSize:"0.8rem",fontWeight:600,color:"var(--text)"}}>{it.nombre}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{it.desc}</div></div>
+          <span className={`bdg ${it.activo?"bdg-em":"bdg-moon"}`}>{it.activo?"Conectado":"Pendiente"}</span>
+          <button className="btn btn-out btn-sm">{it.activo?"Configurar":"Conectar"}</button>
+        </div>
+      ))}
     </div>
   );
 }
