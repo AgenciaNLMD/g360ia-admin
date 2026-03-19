@@ -75,21 +75,21 @@ export default function DashboardPage() {
             <div className="sb-sec">Principal</div>
             <NavItem id="dashboard"      icon="bi-grid-1x2"      label="Dashboard"      active={view==="dashboard"}      onClick={nav} />
             <NavItem id="clientes"       icon="bi-people"         label="Clientes"       active={view==="clientes"}       onClick={nav} badge={stats.clientes > 0 ? String(stats.clientes) : null} />
-            <NavItem id="modulos"        icon="bi-puzzle"         label="Módulos"        active={view==="modulos"}        onClick={nav} />
-            <NavItem id="planes"         icon="bi-tag"            label="Planes"         active={view==="planes"}         onClick={nav} />
+            <NavItem id="modulos"        icon="bi-puzzle"         label="Módulos"        active={view==="modulos"}        onClick={nav} incoming />
+            <NavItem id="planes"         icon="bi-tag"            label="Planes"         active={view==="planes"}         onClick={nav} incoming />
 
             <div className="sb-divider" />
             <div className="sb-sec">Comunicaciones</div>
-            <NavItem id="comunicaciones" icon="bi-chat-dots"      label="Conversaciones" active={view==="comunicaciones"} onClick={nav} badge={stats.conversaciones > 0 ? String(stats.conversaciones) : null} badgeClass="amber" />
-            <NavItem id="seguimiento"    icon="bi-check2-square"  label="Seguimiento"    active={view==="seguimiento"}    onClick={nav} />
+            <NavItem id="comunicaciones" icon="bi-chat-dots"      label="Conversaciones" active={view==="comunicaciones"} onClick={nav} badge={stats.conversaciones > 0 ? String(stats.conversaciones) : null} badgeClass="amber" incoming={!stats.conversaciones} />
+            <NavItem id="seguimiento"    icon="bi-check2-square"  label="Seguimiento"    active={view==="seguimiento"}    onClick={nav} incoming />
             <NavItem id="alertas"        icon="bi-bell"           label="Alertas IA"     active={view==="alertas"}        onClick={nav} badge={stats.alertas > 0 ? String(stats.alertas) : null} badgeClass="red" />
 
             <div className="sb-divider" />
             <div className="sb-sec">Sistema</div>
             <NavItem id="sistema"        icon="bi-shield-lock"    label="Usuarios"       active={view==="sistema"}        onClick={nav} />
-            <NavItem id="integraciones"  icon="bi-plug"           label="Integraciones"  active={view==="integraciones"}  onClick={nav} />
+            <NavItem id="integraciones"  icon="bi-plug"           label="Integraciones"  active={view==="integraciones"}  onClick={nav} incoming />
             <NavItem id="auditoria"      icon="bi-journal-text"   label="Auditoría"      active={view==="auditoria"}      onClick={nav} />
-            <NavItem id="configuracion"  icon="bi-gear"           label="Configuración"  active={view==="configuracion"}  onClick={nav} />
+            <NavItem id="configuracion"  icon="bi-gear"           label="Configuración"  active={view==="configuracion"}  onClick={nav} incoming />
           </div>
 
           {/* ══ FOOTER USUARIO ══ */}
@@ -493,11 +493,19 @@ export default function DashboardPage() {
 
 /* ══ COMPONENTES REUTILIZABLES ══ */
 
-function NavItem({ id, icon, label, active, onClick, badge, badgeClass }) {
+function NavItem({ id, icon, label, active, onClick, badge, badgeClass, incoming }) {
   return (
     <div className={`ni${active ? " on" : ""}`} data-tip={label} onClick={() => onClick(id)}>
       <i className={`bi ${icon} ni-ic`} />
       <span className="ni-txt">{label}</span>
+      {incoming && !badge && (
+        <span style={{
+          background:"rgba(176,138,85,.18)", color:"#C8A472",
+          fontSize:"0.52rem", fontWeight:700, padding:"1px 6px",
+          borderRadius:9, flexShrink:0, letterSpacing:"0.04em",
+          textTransform:"uppercase", border:"1px solid rgba(176,138,85,.3)",
+        }}>soon</span>
+      )}
       {badge && <span className={`ni-badge${badgeClass ? " " + badgeClass : ""}`}>{badge}</span>}
     </div>
   );
