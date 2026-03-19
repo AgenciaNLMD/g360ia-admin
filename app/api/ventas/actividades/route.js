@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import db from "../../../../../lib/db";
-
+import db from "../../../../lib/db";
 // GET — actividades de un lead
 export async function GET(req) {
   try {
