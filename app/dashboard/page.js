@@ -5,7 +5,8 @@ import { useSession, signOut } from "next-auth/react";
 
 const VIEWS = {
   dashboard:      ["Dashboard",        "Resumen general del sistema"],
-  clientes:       ["Clientes",         "24 clientes registrados"],
+  clientes:       ["Clientes",         "Tenants registrados"],
+  ventas:         ["Ventas",           "Leads y seguimiento comercial"],
   modulos:        ["Módulos",          "Catálogo del sistema"],
   planes:         ["Planes",           "Gestión de suscripciones"],
   comunicaciones: ["Comunicaciones",   "Conversaciones con clientes"],
@@ -75,6 +76,7 @@ export default function DashboardPage() {
             <div className="sb-sec">Principal</div>
             <NavItem id="dashboard"      icon="bi-grid-1x2"      label="Dashboard"      active={view==="dashboard"}      onClick={nav} />
             <NavItem id="clientes"       icon="bi-people"         label="Clientes"       active={view==="clientes"}       onClick={nav} badge={stats.clientes > 0 ? String(stats.clientes) : null} />
+            <NavItem id="ventas"         icon="bi-graph-up-arrow" label="Ventas"         active={view==="ventas"}         onClick={nav} />
             <NavItem id="modulos"        icon="bi-puzzle"         label="Módulos"        active={view==="modulos"}        onClick={nav} incoming />
             <NavItem id="planes"         icon="bi-tag"            label="Planes"         active={view==="planes"}         onClick={nav} incoming />
 
@@ -209,6 +211,7 @@ export default function DashboardPage() {
           <div id="content" style={{padding: view==="comunicaciones" ? "0" : "1.3rem 1.4rem"}}>
             {view === "dashboard"      && <ViewDashboard />}
             {view === "clientes"       && <ViewClientes />}
+            {view === "ventas"         && <ViewVentas />}
             {view === "modulos"        && <ViewModulos />}
             {view === "planes"         && <ViewPlanes />}
             {view === "comunicaciones" && <ViewComunicaciones />}
@@ -1578,6 +1581,530 @@ function ViewPerfil() {
         </div>
       </div>
 
+    </div>
+  );
+}
+
+const RUBROS_VENTA = [
+  "Hotel","Salón de eventos","Consultorio / Clínica","Spa / Centro de bienestar",
+  "Inmobiliaria","Restaurante / Local de comida","Contador / Estudio contable",
+  "Abogado / Estudio jurídico","Gestor de seguros","Logística / Distribución","GovTech","Otro",
+];
+
+const ESTADO_LEAD = {
+  nuevo:      { label:"Nuevo",      cls:"bdg-blue" },
+  contactado: { label:"Contactado", cls:"bdg-amber" },
+  demo:       { label:"Demo",       cls:"bdg-pine" },
+  propuesta:  { label:"Propuesta",  cls:"bdg-gold" },
+  cerrado:    { label:"Cerrado",    cls:"bdg-em" },
+  perdido:    { label:"Perdido",    cls:"bdg-red" },
+};
+
+const TIPO_ACTIVIDAD = {
+  llamada:  { icon:"bi-telephone", color:"var(--pr)" },
+  email:    { icon:"bi-envelope",  color:"var(--accent)" },
+  whatsapp: { icon:"bi-whatsapp", color:"#25D366" },
+  reunion:  { icon:"bi-calendar-check", color:"var(--em-d)" },
+  nota:     { icon:"bi-sticky",   color:"var(--muted)" },
+};
+
+const LEAD_VACIO = {
+  nombre:"", empresa:"", email:"", telefono:"",
+  rubro_interes:"", plan_interes:"", fuente:"web",
+  valor_mrr_estimado:"", notas:"",
+};
+
+const ACT_VACIO = {
+  tipo:"nota", descripcion:"", proxima_accion:"", fecha_proxima_accion:"",
+};
+
+function ViewVentas() {
+  const { data: session } = useSession();
+  const [tab, setTab] = useState("leads");
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [form, setForm] = useState(LEAD_VACIO);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [leadActivo, setLeadActivo] = useState(null);
+  const [actividades, setActividades] = useState([]);
+  const [loadingAct, setLoadingAct] = useState(false);
+  const [modalAct, setModalAct] = useState(false);
+  const [formAct, setFormAct] = useState(ACT_VACIO);
+  const [filtroEstado, setFiltroEstado] = useState("");
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const rol = session?.user?.rol || "superadmin";
+      const uid = session?.user?.id || "";
+      const params = new URLSearchParams({ rol, usuario_id: uid });
+      if (filtroEstado) params.append("estado", filtroEstado);
+      const res = await fetch(`/api/ventas/leads?${params}`);
+      const data = await res.json();
+      if (data.ok) setLeads(data.leads);
+    } catch (_) {}
+    setLoading(false);
+  };
+
+  const cargarActividades = async (lead_id) => {
+    setLoadingAct(true);
+    try {
+      const res = await fetch(`/api/ventas/actividades?lead_id=${lead_id}`);
+      const data = await res.json();
+      if (data.ok) setActividades(data.actividades);
+    } catch (_) {}
+    setLoadingAct(false);
+  };
+
+  useEffect(() => { cargar(); }, [filtroEstado]);
+
+  const abrirNuevo = () => {
+    setEditando(null);
+    setForm(LEAD_VACIO);
+    setError("");
+    setModal(true);
+  };
+
+  const abrirEditar = (l) => {
+    setEditando(l);
+    setForm({
+      nombre: l.nombre || "",
+      empresa: l.empresa || "",
+      email: l.email || "",
+      telefono: l.telefono || "",
+      rubro_interes: l.rubro_interes || "",
+      plan_interes: l.plan_interes || "",
+      fuente: l.fuente || "web",
+      valor_mrr_estimado: l.valor_mrr_estimado || "",
+      notas: l.notas || "",
+    });
+    setError("");
+    setModal(true);
+  };
+
+  const guardar = async () => {
+    if (!form.nombre) { setError("Nombre es obligatorio"); return; }
+    setSaving(true); setError("");
+    try {
+      const method = editando ? "PATCH" : "POST";
+      const body = editando ? { id: editando.id, ...form } : form;
+      const res = await fetch("/api/ventas/leads", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!data.ok) { setError(data.error || "Error al guardar"); setSaving(false); return; }
+      setModal(false);
+      await cargar();
+    } catch (_) { setError("Error de conexión"); }
+    setSaving(false);
+  };
+
+  const cambiarEstado = async (id, estado) => {
+    try {
+      await fetch("/api/ventas/leads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, estado }),
+      });
+      await cargar();
+    } catch (_) {}
+  };
+
+  const eliminar = async (l) => {
+    if (!confirm(`¿Eliminar lead ${l.nombre}?`)) return;
+    try {
+      await fetch("/api/ventas/leads", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: l.id }),
+      });
+      if (leadActivo?.id === l.id) setLeadActivo(null);
+      await cargar();
+    } catch (_) {}
+  };
+
+  const abrirLead = async (l) => {
+    setLeadActivo(l);
+    setTab("detalle");
+    await cargarActividades(l.id);
+  };
+
+  const guardarActividad = async () => {
+    if (!formAct.tipo) return;
+    setSaving(true);
+    try {
+      await fetch("/api/ventas/actividades", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lead_id: leadActivo.id,
+          usuario_id: session?.user?.id || 1,
+          ...formAct,
+        }),
+      });
+      setModalAct(false);
+      setFormAct(ACT_VACIO);
+      await cargarActividades(leadActivo.id);
+    } catch (_) {}
+    setSaving(false);
+  };
+
+  const f = (v) => setForm(p => ({ ...p, ...v }));
+  const fa = (v) => setFormAct(p => ({ ...p, ...v }));
+
+  // KPIs
+  const nuevos     = leads.filter(l => l.estado === "nuevo").length;
+  const enProceso  = leads.filter(l => ["contactado","demo","propuesta"].includes(l.estado)).length;
+  const cerrados   = leads.filter(l => l.estado === "cerrado").length;
+  const mrrTotal   = leads.filter(l => l.estado !== "perdido").reduce((s,l) => s + (Number(l.valor_mrr_estimado)||0), 0);
+
+  return (
+    <div className="view-anim">
+      <div className="vh">
+        <div><div className="vh-title">Ventas</div><div className="vh-sub">Pipeline comercial · {leads.length} leads</div></div>
+        <div style={{display:"flex",gap:"0.5rem"}}>
+          <button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /></button>
+          <button className="btn btn-em btn-sm" onClick={abrirNuevo}><i className="bi bi-plus-lg" /> Nuevo lead</button>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="g4" style={{marginBottom:"0.9rem"}}>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--blue-bg)"}}><i className="bi bi-person-plus" style={{color:"var(--blue)"}} /></div>
+          <div className="kpi-val">{nuevos}</div>
+          <div className="kpi-lbl">Leads nuevos</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--amber-bg)"}}><i className="bi bi-hourglass-split" style={{color:"var(--amber)"}} /></div>
+          <div className="kpi-val">{enProceso}</div>
+          <div className="kpi-lbl">En proceso</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--em-pale)"}}><i className="bi bi-check-circle" style={{color:"var(--em-d)"}} /></div>
+          <div className="kpi-val">{cerrados}</div>
+          <div className="kpi-lbl">Cerrados</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--accent-pale)"}}><i className="bi bi-cash-coin" style={{color:"var(--accent)"}} /></div>
+          <div className="kpi-val" style={{fontSize:"1.3rem"}}>
+            {mrrTotal > 0 ? `$${mrrTotal.toLocaleString("es-AR")}` : "—"}
+          </div>
+          <div className="kpi-lbl">MRR estimado</div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:4,marginBottom:"0.9rem",borderBottom:"1px solid var(--border)"}}>
+        {[["leads","Leads","bi-people"],["detalle","Detalle / Actividades","bi-journal-text"]].map(([id,label,icon]) => (
+          <button key={id} onClick={() => setTab(id)} style={{
+            padding:"0.45rem 0.9rem", border:"none", background:"none",
+            fontFamily:"inherit", fontSize:"0.8rem",
+            fontWeight: tab===id ? 700 : 500,
+            color: tab===id ? "var(--pr)" : "var(--sub)",
+            cursor:"pointer",
+            borderBottom: tab===id ? "2px solid var(--pr)" : "2px solid transparent",
+            display:"flex", alignItems:"center", gap:5, marginBottom:-1,
+          }}>
+            <i className={`bi ${icon}`} />{label}
+          </button>
+        ))}
+      </div>
+
+      {/* TAB LEADS */}
+      {tab === "leads" && (
+        <>
+          {/* Filtro estado */}
+          <div style={{display:"flex",gap:"0.5rem",marginBottom:"0.7rem",flexWrap:"wrap"}}>
+            {["","nuevo","contactado","demo","propuesta","cerrado","perdido"].map(e => (
+              <button key={e} onClick={() => setFiltroEstado(e)}
+                className="btn btn-xs"
+                style={{
+                  background: filtroEstado===e ? "var(--pr)" : "var(--bg)",
+                  color: filtroEstado===e ? "#fff" : "var(--sub)",
+                  border: `1px solid ${filtroEstado===e ? "var(--pr)" : "var(--border)"}`,
+                }}>
+                {e === "" ? "Todos" : ESTADO_LEAD[e]?.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="card">
+            {loading ? (
+              <div style={{padding:"2.5rem",textAlign:"center",color:"var(--muted)"}}>
+                <i className="bi bi-hourglass-split" style={{fontSize:"1.4rem",display:"block",marginBottom:8}} />
+                Cargando leads...
+              </div>
+            ) : (
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>Contacto</th>
+                    <th>Rubro</th>
+                    <th>Plan</th>
+                    <th>Fuente</th>
+                    <th>Estado</th>
+                    <th>MRR Est.</th>
+                    <th>Vendedor</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.length === 0 ? (
+                    <tr><td colSpan={8} style={{textAlign:"center",padding:"2.5rem",color:"var(--muted)"}}>
+                      <i className="bi bi-graph-up-arrow" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
+                      No hay leads todavía
+                    </td></tr>
+                  ) : leads.map(l => (
+                    <tr key={l.id} onClick={() => abrirLead(l)} style={{cursor:"pointer"}}>
+                      <td>
+                        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                          <div style={{width:26,height:26,borderRadius:"50%",background:"var(--pr-pale)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.68rem",fontWeight:700,color:"var(--pr)",flexShrink:0}}>
+                            {l.nombre?.[0]?.toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{fontWeight:600,fontSize:"0.8rem"}}>{l.nombre}</div>
+                            {l.empresa && <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{l.empresa}</div>}
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{fontSize:"0.75rem",color:"var(--text2)"}}>{l.rubro_interes || "—"}</td>
+                      <td>{l.plan_interes ? <span className="bdg bdg-blue">{l.plan_interes}</span> : <span style={{color:"var(--muted)",fontSize:"0.75rem"}}>—</span>}</td>
+                      <td style={{fontSize:"0.75rem",color:"var(--muted)"}}>{l.fuente}</td>
+                      <td>
+                        <select
+                          value={l.estado}
+                          onClick={e => e.stopPropagation()}
+                          onChange={e => cambiarEstado(l.id, e.target.value)}
+                          style={{padding:"0.22rem 0.5rem",borderRadius:"var(--r-sm)",border:"1px solid var(--border2)",fontSize:"0.72rem",fontFamily:"inherit",background:"var(--white)",cursor:"pointer"}}
+                        >
+                          {Object.entries(ESTADO_LEAD).map(([k,v]) => (
+                            <option key={k} value={k}>{v.label}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--text)"}}>
+                        {l.valor_mrr_estimado ? `$${Number(l.valor_mrr_estimado).toLocaleString("es-AR")}` : "—"}
+                      </td>
+                      <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{l.vendedor_nombre || "Sin asignar"}</td>
+                      <td onClick={e => e.stopPropagation()}>
+                        <div style={{display:"flex",gap:4}}>
+                          <button className="btn btn-xs btn-out" onClick={() => abrirEditar(l)}><i className="bi bi-pencil" /></button>
+                          <button className="btn btn-xs" onClick={() => eliminar(l)}
+                            style={{background:"var(--red-bg)",color:"var(--red)",border:"1px solid #f5c6c6"}}>
+                            <i className="bi bi-trash3" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* TAB DETALLE */}
+      {tab === "detalle" && (
+        <>
+          {!leadActivo ? (
+            <div className="card" style={{padding:"2.5rem",textAlign:"center",color:"var(--muted)"}}>
+              <i className="bi bi-hand-index" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
+              Seleccioná un lead de la pestaña Leads para ver su detalle
+            </div>
+          ) : (
+            <div className="g2">
+              {/* Info del lead */}
+              <div className="card">
+                <div className="ch">
+                  <i className="bi bi-person-circle" style={{color:"var(--pr)"}} />
+                  <span className="ch-title">{leadActivo.nombre}</span>
+                  <span className={`bdg ${ESTADO_LEAD[leadActivo.estado]?.cls} ch-act`}>{ESTADO_LEAD[leadActivo.estado]?.label}</span>
+                </div>
+                <div className="cb" style={{display:"flex",flexDirection:"column",gap:"0.5rem"}}>
+                  {[
+                    ["Empresa", leadActivo.empresa],
+                    ["Email", leadActivo.email],
+                    ["Teléfono", leadActivo.telefono],
+                    ["Rubro", leadActivo.rubro_interes],
+                    ["Plan interés", leadActivo.plan_interes],
+                    ["Fuente", leadActivo.fuente],
+                    ["MRR estimado", leadActivo.valor_mrr_estimado ? `$${Number(leadActivo.valor_mrr_estimado).toLocaleString("es-AR")}` : null],
+                    ["Vendedor", leadActivo.vendedor_nombre],
+                  ].map(([k,v]) => v ? (
+                    <div key={k} style={{display:"flex",gap:"0.5rem",fontSize:"0.8rem"}}>
+                      <span style={{color:"var(--muted)",width:90,flexShrink:0}}>{k}</span>
+                      <span style={{color:"var(--text)",fontWeight:500}}>{v}</span>
+                    </div>
+                  ) : null)}
+                  {leadActivo.notas && (
+                    <div style={{marginTop:"0.5rem",padding:"0.6rem",background:"var(--bg)",borderRadius:"var(--r-sm)",fontSize:"0.78rem",color:"var(--text2)"}}>
+                      {leadActivo.notas}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Actividades */}
+              <div className="card">
+                <div className="ch">
+                  <i className="bi bi-journal-text" style={{color:"var(--accent)"}} />
+                  <span className="ch-title">Actividades</span>
+                  <div className="ch-act">
+                    <button className="btn btn-em btn-xs" onClick={() => setModalAct(true)}>
+                      <i className="bi bi-plus-lg" /> Registrar
+                    </button>
+                  </div>
+                </div>
+                <div className="cb" style={{padding:0}}>
+                  {loadingAct ? (
+                    <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando...</div>
+                  ) : actividades.length === 0 ? (
+                    <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>
+                      Sin actividades registradas
+                    </div>
+                  ) : actividades.map((a,i) => (
+                    <div key={a.id} style={{display:"flex",gap:"0.65rem",padding:"0.7rem 1rem",borderBottom: i<actividades.length-1 ? "1px solid var(--border)" : "none"}}>
+                      <div style={{width:28,height:28,borderRadius:7,background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <i className={`bi ${TIPO_ACTIVIDAD[a.tipo]?.icon || "bi-dot"}`} style={{color:TIPO_ACTIVIDAD[a.tipo]?.color,fontSize:"0.82rem"}} />
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:"0.78rem",color:"var(--text)",lineHeight:1.4}}>{a.descripcion || "—"}</div>
+                        {a.proxima_accion && (
+                          <div style={{fontSize:"0.67rem",color:"var(--accent)",marginTop:2}}>
+                            → {a.proxima_accion} {a.fecha_proxima_accion ? `(${new Date(a.fecha_proxima_accion).toLocaleDateString("es-AR")})` : ""}
+                          </div>
+                        )}
+                        <div style={{fontSize:"0.65rem",color:"var(--muted)",marginTop:2}}>
+                          {a.usuario_nombre} · {new Date(a.fecha_actividad).toLocaleDateString("es-AR")}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Modal nuevo/editar lead */}
+      {modal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(15,23,42,.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999,padding:"1rem"}}
+          onClick={e => e.target===e.currentTarget && setModal(false)}>
+          <div style={{background:"#fff",borderRadius:"var(--r)",width:"100%",maxWidth:500,boxShadow:"0 20px 60px rgba(15,23,42,.2)",overflow:"hidden"}}>
+            <div style={{padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between",background:"var(--bg)"}}>
+              <div style={{fontWeight:700,fontSize:"0.9rem"}}>{editando ? "Editar lead" : "Nuevo lead"}</div>
+              <button onClick={() => setModal(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:"1rem"}}><i className="bi bi-x-lg" /></button>
+            </div>
+            <div style={{padding:"1.2rem",display:"flex",flexDirection:"column",gap:"0.7rem",maxHeight:"70vh",overflowY:"auto"}}>
+              <div className="fi-row">
+                <div className="fg"><label className="fl">Nombre *</label><input className="fi" value={form.nombre} onChange={e=>f({nombre:e.target.value})} placeholder="Juan García" /></div>
+                <div className="fg"><label className="fl">Empresa</label><input className="fi" value={form.empresa} onChange={e=>f({empresa:e.target.value})} placeholder="Hotel Aurora" /></div>
+              </div>
+              <div className="fi-row">
+                <div className="fg"><label className="fl">Email</label><input className="fi" value={form.email} onChange={e=>f({email:e.target.value})} placeholder="juan@empresa.com" /></div>
+                <div className="fg"><label className="fl">Teléfono</label><input className="fi" value={form.telefono} onChange={e=>f({telefono:e.target.value})} placeholder="+54 11..." /></div>
+              </div>
+              <div className="fi-row">
+                <div className="fg">
+                  <label className="fl">Rubro de interés</label>
+                  <select className="fi" value={form.rubro_interes} onChange={e=>f({rubro_interes:e.target.value})}>
+                    <option value="">Seleccionar…</option>
+                    {RUBROS_VENTA.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div className="fg">
+                  <label className="fl">Plan de interés</label>
+                  <select className="fi" value={form.plan_interes} onChange={e=>f({plan_interes:e.target.value})}>
+                    <option value="">Sin definir</option>
+                    <option value="starter">Starter</option>
+                    <option value="pro">Pro</option>
+                    <option value="plan_ia">Plan IA</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                </div>
+              </div>
+              <div className="fi-row">
+                <div className="fg">
+                  <label className="fl">Fuente</label>
+                  <select className="fi" value={form.fuente} onChange={e=>f({fuente:e.target.value})}>
+                    <option value="web">Web</option>
+                    <option value="referido">Referido</option>
+                    <option value="ads">Ads</option>
+                    <option value="evento">Evento</option>
+                    <option value="cold">Cold outreach</option>
+                  </select>
+                </div>
+                <div className="fg">
+                  <label className="fl">MRR estimado (ARS)</label>
+                  <input className="fi" type="number" value={form.valor_mrr_estimado} onChange={e=>f({valor_mrr_estimado:e.target.value})} placeholder="0" />
+                </div>
+              </div>
+              <div className="fg">
+                <label className="fl">Notas</label>
+                <textarea className="fi" rows={3} value={form.notas} onChange={e=>f({notas:e.target.value})} placeholder="Observaciones sobre el lead…" style={{resize:"vertical"}} />
+              </div>
+              {error && <div style={{background:"var(--red-bg)",border:"1px solid #f5c6c6",borderRadius:"var(--r-sm)",padding:"0.5rem 0.75rem",fontSize:"0.78rem",color:"var(--red)"}}>{error}</div>}
+            </div>
+            <div style={{padding:"0.9rem 1.2rem",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"flex-end",gap:"0.5rem",background:"var(--bg)"}}>
+              <button className="btn btn-out btn-sm" onClick={() => setModal(false)}>Cancelar</button>
+              <button className="btn btn-em btn-sm" onClick={guardar} disabled={saving}>
+                {saving ? "Guardando…" : editando ? "Guardar cambios" : "Crear lead"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal nueva actividad */}
+      {modalAct && (
+        <div style={{position:"fixed",inset:0,background:"rgba(15,23,42,.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999,padding:"1rem"}}
+          onClick={e => e.target===e.currentTarget && setModalAct(false)}>
+          <div style={{background:"#fff",borderRadius:"var(--r)",width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(15,23,42,.2)",overflow:"hidden"}}>
+            <div style={{padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between",background:"var(--bg)"}}>
+              <div style={{fontWeight:700,fontSize:"0.9rem"}}>Registrar actividad</div>
+              <button onClick={() => setModalAct(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:"1rem"}}><i className="bi bi-x-lg" /></button>
+            </div>
+            <div style={{padding:"1.2rem",display:"flex",flexDirection:"column",gap:"0.7rem"}}>
+              <div className="fg">
+                <label className="fl">Tipo</label>
+                <select className="fi" value={formAct.tipo} onChange={e=>fa({tipo:e.target.value})}>
+                  <option value="nota">Nota</option>
+                  <option value="llamada">Llamada</option>
+                  <option value="email">Email</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="reunion">Reunión</option>
+                </select>
+              </div>
+              <div className="fg">
+                <label className="fl">Descripción</label>
+                <textarea className="fi" rows={3} value={formAct.descripcion} onChange={e=>fa({descripcion:e.target.value})} placeholder="¿Qué ocurrió?" style={{resize:"vertical"}} />
+              </div>
+              <div className="fg">
+                <label className="fl">Próxima acción</label>
+                <input className="fi" value={formAct.proxima_accion} onChange={e=>fa({proxima_accion:e.target.value})} placeholder="Enviar propuesta, llamar el lunes…" />
+              </div>
+              <div className="fg">
+                <label className="fl">Fecha próxima acción</label>
+                <input className="fi" type="date" value={formAct.fecha_proxima_accion} onChange={e=>fa({fecha_proxima_accion:e.target.value})} />
+              </div>
+            </div>
+            <div style={{padding:"0.9rem 1.2rem",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"flex-end",gap:"0.5rem",background:"var(--bg)"}}>
+              <button className="btn btn-out btn-sm" onClick={() => setModalAct(false)}>Cancelar</button>
+              <button className="btn btn-em btn-sm" onClick={guardarActividad} disabled={saving}>
+                {saving ? "Guardando…" : "Registrar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
