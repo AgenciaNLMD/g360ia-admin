@@ -85,94 +85,100 @@ export default function DashboardPage() {
 
           {/* ══ FOOTER USUARIO ══ */}
           <div className="sb-foot">
-  <div style={{position:"relative"}} ref={menuRef}>
-    
-    {/* Fila usuario */}
-    <div style={{
-      display:"flex", alignItems:"center", gap:"0.55rem",
-      padding:"0.44rem 0.55rem", borderRadius:"var(--r-sm)",
-      cursor:"pointer",
-    }}>
-      {/* Avatar + textos — solo decorativo, sin onClick */}
-      {session?.user?.image ? (
-        <img src={session.user.image} alt="" className="sb-av"
-          style={{borderRadius:"50%",objectFit:"cover"}} referrerPolicy="no-referrer" />
-      ) : (
-        <div className="sb-av">{userInitial}</div>
-      )}
-      <div className="sb-user-texts">
-        <div className="sb-uname">{userName}</div>
-        <div className="sb-urole">Superadmin</div>
-      </div>
+            <div ref={menuRef} style={{position:"relative"}}>
 
-      {/* Botón 3 puntos — zona de click exclusiva */}
-      {!collapsed && (
-        <button
-          onClick={() => setMenuUsuario(m => !m)}
-          style={{
-            background:"none", border:"none", cursor:"pointer",
-            padding:"4px 6px", borderRadius:6, flexShrink:0,
-            color:"rgba(255,255,255,.5)", fontSize:"0.85rem",
-            display:"flex", alignItems:"center", justifyContent:"center",
-            transition:"background .13s",
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.15)"}
-          onMouseLeave={e => e.currentTarget.style.background = "none"}
-        >
-          <i className="bi bi-three-dots-vertical" />
-        </button>
-      )}
-    </div>
+              {/* Fila usuario */}
+              <div style={{display:"flex",alignItems:"center",gap:"0.55rem",padding:"0.44rem 0.55rem",borderRadius:"var(--r-sm)"}}>
 
-    {/* Dropdown */}
-    {menuUsuario && (
-      <div style={{
-        position:"absolute", bottom:"calc(100% + 6px)", left:6, right:6,
-        background:"#fff", border:"1px solid var(--border)",
-        borderRadius:"var(--r)", boxShadow:"var(--sh-md)",
-        zIndex:999, overflow:"hidden",
-      }}>
-        {/* Encabezado */}
-        <div style={{padding:"0.7rem 0.85rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:"0.5rem"}}>
-          {session?.user?.image ? (
-            <img src={session.user.image} alt="" style={{width:28,height:28,borderRadius:"50%",objectFit:"cover"}} referrerPolicy="no-referrer" />
-          ) : (
-            <div style={{width:28,height:28,borderRadius:"50%",background:"var(--pr)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.7rem",fontWeight:700,color:"#fff"}}>{userInitial}</div>
-          )}
-          <div>
-            <div style={{fontSize:"0.78rem",fontWeight:600,color:"var(--text)"}}>{userName}</div>
-            <div style={{fontSize:"0.65rem",color:"var(--muted)"}}>{session?.user?.email}</div>
+                {/* Avatar — único trigger del dropdown */}
+                <div onClick={() => setMenuUsuario(m => !m)} style={{cursor:"pointer",flexShrink:0}}>
+                  {session?.user?.image ? (
+                    <img src={session.user.image} alt=""
+                      style={{width:30,height:30,borderRadius:"50%",objectFit:"cover",display:"block",border:"2px solid rgba(255,255,255,.25)"}}
+                      referrerPolicy="no-referrer" />
+                  ) : (
+                    <div style={{
+                      width:30,height:30,borderRadius:"50%",
+                      background:"linear-gradient(135deg,var(--pr-d),var(--pr-l))",
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:"0.72rem",fontWeight:700,color:"#fff",
+                      border:"2px solid rgba(255,255,255,.25)",
+                    }}>
+                      {userInitial}
+                    </div>
+                  )}
+                </div>
+
+                {/* Textos */}
+                <div className="sb-user-texts" style={{flex:1,minWidth:0}}>
+                  <div className="sb-uname">{userName}</div>
+                  <div className="sb-urole">Superadmin · Pro</div>
+                </div>
+              </div>
+
+              {/* Dropdown — position:fixed para escapar del overflow:hidden del sidebar */}
+              {menuUsuario && (
+                <div style={{
+                  position:"fixed",
+                  bottom:64,
+                  left: collapsed ? 60 : 238,
+                  width:240,
+                  background:"#fff",
+                  border:"1px solid var(--border)",
+                  borderRadius:"var(--r)",
+                  boxShadow:"0 8px 32px rgba(30,50,80,.18)",
+                  zIndex:9999,
+                  overflow:"hidden",
+                }}>
+                  {/* Encabezado */}
+                  <div style={{padding:"0.9rem 1rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:"0.65rem",background:"var(--bg)"}}>
+                    {session?.user?.image ? (
+                      <img src={session.user.image} alt=""
+                        style={{width:38,height:38,borderRadius:"50%",objectFit:"cover",border:"2px solid var(--border)",flexShrink:0}}
+                        referrerPolicy="no-referrer" />
+                    ) : (
+                      <div style={{width:38,height:38,borderRadius:"50%",background:"var(--pr)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.9rem",fontWeight:700,color:"#fff",flexShrink:0}}>
+                        {userInitial}
+                      </div>
+                    )}
+                    <div style={{minWidth:0}}>
+                      <div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{userName}</div>
+                      <div style={{fontSize:"0.67rem",color:"var(--muted)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{session?.user?.email}</div>
+                      <div style={{marginTop:3,display:"flex",gap:4}}>
+                        <span style={{background:"var(--pr-pale)",color:"var(--pr)",fontSize:"0.6rem",fontWeight:700,padding:"1px 7px",borderRadius:9}}>Superadmin</span>
+                        <span style={{background:"var(--em-pale)",color:"var(--em-d)",fontSize:"0.6rem",fontWeight:700,padding:"1px 7px",borderRadius:9}}>Pro</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Opciones */}
+                  <div style={{padding:"0.3rem 0"}}>
+                    <DropdownItem
+                      icon="bi-person"
+                      label="Mi perfil"
+                      onClick={() => { setMenuUsuario(false); nav("perfil"); }}
+                    />
+                    <DropdownItem
+                      icon="bi-eye"
+                      label="Ver como cliente"
+                      onClick={() => setMenuUsuario(false)}
+                      muted
+                    />
+                  </div>
+
+                  {/* Cerrar sesión */}
+                  <div style={{borderTop:"1px solid var(--border)",padding:"0.3rem 0"}}>
+                    <DropdownItem
+                      icon="bi-box-arrow-right"
+                      label="Cerrar sesión"
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      danger
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Opciones */}
-        <div style={{padding:"0.3rem 0"}}>
-          <DropdownItem
-            icon="bi-person"
-            label="Mi perfil"
-            onClick={() => { setMenuUsuario(false); nav("perfil"); }}
-          />
-          <DropdownItem
-            icon="bi-eye"
-            label="Ver como cliente"
-            onClick={() => setMenuUsuario(false)}
-            muted
-          />
-        </div>
-
-        {/* Cerrar sesión */}
-        <div style={{borderTop:"1px solid var(--border)",padding:"0.3rem 0"}}>
-          <DropdownItem
-            icon="bi-box-arrow-right"
-            label="Cerrar sesión"
-            onClick={() => signOut({ callbackUrl: "/" })}
-            danger
-          />
-        </div>
-      </div>
-    )}
-  </div>
-</div>
         </nav>
 
         {/* ══ MAIN ══ */}
