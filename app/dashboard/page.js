@@ -9,6 +9,7 @@ const VIEWS = {
   ventas:         ["Ventas",           "Pipeline comercial"],
   conversaciones: ["Conversaciones",   "Mensajes entrantes y seguimiento"],
   vendedores:     ["Vendedores",       "Equipo comercial y rendimiento"],
+  equipo:         ["Equipo",           "Áreas y personal del equipo"],
   soporte:        ["Soporte",          "Tickets y atención a clientes"],
   modulos:        ["Módulos",          "Catálogo del sistema"],
   planes:         ["Planes",           "Gestión de suscripciones"],
@@ -107,6 +108,15 @@ export default function DashboardPage() {
             <NavItem id="conversaciones" icon="bi-chat-dots"    label="Conversaciones" active={view==="conversaciones"} onClick={nav}
               badge={stats.conv_sin_asignar > 0 ? String(stats.conv_sin_asignar) : null} badgeClass="amber" />
             <NavItem id="vendedores"     icon="bi-person-badge" label="Vendedores"     active={view==="vendedores"}     onClick={nav} />
+
+            {/* EQUIPO */}
+            {!esVendedor && (
+              <>
+                <div className="sb-divider" />
+                <div className="sb-sec">Equipo</div>
+                <NavItem id="equipo" icon="bi-people-fill" label="Áreas y personal" active={view==="equipo"} onClick={nav} />
+              </>
+            )}
 
             {/* SISTEMA */}
             {!esVendedor && (
@@ -210,6 +220,7 @@ export default function DashboardPage() {
             {view === "ventas"         && <ViewVentas session={session} />}
             {view === "conversaciones" && <ViewConversaciones session={session} onNavegar={nav} />}
             {view === "vendedores"     && <ViewVendedores />}
+            {view === "equipo"         && <ViewEquipo />}
             {view === "soporte"        && <ViewSoporte session={session} />}
             {view === "modulos"        && <ViewModulos />}
             {view === "planes"         && <ViewPlanes />}
@@ -1230,6 +1241,263 @@ function ViewVendedores() {
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ══ EQUIPO ══ */
+const AREA_META = {
+  comercial:      { label:"Área Comercial",  color:"var(--pr)",      bg:"var(--pr-pale)",     icon:"bi-graph-up-arrow", roles:["vendedor"] },
+  contenido:      { label:"Área Marketing",  color:"var(--accent)",  bg:"var(--accent-pale)", icon:"bi-megaphone",      roles:["cm"] },
+  atencion:       { label:"Área Soporte",    color:"var(--em-d)",    bg:"var(--em-pale)",     icon:"bi-headset",        roles:["soporte"] },
+  administracion: { label:"Administración",  color:"var(--sub)",     bg:"var(--moon-l)",      icon:"bi-shield-lock",    roles:["admin"] },
+};
+
+const ROL_META = {
+  vendedor: { label:"Vendedor",           color:"var(--pr)" },
+  cm:       { label:"Community Manager",  color:"var(--accent)" },
+  soporte:  { label:"Soporte",            color:"var(--em-d)" },
+  admin:    { label:"Admin",              color:"var(--sub)" },
+};
+
+function ViewEquipo() {
+  const [tab, setTab] = useState("comercial");
+  const [data, setData] = useState({ equipos:[], usuarios:[], porArea:{} });
+  const [loading, setLoading] = useState(true);
+  const [modalEditar, setModalEditar] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [formEdit, setFormEdit] = useState({ rol:"", area:"", titulo:"", activo:1 });
+  const [saving, setSaving] = useState(false);
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch("/api/equipos");
+      const d = await r.json();
+      if (d.ok) setData(d);
+    } catch(_){}
+    setLoading(false);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const abrirEditar = (u) => {
+    setEditando(u);
+    setFormEdit({ rol: u.rol||"", area: u.area||"", titulo: u.titulo||"", activo: u.activo });
+    setModalEditar(true);
+  };
+
+  const guardarEditar = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/equipos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario_id: editando.id, ...formEdit }),
+      });
+      setModalEditar(false);
+      await cargar();
+    } catch(_){}
+    setSaving(false);
+  };
+
+  const fe = (v) => setFormEdit(p => ({...p,...v}));
+
+  const TABS = [
+    ["comercial",  "Comercial",  "bi-graph-up-arrow"],
+    ["contenido",  "Marketing",  "bi-megaphone"],
+    ["atencion",   "Soporte",    "bi-headset"],
+  ];
+
+  const miembros = data.porArea[tab] || [];
+  const meta = AREA_META[tab];
+
+  // KPIs del área
+  const totalActivos = miembros.filter(u => u.activo).length;
+  const mrrTotal = miembros.reduce((s,u) => s + (Number(u.mrr_generado)||0), 0);
+  const tasaPromedio = miembros.length > 0
+    ? (miembros.reduce((s,u) => s + (Number(u.tasa_cierre)||0), 0) / miembros.length).toFixed(0)
+    : 0;
+  const leadsActivos = miembros.reduce((s,u) => s + (Number(u.leads_activos)||0), 0);
+
+  return (
+    <div className="view-anim">
+      <div className="vh">
+        <div>
+          <div className="vh-title">Equipo</div>
+          <div className="vh-sub">Áreas y personal · {data.usuarios?.length || 0} personas en total</div>
+        </div>
+      </div>
+
+      {/* Tabs de área */}
+      <Tabs tabs={TABS} active={tab} onChange={setTab} />
+
+      {loading ? <Cargando texto="Cargando equipo..." /> : (
+        <>
+          {/* KPIs del área */}
+          <div className="g4" style={{marginBottom:"0.9rem"}}>
+            <div className="kpi">
+              <div className="kpi-ico" style={{background:meta?.bg}}>
+                <i className={`bi ${meta?.icon}`} style={{color:meta?.color}} />
+              </div>
+              <div className="kpi-val">{totalActivos}</div>
+              <div className="kpi-lbl">Activos</div>
+            </div>
+            {tab === "comercial" && <>
+              <div className="kpi">
+                <div className="kpi-ico" style={{background:"var(--em-pale)"}}><i className="bi bi-graph-up" style={{color:"var(--em-d)"}} /></div>
+                <div className="kpi-val" style={{fontSize:"1.3rem"}}>{mrrTotal > 0 ? `$${mrrTotal.toLocaleString("es-AR")}` : "—"}</div>
+                <div className="kpi-lbl">MRR generado</div>
+              </div>
+              <div className="kpi">
+                <div className="kpi-ico" style={{background:"var(--accent-pale)"}}><i className="bi bi-percent" style={{color:"var(--accent)"}} /></div>
+                <div className="kpi-val">{tasaPromedio}%</div>
+                <div className="kpi-lbl">Tasa cierre prom.</div>
+              </div>
+              <div className="kpi">
+                <div className="kpi-ico" style={{background:"var(--blue-bg)"}}><i className="bi bi-person-plus" style={{color:"var(--blue)"}} /></div>
+                <div className="kpi-val">{leadsActivos}</div>
+                <div className="kpi-lbl">Leads activos</div>
+              </div>
+            </>}
+            {tab === "atencion" && <>
+              <div className="kpi">
+                <div className="kpi-ico" style={{background:"var(--red-bg)"}}><i className="bi bi-ticket" style={{color:"var(--red)"}} /></div>
+                <div className="kpi-val">{miembros.reduce((s,u)=>s+(Number(u.tickets_abiertos)||0),0)}</div>
+                <div className="kpi-lbl">Tickets abiertos</div>
+              </div>
+              <div className="kpi">
+                <div className="kpi-ico" style={{background:"var(--em-pale)"}}><i className="bi bi-check-circle" style={{color:"var(--em-d)"}} /></div>
+                <div className="kpi-val">{miembros.reduce((s,u)=>s+(Number(u.tickets_resueltos)||0),0)}</div>
+                <div className="kpi-lbl">Resueltos total</div>
+              </div>
+              <div className="kpi">
+                <div className="kpi-ico" style={{background:"var(--accent-pale)"}}><i className="bi bi-star" style={{color:"var(--accent)"}} /></div>
+                <div className="kpi-val">{miembros.length > 0 ? (miembros.reduce((s,u)=>s+(Number(u.satisfaccion_avg)||0),0)/miembros.length).toFixed(1) : "—"}</div>
+                <div className="kpi-lbl">Satisfacción prom.</div>
+              </div>
+            </>}
+          </div>
+
+          {/* Lista de miembros */}
+          {miembros.length === 0 ? (
+            <div className="card" style={{padding:"2.5rem",textAlign:"center",color:"var(--muted)"}}>
+              <i className={`bi ${meta?.icon}`} style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem",color:meta?.color}} />
+              No hay personal en esta área todavía.
+              <div style={{fontSize:"0.75rem",marginTop:"0.4rem"}}>
+                Creá usuarios en Sistema y asignales el área correspondiente.
+              </div>
+            </div>
+          ) : (
+            <div className="card">
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>Persona</th>
+                    <th>Rol</th>
+                    <th>Título</th>
+                    {tab === "comercial" && <><th>Leads activos</th><th>MRR generado</th><th>Tasa cierre</th></>}
+                    {tab === "atencion" && <><th>Tickets abiertos</th><th>Resueltos</th><th>Satisfacción</th></>}
+                    {tab === "contenido" && <><th>Último acceso</th></>}
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {miembros.map(u => (
+                    <tr key={u.id}>
+                      <td>
+                        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                          <Av letra={u.nombre?.[0]} size={30} />
+                          <div>
+                            <div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div>
+                            <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="bdg bdg-blue" style={{color:ROL_META[u.rol]?.color,background:"var(--bg)"}}>
+                          {ROL_META[u.rol]?.label || u.rol}
+                        </span>
+                      </td>
+                      <td style={{fontSize:"0.75rem",color:"var(--text2)"}}>{u.titulo || <span style={{color:"var(--muted)"}}>—</span>}</td>
+
+                      {tab === "comercial" && <>
+                        <td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--blue)"}}>{u.leads_activos||0}</td>
+                        <td style={{fontSize:"0.78rem",fontWeight:600}}>{u.mrr_generado?`$${Number(u.mrr_generado).toLocaleString("es-AR")}`:"—"}</td>
+                        <td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--em-d)"}}>{u.tasa_cierre||0}%</td>
+                      </>}
+                      {tab === "atencion" && <>
+                        <td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--red)"}}>{u.tickets_abiertos||0}</td>
+                        <td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--em-d)"}}>{u.tickets_resueltos||0}</td>
+                        <td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--accent)"}}>{u.satisfaccion_avg||"—"}</td>
+                      </>}
+                      {tab === "contenido" && <>
+                        <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleDateString("es-AR") : "Nunca"}</td>
+                      </>}
+
+                      <td>
+                        <span className={`bdg ${u.activo ? "bdg-em" : "bdg-red"}`}>
+                          {u.activo ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td>
+                        <button className="btn btn-xs btn-out" onClick={() => abrirEditar(u)}>
+                          <i className="bi bi-pencil" /> Editar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Modal editar miembro */}
+      {modalEditar && editando && (
+        <Modal title={`Editar — ${editando.nombre}`} onClose={() => setModalEditar(false)}>
+          <div style={{padding:"1.2rem",display:"flex",flexDirection:"column",gap:"0.7rem"}}>
+            <div className="fi-row">
+              <div className="fg">
+                <label className="fl">Rol</label>
+                <select className="fi" value={formEdit.rol} onChange={e=>fe({rol:e.target.value})}>
+                  <option value="vendedor">Vendedor</option>
+                  <option value="cm">Community Manager</option>
+                  <option value="soporte">Soporte</option>
+                  <option value="admin">Admin</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              <div className="fg">
+                <label className="fl">Área</label>
+                <select className="fi" value={formEdit.area} onChange={e=>fe({area:e.target.value})}>
+                  <option value="">Sin área</option>
+                  <option value="comercial">Comercial</option>
+                  <option value="contenido">Marketing</option>
+                  <option value="atencion">Soporte</option>
+                  <option value="administracion">Administración</option>
+                </select>
+              </div>
+            </div>
+            <div className="fg">
+              <label className="fl">Título / Cargo</label>
+              <input className="fi" value={formEdit.titulo} onChange={e=>fe({titulo:e.target.value})} placeholder="Ej: Vendedor Senior, CM Junior…" />
+            </div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.5rem 0",borderTop:"1px solid var(--border)"}}>
+              <div>
+                <div style={{fontSize:"0.8rem",fontWeight:600}}>Estado</div>
+                <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>Activo / Inactivo en el sistema</div>
+              </div>
+              <div className={`tog${formEdit.activo?" on":""}`} onClick={()=>fe({activo:formEdit.activo?0:1})}>
+                <div className="tog-k" />
+              </div>
+            </div>
+          </div>
+          <ModalFooter onCancel={()=>setModalEditar(false)} onConfirm={guardarEditar} saving={saving} labelConfirm="Guardar cambios" />
+        </Modal>
       )}
     </div>
   );
