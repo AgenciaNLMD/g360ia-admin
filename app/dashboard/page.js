@@ -104,40 +104,18 @@ export default function DashboardPage() {
             {/* VENTAS */}
             <div className="sb-divider" />
             <div className="sb-sec">Ventas</div>
-            <NavItem id="ventas"         icon="bi-graph-up-arrow" label="Pipeline / Leads" active={view==="ventas"}         onClick={nav} />
-            <NavItem id="conversaciones" icon="bi-chat-dots"       label="Conversaciones"   active={view==="conversaciones"} onClick={nav}
+            <NavItem id="conversaciones" icon="bi-chat-dots"    label="Conversaciones" active={view==="conversaciones"} onClick={nav}
               badge={stats.conv_sin_asignar > 0 ? String(stats.conv_sin_asignar) : null} badgeClass="amber" />
-            <NavItem id="vendedores"     icon="bi-person-badge"    label="Vendedores"       active={view==="vendedores"}     onClick={nav} />
-
-            {/* SOPORTE */}
-            {!esVendedor && (
-              <>
-                <div className="sb-divider" />
-                <div className="sb-sec">Soporte</div>
-                <NavItem id="soporte" icon="bi-headset" label="Tickets" active={view==="soporte"} onClick={nav}
-                  badge={stats.tickets_urgentes > 0 ? String(stats.tickets_urgentes) : null} badgeClass="red" />
-              </>
-            )}
-
-            {/* COMUNICACIONES */}
-            {!esVendedor && (
-              <>
-                <div className="sb-divider" />
-                <div className="sb-sec">Comunicaciones</div>
-                <NavItem id="comunicaciones" icon="bi-envelope"      label="Mensajes"   active={view==="comunicaciones"} onClick={nav} />
-                <NavItem id="alertas"        icon="bi-bell"          label="Alertas IA" active={view==="alertas"}        onClick={nav} />
-              </>
-            )}
+            <NavItem id="vendedores"     icon="bi-person-badge" label="Vendedores"     active={view==="vendedores"}     onClick={nav} />
 
             {/* SISTEMA */}
             {!esVendedor && (
               <>
                 <div className="sb-divider" />
                 <div className="sb-sec">Sistema</div>
-                <NavItem id="sistema"       icon="bi-shield-lock"  label="Usuarios"      active={view==="sistema"}       onClick={nav}
+                <NavItem id="sistema"   icon="bi-shield-lock"  label="Usuarios"  active={view==="sistema"}   onClick={nav}
                   badge={stats.usuarios_pendientes > 0 ? String(stats.usuarios_pendientes) : null} badgeClass="red" />
-                <NavItem id="integraciones" icon="bi-plug"         label="Integraciones" active={view==="integraciones"} onClick={nav} />
-                <NavItem id="auditoria"     icon="bi-journal-text" label="Auditoría"     active={view==="auditoria"}     onClick={nav} />
+                <NavItem id="auditoria" icon="bi-journal-text" label="Auditoría" active={view==="auditoria"} onClick={nav} />
               </>
             )}
 
@@ -146,10 +124,15 @@ export default function DashboardPage() {
               <>
                 <div className="sb-divider" />
                 <div className="sb-sec" style={{opacity:.4}}>Próximamente</div>
-                <NavItem id="seguimiento"   icon="bi-check2-square" label="Seguimiento"   active={view==="seguimiento"}   onClick={nav} incoming />
-                <NavItem id="modulos"       icon="bi-puzzle"        label="Módulos"       active={view==="modulos"}       onClick={nav} incoming />
-                <NavItem id="planes"        icon="bi-tag"           label="Planes"        active={view==="planes"}        onClick={nav} incoming />
-                <NavItem id="configuracion" icon="bi-gear"          label="Configuración" active={view==="configuracion"} onClick={nav} incoming />
+                <NavItem id="ventas"        icon="bi-graph-up-arrow" label="Pipeline / Leads" active={view==="ventas"}        onClick={nav} incoming />
+                <NavItem id="soporte"       icon="bi-headset"        label="Tickets"          active={view==="soporte"}       onClick={nav} incoming />
+                <NavItem id="comunicaciones" icon="bi-envelope"      label="Mensajes"         active={view==="comunicaciones"} onClick={nav} incoming />
+                <NavItem id="alertas"       icon="bi-bell"           label="Alertas IA"       active={view==="alertas"}       onClick={nav} incoming />
+                <NavItem id="integraciones" icon="bi-plug"           label="Integraciones"    active={view==="integraciones"} onClick={nav} incoming />
+                <NavItem id="seguimiento"   icon="bi-check2-square"  label="Seguimiento"      active={view==="seguimiento"}   onClick={nav} incoming />
+                <NavItem id="modulos"       icon="bi-puzzle"         label="Módulos"          active={view==="modulos"}       onClick={nav} incoming />
+                <NavItem id="planes"        icon="bi-tag"            label="Planes"           active={view==="planes"}        onClick={nav} incoming />
+                <NavItem id="configuracion" icon="bi-gear"           label="Configuración"    active={view==="configuracion"} onClick={nav} incoming />
               </>
             )}
           </div>
