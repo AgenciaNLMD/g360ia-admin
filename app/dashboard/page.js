@@ -811,22 +811,132 @@ function ViewIntegraciones() {
 }
 
 function ViewAuditoria() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filtro, setFiltro] = useState("");
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auditoria");
+      const data = await res.json();
+      if (data.ok) setLogs(data.logs);
+    } catch (_) {}
+    setLoading(false);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const formatFecha = (f) => {
+    const d = new Date(f);
+    return d.toLocaleDateString("es-AR", { day:"2-digit", month:"short", year:"numeric" })
+      + " · " + d.toLocaleTimeString("es-AR", { hour:"2-digit", minute:"2-digit" });
+  };
+
+  const filtrados = logs.filter(l =>
+    !filtro ||
+    l.nombre?.toLowerCase().includes(filtro.toLowerCase()) ||
+    l.email?.toLowerCase().includes(filtro.toLowerCase()) ||
+    l.dispositivo?.toLowerCase().includes(filtro.toLowerCase()) ||
+    l.ip?.includes(filtro)
+  );
+
+  // KPIs
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  const sesionesHoy = logs.filter(l => new Date(l.creado_en) >= hoy).length;
+  const usuariosUnicos = [...new Set(logs.filter(l => new Date(l.creado_en) >= hoy).map(l => l.email))].length;
+  const ultimoAcceso = logs[0] ? formatFecha(logs[0].creado_en) : "—";
+
   return (
     <div className="view-anim">
       <div className="vh">
-        <div><div className="vh-title">Auditoría</div><div className="vh-sub">Registro de actividad del sistema</div></div>
-        <button className="btn btn-out btn-sm"><i className="bi bi-download" /> Exportar log</button>
+        <div><div className="vh-title">Auditoría</div><div className="vh-sub">Registro de accesos al sistema</div></div>
+        <button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /> Actualizar</button>
       </div>
+
+      {/* KPIs */}
+      <div className="g3" style={{marginBottom:"0.9rem"}}>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--pr-pale)"}}><i className="bi bi-box-arrow-in-right" style={{color:"var(--pr)"}} /></div>
+          <div className="kpi-val">{sesionesHoy}</div>
+          <div className="kpi-lbl">Accesos hoy</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--em-pale)"}}><i className="bi bi-people" style={{color:"var(--em-d)"}} /></div>
+          <div className="kpi-val">{usuariosUnicos}</div>
+          <div className="kpi-lbl">Usuarios únicos hoy</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ico" style={{background:"var(--accent-pale)"}}><i className="bi bi-clock-history" style={{color:"var(--accent)"}} /></div>
+          <div className="kpi-val" style={{fontSize:"0.95rem",marginTop:4}}>{logs[0] ? logs[0].nombre || "—" : "—"}</div>
+          <div className="kpi-lbl">Último acceso</div>
+          <div style={{fontSize:"0.65rem",color:"var(--muted)",marginTop:2}}>{ultimoAcceso}</div>
+        </div>
+      </div>
+
+      {/* Filtro */}
+      <div style={{display:"flex",gap:"0.6rem",marginBottom:"0.7rem"}}>
+        <div className="tb-search" style={{width:"100%",maxWidth:280}}>
+          <i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.78rem"}} />
+          <input
+            placeholder="Buscar usuario, IP, dispositivo…"
+            value={filtro}
+            onChange={e => setFiltro(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Tabla */}
       <div className="card">
-        <table className="tbl">
-          <thead><tr><th>Timestamp</th><th>Usuario</th><th>Acción</th><th>IP</th><th>Estado</th></tr></thead>
-          <tbody>
-            <tr><td colSpan={5} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>
-              <i className="bi bi-journal-text" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
-              Sin registros de auditoría todavía
-            </td></tr>
-          </tbody>
-        </table>
+        {loading ? (
+          <div style={{padding:"2.5rem",textAlign:"center",color:"var(--muted)"}}>
+            <i className="bi bi-hourglass-split" style={{fontSize:"1.4rem",display:"block",marginBottom:8}} />
+            Cargando registros...
+          </div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Dispositivo</th>
+                <th>IP</th>
+                <th>Fecha y hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtrados.length === 0 ? (
+                <tr><td colSpan={4} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>
+                  <i className="bi bi-journal-text" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
+                  Sin registros todavía
+                </td></tr>
+              ) : filtrados.map((l,i) => (
+                <tr key={i}>
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <div style={{width:26,height:26,borderRadius:"50%",background:"var(--pr-pale)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.68rem",fontWeight:700,color:"var(--pr)",flexShrink:0}}>
+                        {l.nombre?.[0]?.toUpperCase() ?? "?"}
+                      </div>
+                      <div>
+                        <div style={{fontWeight:600,fontSize:"0.8rem"}}>{l.nombre || "—"}</div>
+                        <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{l.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      <i className={`bi ${l.dispositivo?.includes("Android")||l.dispositivo?.includes("iOS") ? "bi-phone" : "bi-laptop"}`}
+                        style={{color:"var(--muted)",fontSize:"0.82rem"}} />
+                      <span style={{fontSize:"0.78rem"}}>{l.dispositivo || "Desconocido"}</span>
+                    </div>
+                  </td>
+                  <td style={{fontSize:"0.78rem",color:"var(--muted)",fontFamily:"monospace"}}>{l.ip || "—"}</td>
+                  <td style={{fontSize:"0.75rem",color:"var(--muted)"}}>{formatFecha(l.creado_en)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
@@ -1084,22 +1194,6 @@ function ViewSistema() {
 
 function ViewPerfil() {
   const { data: session } = useSession();
-  const [sesiones, setSesiones] = useState([]);
-  const [loadingSesiones, setLoadingSesiones] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/perfil/sesiones")
-      .then(r => r.json())
-      .then(d => { if (d.ok) setSesiones(d.sesiones); })
-      .catch(() => {})
-      .finally(() => setLoadingSesiones(false));
-  }, []);
-
-  const formatFecha = (f) => {
-    const d = new Date(f);
-    return d.toLocaleDateString("es-AR", { day:"2-digit", month:"short", year:"numeric" })
-      + " · " + d.toLocaleTimeString("es-AR", { hour:"2-digit", minute:"2-digit" });
-  };
 
   return (
     <div className="view-anim" style={{maxWidth:680}}>
@@ -1133,63 +1227,6 @@ function ViewPerfil() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Sesiones activas */}
-      <div className="cfg-section">
-        <div className="cfg-hdr"><i className="bi bi-shield-lock" style={{color:"var(--pr)"}} /><span className="cfg-title">Sesiones activas</span></div>
-        <div style={{padding:0}}>
-          {loadingSesiones ? (
-            <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando...</div>
-          ) : sesiones.length === 0 ? (
-            <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin registros todavía</div>
-          ) : sesiones.slice(0,3).map((s,i) => (
-            <div key={s.id} style={{
-              display:"flex",alignItems:"center",gap:"0.75rem",
-              padding:"0.7rem 1rem",
-              borderBottom: i < Math.min(sesiones.length,3)-1 ? "1px solid var(--border)" : "none"
-            }}>
-              <div style={{width:32,height:32,borderRadius:8,background: i===0 ? "var(--em-pale)" : "var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <i className={`bi ${s.dispositivo?.includes("Android")||s.dispositivo?.includes("iOS") ? "bi-phone" : "bi-laptop"}`}
-                  style={{fontSize:"0.88rem",color: i===0 ? "var(--em-d)" : "var(--sub)"}} />
-              </div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:"0.8rem",fontWeight:600,color:"var(--text)",display:"flex",alignItems:"center",gap:6}}>
-                  {s.dispositivo || "Dispositivo desconocido"}
-                  {i===0 && <span style={{background:"var(--em-pale)",color:"var(--em-d)",fontSize:"0.6rem",fontWeight:700,padding:"1px 7px",borderRadius:9}}>Actual</span>}
-                </div>
-                <div style={{fontSize:"0.67rem",color:"var(--muted)",marginTop:1}}>
-                  {s.ip ? `IP: ${s.ip} · ` : ""}{formatFecha(s.creado_en)}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Historial de accesos */}
-      <div className="cfg-section">
-        <div className="cfg-hdr"><i className="bi bi-clock-history" style={{color:"var(--pr)"}} /><span className="cfg-title">Historial de accesos</span></div>
-        <div style={{padding:0}}>
-          {loadingSesiones ? (
-            <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando...</div>
-          ) : sesiones.length === 0 ? (
-            <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin historial todavía</div>
-          ) : sesiones.map((s,i) => (
-            <div key={s.id} style={{
-              display:"flex",alignItems:"center",gap:"0.75rem",
-              padding:"0.55rem 1rem",
-              borderBottom: i < sesiones.length-1 ? "1px solid var(--border)" : "none"
-            }}>
-              <i className="bi bi-circle-fill" style={{fontSize:"0.4rem",color:"var(--muted)",flexShrink:0}} />
-              <div style={{flex:1,fontSize:"0.77rem",color:"var(--text2)"}}>
-                {s.dispositivo || "Dispositivo desconocido"}
-                {s.ip && <span style={{color:"var(--muted)"}}> · {s.ip}</span>}
-              </div>
-              <div style={{fontSize:"0.67rem",color:"var(--muted)",flexShrink:0}}>{formatFecha(s.creado_en)}</div>
-            </div>
-          ))}
         </div>
       </div>
 
