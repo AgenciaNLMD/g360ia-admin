@@ -605,24 +605,292 @@ function ViewDashboard() {
   );
 }
 
+const RUBROS = [
+  "Hotel","Salón de eventos","Consultorio / Clínica","Spa / Centro de bienestar",
+  "Inmobiliaria","Restaurante / Local de comida","Contador / Estudio contable",
+  "Abogado / Estudio jurídico","Gestor de seguros","Logística / Distribución","GovTech","Otro",
+];
+
+const PLAN_META = {
+  starter:    { label:"Starter",  cls:"bdg-moon" },
+  pro:        { label:"Pro",      cls:"bdg-pro" },
+  plan_ia:    { label:"Plan IA",  cls:"bdg-gold" },
+  enterprise: { label:"Enterprise", cls:"bdg-pine" },
+};
+
+const FORM_VACIO = {
+  nombre:"", rubro:"", plan:"starter", subdominio:"",
+  email:"", telefono:"", logo_url:"",
+};
+
 function ViewClientes() {
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [form, setForm] = useState(FORM_VACIO);
+  const [error, setError] = useState("");
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/tenants");
+      const data = await res.json();
+      if (data.ok) setTenants(data.tenants);
+    } catch (_) {}
+    setLoading(false);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const abrirNuevo = () => {
+    setEditando(null);
+    setForm(FORM_VACIO);
+    setError("");
+    setModal(true);
+  };
+
+  const abrirEditar = (t) => {
+    setEditando(t);
+    setForm({
+      nombre: t.nombre || "",
+      rubro: t.rubro || "",
+      plan: t.plan || "starter",
+      subdominio: t.subdominio || "",
+      email: t.email || "",
+      telefono: t.telefono || "",
+      logo_url: t.logo_url || "",
+    });
+    setError("");
+    setModal(true);
+  };
+
+  const guardar = async () => {
+    if (!form.nombre || !form.rubro) { setError("Nombre y rubro son obligatorios"); return; }
+    setSaving(true);
+    setError("");
+    try {
+      const method = editando ? "PATCH" : "POST";
+      const body = editando ? { id: editando.id, ...form } : form;
+      const res = await fetch("/api/tenants", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!data.ok) { setError(data.error || "Error al guardar"); setSaving(false); return; }
+      setModal(false);
+      await cargar();
+    } catch (_) { setError("Error de conexión"); }
+    setSaving(false);
+  };
+
+  const toggleActivo = async (t) => {
+    try {
+      await fetch("/api/tenants", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: t.id, activo: t.activo ? 0 : 1 }),
+      });
+      await cargar();
+    } catch (_) {}
+  };
+
+  const eliminar = async (t) => {
+    if (!confirm(`¿Eliminar a ${t.nombre}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await fetch("/api/tenants", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: t.id }),
+      });
+      await cargar();
+    } catch (_) {}
+  };
+
+  const f = (v) => setForm(p => ({ ...p, ...v }));
+
   return (
     <div className="view-anim">
       <div className="vh">
-        <div><div className="vh-title">Clientes</div><div className="vh-sub">Listado de tenants registrados</div></div>
-        <button className="btn btn-em btn-sm"><i className="bi bi-plus-lg" /> Nuevo cliente</button>
+        <div>
+          <div className="vh-title">Clientes</div>
+          <div className="vh-sub">{tenants.length} tenants registrados</div>
+        </div>
+        <div style={{display:"flex",gap:"0.5rem"}}>
+          <button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /></button>
+          <button className="btn btn-em btn-sm" onClick={abrirNuevo}><i className="bi bi-plus-lg" /> Nuevo cliente</button>
+        </div>
       </div>
+
       <div className="card">
-        <table className="tbl">
-          <thead><tr><th>Cliente</th><th>Rubro</th><th>Plan</th><th>Estado</th><th>Módulos</th><th>Creado</th><th></th></tr></thead>
-          <tbody>
-            <tr><td colSpan={7} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>
-              <i className="bi bi-people" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
-              No hay clientes registrados todavía
-            </td></tr>
-          </tbody>
-        </table>
+        {loading ? (
+          <div style={{padding:"2.5rem",textAlign:"center",color:"var(--muted)"}}>
+            <i className="bi bi-hourglass-split" style={{fontSize:"1.4rem",display:"block",marginBottom:8}} />
+            Cargando clientes...
+          </div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Rubro</th>
+                <th>Plan</th>
+                <th>Subdominio</th>
+                <th>Activo</th>
+                <th>Creado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {tenants.length === 0 ? (
+                <tr><td colSpan={7} style={{textAlign:"center",padding:"2.5rem",color:"var(--muted)"}}>
+                  <i className="bi bi-people" style={{fontSize:"1.5rem",display:"block",marginBottom:"0.5rem"}} />
+                  No hay clientes registrados todavía
+                </td></tr>
+              ) : tenants.map(t => (
+                <tr key={t.id}>
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      {t.logo_url ? (
+                        <img src={t.logo_url} alt="" style={{width:28,height:28,borderRadius:7,objectFit:"cover",border:"1px solid var(--border)",flexShrink:0}} />
+                      ) : (
+                        <div style={{width:28,height:28,borderRadius:7,background:"var(--pr-pale)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.72rem",fontWeight:700,color:"var(--pr)",flexShrink:0}}>
+                          {t.nombre?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <div style={{fontWeight:600,fontSize:"0.8rem"}}>{t.nombre}</div>
+                        {t.email && <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{t.email}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td><span className="bdg bdg-blue">{t.rubro}</span></td>
+                  <td><span className={`bdg ${PLAN_META[t.plan]?.cls ?? "bdg-moon"}`}>{PLAN_META[t.plan]?.label ?? t.plan}</span></td>
+                  <td style={{fontSize:"0.75rem",color:"var(--muted)"}}>
+                    {t.subdominio ? `${t.subdominio}.gestion360ia.com.ar` : <span style={{color:"var(--border2)"}}>—</span>}
+                  </td>
+                  <td>
+                    <div className={`tog${t.activo ? " on" : ""}`} onClick={() => toggleActivo(t)}>
+                      <div className="tog-k" />
+                    </div>
+                  </td>
+                  <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>
+                    {new Date(t.creado_en).toLocaleDateString("es-AR")}
+                  </td>
+                  <td>
+                    <div style={{display:"flex",gap:4}}>
+                      <button className="btn btn-xs btn-out" onClick={() => abrirEditar(t)}>
+                        <i className="bi bi-pencil" />
+                      </button>
+                      <button className="btn btn-xs" onClick={() => eliminar(t)}
+                        style={{background:"var(--red-bg)",color:"var(--red)",border:"1px solid #f5c6c6"}}>
+                        <i className="bi bi-trash3" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
+
+      {/* Modal alta / edición */}
+      {modal && (
+        <div style={{
+          position:"fixed",inset:0,background:"rgba(15,23,42,.45)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          zIndex:9999,padding:"1rem",
+        }} onClick={e => e.target === e.currentTarget && setModal(false)}>
+          <div style={{
+            background:"#fff",borderRadius:"var(--r)",
+            width:"100%",maxWidth:480,
+            boxShadow:"0 20px 60px rgba(15,23,42,.2)",
+            overflow:"hidden",
+          }}>
+            {/* Header modal */}
+            <div style={{padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between",background:"var(--bg)"}}>
+              <div style={{fontWeight:700,fontSize:"0.9rem",color:"var(--text)"}}>
+                {editando ? "Editar cliente" : "Nuevo cliente"}
+              </div>
+              <button onClick={() => setModal(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:"1rem"}}>
+                <i className="bi bi-x-lg" />
+              </button>
+            </div>
+
+            {/* Body modal */}
+            <div style={{padding:"1.2rem",display:"flex",flexDirection:"column",gap:"0.7rem"}}>
+
+              <div className="fg">
+                <label className="fl">Nombre del negocio *</label>
+                <input className="fi" value={form.nombre} onChange={e => f({nombre:e.target.value})} placeholder="Ej: Hotel Aurora" />
+              </div>
+
+              <div className="fi-row">
+                <div className="fg">
+                  <label className="fl">Rubro *</label>
+                  <select className="fi" value={form.rubro} onChange={e => f({rubro:e.target.value})}>
+                    <option value="">Seleccionar…</option>
+                    {RUBROS.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div className="fg">
+                  <label className="fl">Plan</label>
+                  <select className="fi" value={form.plan} onChange={e => f({plan:e.target.value})}>
+                    <option value="starter">Starter</option>
+                    <option value="pro">Pro</option>
+                    <option value="plan_ia">Plan IA</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="fi-row">
+                <div className="fg">
+                  <label className="fl">Email</label>
+                  <input className="fi" value={form.email} onChange={e => f({email:e.target.value})} placeholder="contacto@empresa.com" />
+                </div>
+                <div className="fg">
+                  <label className="fl">Teléfono</label>
+                  <input className="fi" value={form.telefono} onChange={e => f({telefono:e.target.value})} placeholder="+54 11 0000-0000" />
+                </div>
+              </div>
+
+              <div className="fg">
+                <label className="fl">Subdominio</label>
+                <div style={{display:"flex",alignItems:"center",gap:0}}>
+                  <input className="fi" value={form.subdominio} onChange={e => f({subdominio:e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"")})}
+                    placeholder="mi-empresa" style={{borderRadius:"var(--r-sm) 0 0 var(--r-sm)",borderRight:"none"}} />
+                  <div style={{padding:"0.4rem 0.65rem",background:"var(--bg)",border:"1px solid var(--border2)",borderRadius:"0 var(--r-sm) var(--r-sm) 0",fontSize:"0.75rem",color:"var(--muted)",whiteSpace:"nowrap"}}>
+                    .gestion360ia.com.ar
+                  </div>
+                </div>
+              </div>
+
+              <div className="fg">
+                <label className="fl">URL del logo</label>
+                <input className="fi" value={form.logo_url} onChange={e => f({logo_url:e.target.value})} placeholder="https://…" />
+              </div>
+
+              {error && (
+                <div style={{background:"var(--red-bg)",border:"1px solid #f5c6c6",borderRadius:"var(--r-sm)",padding:"0.5rem 0.75rem",fontSize:"0.78rem",color:"var(--red)"}}>
+                  <i className="bi bi-exclamation-circle" /> {error}
+                </div>
+              )}
+            </div>
+
+            {/* Footer modal */}
+            <div style={{padding:"0.9rem 1.2rem",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"flex-end",gap:"0.5rem",background:"var(--bg)"}}>
+              <button className="btn btn-out btn-sm" onClick={() => setModal(false)}>Cancelar</button>
+              <button className="btn btn-em btn-sm" onClick={guardar} disabled={saving}>
+                {saving ? <><i className="bi bi-hourglass-split" /> Guardando…</> : <><i className="bi bi-check-lg" /> {editando ? "Guardar cambios" : "Crear cliente"}</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
