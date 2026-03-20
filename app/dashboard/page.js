@@ -8,7 +8,6 @@ const VIEWS = {
   clientes:       ["Clientes",         "Tenants registrados"],
   ventas:         ["Ventas",           "Pipeline comercial"],
   conversaciones: ["Conversaciones",   "Mensajes entrantes y seguimiento"],
-  vendedores:     ["Vendedores",       "Equipo comercial y rendimiento"],
   equipo:         ["Equipo",           "Áreas y personal del equipo"],
   soporte:        ["Soporte",          "Tickets y atención a clientes"],
   modulos:        ["Módulos",          "Catálogo del sistema"],
@@ -105,9 +104,8 @@ export default function DashboardPage() {
             {/* VENTAS */}
             <div className="sb-divider" />
             <div className="sb-sec">Ventas</div>
-            <NavItem id="conversaciones" icon="bi-chat-dots"    label="Conversaciones" active={view==="conversaciones"} onClick={nav}
+            <NavItem id="conversaciones" icon="bi-chat-dots" label="Conversaciones" active={view==="conversaciones"} onClick={nav}
               badge={stats.conv_sin_asignar > 0 ? String(stats.conv_sin_asignar) : null} badgeClass="amber" />
-            <NavItem id="vendedores"     icon="bi-person-badge" label="Vendedores"     active={view==="vendedores"}     onClick={nav} />
 
             {/* EQUIPO */}
             {!esVendedor && (
@@ -219,7 +217,6 @@ export default function DashboardPage() {
             {view === "clientes"       && <ViewClientes />}
             {view === "ventas"         && <ViewVentas session={session} />}
             {view === "conversaciones" && <ViewConversaciones session={session} onNavegar={nav} />}
-            {view === "vendedores"     && <ViewVendedores />}
             {view === "equipo"         && <ViewEquipo />}
             {view === "soporte"        && <ViewSoporte session={session} />}
             {view === "modulos"        && <ViewModulos />}
