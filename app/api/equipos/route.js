@@ -15,7 +15,7 @@ export async function GET(request) {
 
     const [usuarios] = await db.query(
       `SELECT 
-        id, nombre, email, rol, area, titulo, status, activo, ultimo_acceso,
+        id, nombre, email, rol, area, status, activo, ultimo_acceso,
         tasa_cierre, mrr_generado, tickets_resueltos, satisfaccion_avg,
         rubros_especialidad, modulos_especialidad
        FROM usuarios
@@ -43,12 +43,11 @@ export async function PATCH(request) {
 
   try {
     const body = await request.json();
-    const { usuario_id, area, titulo, rol, activo } = body;
+    const { usuario_id, area, rol, activo } = body;
 
     const sets = [];
     const vals = [];
     if (area   !== undefined) { sets.push("area = ?");   vals.push(area || null); }
-    if (titulo !== undefined) { sets.push("titulo = ?"); vals.push(titulo || null); }
     if (rol    !== undefined) { sets.push("rol = ?");    vals.push(rol); }
     if (activo !== undefined) { sets.push("activo = ?"); vals.push(activo); }
 
