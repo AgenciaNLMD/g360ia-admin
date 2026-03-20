@@ -1485,115 +1485,600 @@ function ModalWhatsApp({ onClose, tenantId }) {
   );
 }
 
-function ViewIntegraciones({ tenantId = null }) {
-  const [integraciones, setIntegraciones] = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [saving, setSaving]               = useState(null);
-  const [modalWsp, setModalWsp]           = useState(false);
-  const [toast, setToast]                 = useState(null);
+// ============================================================
+// REEMPLAZAR en dashboard/page.js
+// Buscar: function ViewIntegraciones({ tenantId = null })
+// Reemplazar todo el bloque hasta el cierre de la función
+// ============================================================
 
-  const showToast = (msg, tipo="ok") => { setToast({msg,tipo}); setTimeout(()=>setToast(null),3500); };
+// ── Secciones del hub de integraciones ──────────────────────
+const INT_SECCIONES = [
+  {
+    id: "whatsapp",
+    titulo: "WhatsApp",
+    icono: "bi-whatsapp",
+    desc: "Conectá una o más líneas de WhatsApp",
+    tipo: "whatsapp_multi", // manejo especial
+  },
+  {
+    id: "web",
+    titulo: "Web / Chat",
+    icono: "bi-chat-dots",
+    desc: "Widget embebible para tu sitio o panel",
+    items: [
+      { tipo:"web", label:"Web / Chat", icono:"bi-chat-dots", color:"#1A7A4A", bg:"#F0FAF4", desc:"Widget de chat para tu sitio web", proximamente:false },
+    ],
+  },
+  {
+    id: "google",
+    titulo: "Google",
+    icono: "bi-google",
+    desc: "Gmail, Calendar y Maps con un solo login",
+    items: [
+      { tipo:"gmail",           label:"Gmail",           icono:"bi-envelope",       color:"#EA4335", bg:"#FEF2F1", desc:"Leé y gestioná tu correo",          proximamente:false },
+      { tipo:"google_calendar", label:"Google Calendar", icono:"bi-calendar-check", color:"#1A73E8", bg:"#EBF3FE", desc:"Sincronizá turnos y eventos",         proximamente:false },
+      { tipo:"google_maps",     label:"Google Maps",     icono:"bi-geo-alt",        color:"#34A853", bg:"#F0FAF3", desc:"Mapas y geolocalización",             proximamente:true  },
+    ],
+  },
+  {
+    id: "meta",
+    titulo: "Meta",
+    icono: "bi-meta",
+    desc: "Instagram y Facebook Messenger",
+    items: [
+      { tipo:"instagram", label:"Instagram",         icono:"bi-instagram", color:"#E1306C", bg:"#FEF0F5", desc:"Mensajes y comentarios con IA", proximamente:true },
+      { tipo:"facebook",  label:"Facebook Messenger",icono:"bi-facebook",  color:"#1877F2", bg:"#EBF3FE", desc:"Página y Messenger conectados",  proximamente:true },
+    ],
+  },
+  {
+    id: "pagos",
+    titulo: "Pagos",
+    icono: "bi-credit-card",
+    desc: "Procesadores de pago",
+    items: [
+      { tipo:"mercadopago", label:"MercadoPago", icono:"bi-credit-card", color:"#009EE3", bg:"#EBF8FE", desc:"Suscripciones y cobros en ARS", proximamente:true },
+    ],
+  },
+  {
+    id: "ecommerce",
+    titulo: "E-commerce",
+    icono: "bi-shop",
+    desc: "Tiendas online y carritos de compras",
+    items: [
+      { tipo:"tiendanube",  label:"Tiendanube",  icono:"bi-cloud-upload", color:"#1F6FEB", bg:"#EBF3FE", desc:"Sincronizá tu tienda Tiendanube",  proximamente:true },
+      { tipo:"woocommerce", label:"WooCommerce", icono:"bi-wordpress",   color:"#96588A", bg:"#F5EEF8", desc:"Conectá tu tienda WordPress",       proximamente:true },
+      { tipo:"shopify",     label:"Shopify",     icono:"bi-bag",         color:"#96BF48", bg:"#F4F9EE", desc:"Sincronizá productos y pedidos",    proximamente:true },
+    ],
+  },
+  {
+    id: "afip",
+    titulo: "ARCA / AFIP",
+    icono: "bi-building-check",
+    desc: "Facturación electrónica y consultas fiscales",
+    items: [
+      { tipo:"afip", label:"ARCA / AFIP", icono:"bi-building-check", color:"#506886", bg:"#EDF1F6", desc:"Facturación electrónica", proximamente:true },
+    ],
+  },
+  {
+    id: "importar",
+    titulo: "Importar datos",
+    icono: "bi-file-earmark-arrow-up",
+    desc: "Cargá datos masivos desde CSV o Excel",
+    tipo: "importar", // manejo especial
+  },
+];
 
-  const cargar = useCallback(async () => {
-    setLoading(true);
-    try { const r=await fetch(`/api/integraciones${tenantId?`?tenant_id=${tenantId}`:""}`); const d=await r.json(); if(d.ok) setIntegraciones(d.integraciones); } catch(_){}
-    setLoading(false);
-  }, [tenantId]);
+// ── Tipos de importación disponibles ────────────────────────
+const IMPORT_TIPOS = [
+  { id:"clientes",    label:"Clientes / Contactos", icono:"bi-people",        desc:"Nombre, email, teléfono, empresa" },
+  { id:"productos",   label:"Productos",            icono:"bi-box-seam",      desc:"Código, nombre, precio, stock" },
+  { id:"proveedores", label:"Proveedores",          icono:"bi-truck",         desc:"Nombre, CUIT, contacto, rubro" },
+  { id:"precios",     label:"Lista de precios",     icono:"bi-tag",           desc:"SKU, precio, descuento" },
+  { id:"stock",       label:"Stock",                icono:"bi-archive",       desc:"SKU, cantidad, depósito" },
+];
 
-  useEffect(() => { cargar(); }, [cargar]);
+// ── Badge de estado ──────────────────────────────────────────
+function IntBadge({ estado, wspStatus }) {
+  const s = estado === "conectado" || wspStatus === "open";
+  const c = estado === "conectando";
+  const e = estado === "error";
+  const p = estado === "proximamente";
+  if (p) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#1E40AF",background:"#DBEAFE",border:"0.5px solid #93C5FD",borderRadius:999,padding:"2px 8px"}}>Próximamente</span>;
+  if (s) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#166534",background:"#DCFCE7",border:"0.5px solid #86EFAC",borderRadius:999,padding:"2px 8px"}}>● Conectado</span>;
+  if (c) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#92400E",background:"#FEF3C7",border:"0.5px solid #FCD34D",borderRadius:999,padding:"2px 8px"}}>◌ Conectando</span>;
+  if (e) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#991B1B",background:"#FEE2E2",border:"0.5px solid #FCA5A5",borderRadius:999,padding:"2px 8px"}}>✕ Error</span>;
+  return <span style={{fontSize:"0.65rem",fontWeight:600,color:"var(--muted)",background:"var(--bg)",border:"0.5px solid var(--border)",borderRadius:999,padding:"2px 8px"}}>Desconectado</span>;
+}
 
-  const conectarGoogle = async () => {
-    try { const r=await fetch(`/api/integraciones/google/auth${tenantId?`?tenant_id=${tenantId}`:""}`); const d=await r.json(); if(d.ok&&d.url) window.location.href=d.url; }
-    catch { showToast("Error al iniciar conexión con Google","error"); }
-  };
+// ── Tarjeta individual de integración ───────────────────────
+function IntTarjeta({ item, tokenData, onConectar, onDesconectar, saving }) {
+  const esPrx   = item.proximamente || tokenData?.estado === "proximamente";
+  const esConec = tokenData?.estado === "conectado" || tokenData?.wsp_status === "open";
+  const metadata = tokenData?.metadata ? (typeof tokenData.metadata === "string" ? JSON.parse(tokenData.metadata) : tokenData.metadata) : null;
 
-  const onConectar = (int) => {
-    if (int.tipo==="whatsapp") return setModalWsp(true);
-    if (int.tipo==="gmail"||int.tipo==="google_calendar") return conectarGoogle();
-    showToast("Esta integración estará disponible pronto","info");
-  };
+  return (
+    <div style={{
+      background:   "var(--white)",
+      border:       `0.5px solid ${esConec ? "#BBF7D0" : "var(--border)"}`,
+      borderRadius: "var(--r)",
+      padding:      "0.9rem",
+      display:      "flex",
+      flexDirection:"column",
+      gap:          "0.6rem",
+      opacity:      esPrx ? 0.7 : 1,
+      transition:   "border-color .2s",
+    }}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{width:36,height:36,borderRadius:9,background:item.bg||"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <i className={`bi ${item.icono}`} style={{color:item.color||"var(--muted)",fontSize:"1rem"}} />
+        </div>
+        <IntBadge estado={tokenData?.estado||"desconectado"} wspStatus={tokenData?.wsp_status} />
+      </div>
+      <div>
+        <div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)"}}>{item.label}</div>
+        <div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{item.desc}</div>
+        {metadata?.email && (
+          <div style={{fontSize:"0.67rem",color:"var(--sub)",marginTop:3,display:"flex",alignItems:"center",gap:3}}>
+            <i className="bi bi-person-circle" style={{fontSize:"0.7rem"}} />
+            {metadata.email}
+          </div>
+        )}
+        {tokenData?.error_msg && (
+          <div style={{fontSize:"0.67rem",color:"var(--red)",marginTop:3}}>{tokenData.error_msg}</div>
+        )}
+      </div>
+      {!esPrx && (
+        esConec ? (
+          <button onClick={onDesconectar} disabled={saving} className="btn btn-out btn-sm" style={{width:"100%",justifyContent:"center"}}>
+            {saving ? "…" : "Desconectar"}
+          </button>
+        ) : (
+          <button onClick={onConectar} disabled={saving} className="btn btn-sm" style={{width:"100%",justifyContent:"center",background:"#1A7A4A",color:"#fff",border:"none"}}>
+            {saving ? "…" : "Conectar"}
+          </button>
+        )
+      )}
+    </div>
+  );
+}
 
-  const onDesconectar = async (int) => {
-    if (!confirm(`¿Desconectar ${INT_META[int.tipo]?.label||int.nombre}?`)) return;
-    setSaving(int.id);
+// ── Modal WhatsApp con nombre ────────────────────────────────
+function ModalWhatsAppNuevo({ onClose, tenantId, onConectado }) {
+  const [fase, setFase]     = useState("form"); // form | qr | conectado | error
+  const [nombre, setNombre] = useState("");
+  const [qr, setQr]         = useState(null);
+  const [msg, setMsg]       = useState("");
+  const [instanceId, setInstanceId] = useState(null);
+  const pollingRef = useRef(null);
+
+  const iniciar = async () => {
+    if (!nombre.trim()) { setMsg("Ingresá un nombre para esta línea"); return; }
+    setFase("cargando");
     try {
-      let url="";
-      if (int.tipo==="whatsapp") url="/api/integraciones/whatsapp/disconnect";
-      if (int.tipo==="gmail"||int.tipo==="google_calendar") url="/api/integraciones/google/disconnect";
-      if (!url) return;
-      await fetch(url,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({tenant_id:tenantId})});
-      showToast("Integración desconectada"); cargar();
-    } catch { showToast("Error al desconectar","error"); }
+      const r = await fetch("/api/integraciones/whatsapp/init", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenant_id: tenantId, nombre: nombre.trim() }),
+      });
+      const d = await r.json();
+      if (d.ok && d.qr) {
+        setQr(d.qr);
+        setInstanceId(d.instance_id);
+        setFase("qr");
+        iniciarPolling(d.instance_id);
+      } else {
+        setMsg(d.error || "No se pudo generar el QR");
+        setFase("error");
+      }
+    } catch { setMsg("Error de conexión"); setFase("error"); }
+  };
+
+  const iniciarPolling = (id) => {
+    pollingRef.current = setInterval(async () => {
+      try {
+        const r = await fetch(`/api/integraciones/whatsapp/status?instance_id=${id}`);
+        const d = await r.json();
+        if (d.conectado) { clearInterval(pollingRef.current); setFase("conectado"); onConectado && onConectado(); }
+      } catch {}
+    }, 3000);
+  };
+
+  useEffect(() => () => clearInterval(pollingRef.current), []);
+
+  const btnVerde = {background:"#1A7A4A",color:"#fff",border:"none",borderRadius:"var(--r-sm)",padding:"0.55rem 1.2rem",fontSize:"0.82rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"};
+  const btnGris  = {background:"var(--bg)",color:"var(--text)",border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.55rem 1.2rem",fontSize:"0.82rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"};
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
+      <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,0.15)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"0.6rem"}}>
+            <div style={{width:34,height:34,borderRadius:9,background:"#F0FBF4",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <i className="bi bi-whatsapp" style={{color:"#25D366",fontSize:"1rem"}} />
+            </div>
+            <div>
+              <div style={{fontSize:"0.88rem",fontWeight:700}}>Nueva línea WhatsApp</div>
+              <div style={{fontSize:"0.7rem",color:"var(--muted)"}}>Podés conectar múltiples números</div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:"1rem",color:"var(--muted)",cursor:"pointer"}}>✕</button>
+        </div>
+        <div style={{padding:"1.4rem",textAlign:"center"}}>
+          {fase === "form" && (
+            <>
+              <div style={{textAlign:"left",marginBottom:"1rem"}}>
+                <label style={{fontSize:"0.75rem",fontWeight:600,color:"var(--sub)",display:"block",marginBottom:"0.3rem"}}>Nombre de esta línea</label>
+                <input
+                  className="fi"
+                  value={nombre}
+                  onChange={e=>setNombre(e.target.value)}
+                  placeholder="Ej: Ventas, Soporte, Sucursal Norte"
+                  style={{width:"100%"}}
+                  autoFocus
+                />
+                {msg && <div style={{fontSize:"0.72rem",color:"var(--red)",marginTop:"0.3rem"}}>{msg}</div>}
+              </div>
+              <p style={{color:"var(--sub)",fontSize:"0.8rem",marginBottom:"1.2rem",lineHeight:1.5,textAlign:"left"}}>
+                Asegurate de tener el celular cerca para escanear el QR.
+              </p>
+              <div style={{display:"flex",gap:"0.5rem",justifyContent:"flex-end"}}>
+                <button onClick={onClose} style={btnGris}>Cancelar</button>
+                <button onClick={iniciar} style={btnVerde}>Generar QR →</button>
+              </div>
+            </>
+          )}
+          {fase === "cargando" && (
+            <><div style={{fontSize:"2rem",marginBottom:"1rem"}}>⏳</div><p style={{color:"var(--muted)",fontSize:"0.85rem"}}>Generando QR…</p></>
+          )}
+          {fase === "qr" && qr && (
+            <>
+              <div style={{background:"#fff",border:"1px solid var(--border)",borderRadius:12,display:"inline-block",padding:"1rem",marginBottom:"1rem"}}>
+                <img src={qr} alt="QR WhatsApp" style={{width:200,height:200}} />
+              </div>
+              <p style={{color:"var(--text)",fontSize:"0.82rem",lineHeight:1.6,marginBottom:"0.5rem"}}>
+                1. Abrí WhatsApp en tu celular<br/>
+                2. Tocá los 3 puntos → <strong>Dispositivos vinculados</strong><br/>
+                3. Escaneá este código QR
+              </p>
+              <div style={{fontSize:"0.75rem",color:"var(--muted)"}}>Esperando conexión…</div>
+            </>
+          )}
+          {fase === "conectado" && (
+            <>
+              <div style={{fontSize:"3rem",marginBottom:"0.8rem"}}>✅</div>
+              <div style={{fontSize:"1rem",fontWeight:700,color:"#166534",marginBottom:"0.4rem"}}>¡WhatsApp conectado!</div>
+              <p style={{color:"var(--muted)",fontSize:"0.82rem",marginBottom:"1rem"}}>La línea <strong>{nombre}</strong> está activa.</p>
+              <button onClick={onClose} style={btnVerde}>Cerrar</button>
+            </>
+          )}
+          {fase === "error" && (
+            <>
+              <div style={{fontSize:"2.5rem",marginBottom:"0.8rem"}}>⚠️</div>
+              <p style={{color:"var(--red)",fontSize:"0.85rem",marginBottom:"1rem"}}>{msg}</p>
+              <button onClick={()=>{setFase("form");setMsg("");}} style={btnGris}>Reintentar</button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sección WhatsApp multi-instancia ────────────────────────
+function SeccionWhatsApp({ tenantId, onToast }) {
+  const [instancias, setInstancias] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [modal, setModal]           = useState(false);
+  const [saving, setSaving]         = useState(null);
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/integraciones/whatsapp/instancias${tenantId ? `?tenant_id=${tenantId}` : ""}`);
+      const d = await r.json();
+      if (d.ok) setInstancias(d.instancias);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const desconectar = async (inst) => {
+    if (!confirm(`¿Desconectar "${inst.nombre}"?`)) return;
+    setSaving(inst.id);
+    try {
+      await fetch("/api/integraciones/whatsapp/disconnect", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instance_id: inst.id, tenant_id: tenantId }),
+      });
+      onToast("Línea desconectada");
+      cargar();
+    } catch { onToast("Error al desconectar", "error"); }
     setSaving(null);
   };
 
-  // Agrupar por grupo
-  const porGrupo = {};
-  integraciones.forEach(int => {
-    const grupo = INT_META[int.tipo]?.grupo || "otras";
-    if (!porGrupo[grupo]) porGrupo[grupo] = [];
-    porGrupo[grupo].push(int);
-  });
-
-  const conectadas = integraciones.filter(i=>i.estado==="conectado"||i.wsp_status==="open").length;
-
   return (
-    <div className="view-anim" style={{maxWidth:740}}>
-      <div className="vh">
-        <div><div className="vh-title">Integraciones</div><div className="vh-sub">{conectadas>0?`${conectadas} canal${conectadas>1?"es":""} conectado${conectadas>1?"s":""}`:"Sin canales conectados aún"}</div></div>
-        <button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /></button>
+    <div style={{marginBottom:"1.5rem"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.6rem"}}>
+        <div>
+          <div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}>
+            <i className="bi bi-whatsapp" style={{color:"#25D366"}} /> WhatsApp
+          </div>
+          <div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>Conectá una o más líneas</div>
+        </div>
+        <button className="btn btn-sm" style={{background:"#1A7A4A",color:"#fff",border:"none"}} onClick={()=>setModal(true)}>
+          <i className="bi bi-plus-lg" /> Nueva línea
+        </button>
       </div>
 
-      {!loading && conectadas===0 && (
+      {loading ? <div style={{fontSize:"0.78rem",color:"var(--muted)",padding:"0.5rem 0"}}>Cargando…</div> : (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"0.6rem"}}>
+          {instancias.map(inst => (
+            <div key={inst.id} style={{background:"var(--white)",border:`0.5px solid ${inst.estado==="conectado"?"#BBF7D0":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.9rem",display:"flex",flexDirection:"column",gap:"0.5rem"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div style={{width:34,height:34,borderRadius:9,background:"#F0FBF4",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <i className="bi bi-whatsapp" style={{color:"#25D366",fontSize:"1rem"}} />
+                </div>
+                <IntBadge estado={inst.estado} wspStatus={inst.wsp_status} />
+              </div>
+              <div>
+                <div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)"}}>{inst.nombre}</div>
+                {inst.numero && <div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{inst.numero}</div>}
+              </div>
+              <button onClick={()=>desconectar(inst)} disabled={saving===inst.id} className="btn btn-out btn-sm" style={{width:"100%",justifyContent:"center"}}>
+                {saving===inst.id?"…":"Desconectar"}
+              </button>
+            </div>
+          ))}
+          {instancias.length === 0 && (
+            <div style={{gridColumn:"1/-1",padding:"1rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem",background:"var(--bg)",borderRadius:"var(--r)",border:"0.5px dashed var(--border2)"}}>
+              Sin líneas conectadas todavía
+            </div>
+          )}
+        </div>
+      )}
+
+      {modal && (
+        <ModalWhatsAppNuevo
+          tenantId={tenantId}
+          onClose={()=>setModal(false)}
+          onConectado={()=>{ cargar(); onToast("WhatsApp conectado"); }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Sección importar datos ───────────────────────────────────
+function SeccionImportar({ onToast }) {
+  const [tipoActivo, setTipoActivo] = useState(null);
+  const [archivo, setArchivo]       = useState(null);
+  const [subiendo, setSubiendo]     = useState(false);
+  const inputRef = useRef(null);
+
+  const seleccionarTipo = (tipo) => {
+    setTipoActivo(tipo);
+    setArchivo(null);
+  };
+
+  const handleArchivo = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const ext = f.name.split(".").pop().toLowerCase();
+    if (!["csv","xlsx","xls"].includes(ext)) {
+      onToast("Solo se aceptan archivos CSV o Excel", "error");
+      return;
+    }
+    setArchivo(f);
+  };
+
+  const subir = async () => {
+    if (!archivo || !tipoActivo) return;
+    setSubiendo(true);
+    try {
+      const fd = new FormData();
+      fd.append("archivo", archivo);
+      fd.append("tipo", tipoActivo.id);
+      const r = await fetch("/api/importar", { method:"POST", body: fd });
+      const d = await r.json();
+      if (d.ok) { onToast(`${d.importados} registros importados correctamente`); setArchivo(null); setTipoActivo(null); }
+      else onToast(d.error || "Error al importar", "error");
+    } catch { onToast("Error de conexión", "error"); }
+    setSubiendo(false);
+  };
+
+  return (
+    <div style={{marginBottom:"1.5rem"}}>
+      <div style={{marginBottom:"0.6rem"}}>
+        <div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}>
+          <i className="bi bi-file-earmark-arrow-up" style={{color:"var(--accent)"}} /> Importar datos
+        </div>
+        <div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>Cargá datos masivos desde CSV o Excel</div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:"0.5rem",marginBottom:"0.8rem"}}>
+        {IMPORT_TIPOS.map(t => (
+          <div key={t.id}
+            onClick={()=>seleccionarTipo(t)}
+            style={{background:tipoActivo?.id===t.id?"var(--em-pale)":"var(--white)",border:`0.5px solid ${tipoActivo?.id===t.id?"var(--em)":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.75rem",cursor:"pointer",transition:"all .15s"}}>
+            <i className={`bi ${t.icono}`} style={{color:tipoActivo?.id===t.id?"var(--em-d)":"var(--muted)",fontSize:"1.1rem",display:"block",marginBottom:"0.4rem"}} />
+            <div style={{fontSize:"0.78rem",fontWeight:600,color:"var(--text)"}}>{t.label}</div>
+            <div style={{fontSize:"0.67rem",color:"var(--muted)",marginTop:2}}>{t.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {tipoActivo && (
+        <div style={{background:"var(--bg)",border:"0.5px solid var(--border)",borderRadius:"var(--r)",padding:"1rem"}}>
+          <div style={{fontSize:"0.8rem",fontWeight:600,color:"var(--text)",marginBottom:"0.5rem"}}>
+            Importar: {tipoActivo.label}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:"0.6rem",flexWrap:"wrap"}}>
+            <input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" onChange={handleArchivo} style={{display:"none"}} />
+            <button className="btn btn-out btn-sm" onClick={()=>inputRef.current?.click()}>
+              <i className="bi bi-upload" /> {archivo ? archivo.name : "Seleccionar archivo"}
+            </button>
+            <button className="btn btn-sm" style={{background:"var(--accent)",color:"#fff",border:"none"}} onClick={()=>{}} title="Descargar plantilla">
+              <i className="bi bi-download" /> Plantilla
+            </button>
+            {archivo && (
+              <button className="btn btn-em btn-sm" onClick={subir} disabled={subiendo}>
+                {subiendo ? "Importando…" : "Importar"}
+              </button>
+            )}
+          </div>
+          {archivo && (
+            <div style={{fontSize:"0.72rem",color:"var(--sub)",marginTop:"0.4rem"}}>
+              <i className="bi bi-file-earmark-text" style={{marginRight:3}} />
+              {archivo.name} — {(archivo.size/1024).toFixed(1)} KB
+            </div>
+          )}
+          <div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:"0.5rem"}}>
+            Formatos aceptados: .csv, .xlsx, .xls — Máximo 5 MB
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Vista principal ──────────────────────────────────────────
+function ViewIntegraciones({ tenantId = null }) {
+  const [tokens, setTokens]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving]   = useState(null);
+  const [toast, setToast]     = useState(null);
+
+  const showToast = (msg, tipo="ok") => { setToast({msg,tipo}); setTimeout(()=>setToast(null), 3500); };
+
+  const cargarTokens = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/integraciones${tenantId ? `?tenant_id=${tenantId}` : ""}`);
+      const d = await r.json();
+      if (d.ok) setTokens(d.integraciones);
+    } catch {}
+    setLoading(false);
+  }, [tenantId]);
+
+  useEffect(() => { cargarTokens(); }, [cargarTokens]);
+
+  // Buscar token por tipo
+  const getToken = (tipo) => tokens.find(t => t.tipo === tipo) || null;
+
+  // Gmail conectado → ocultar Email/SMTP
+  const gmailConectado = getToken("gmail")?.estado === "conectado";
+
+  const conectarGoogle = async () => {
+    try {
+      const r = await fetch(`/api/integraciones/google/auth${tenantId ? `?tenant_id=${tenantId}` : ""}`);
+      const d = await r.json();
+      if (d.ok && d.url) window.location.href = d.url;
+    } catch { showToast("Error al conectar con Google", "error"); }
+  };
+
+  const onConectar = (tipo) => {
+    if (tipo === "gmail" || tipo === "google_calendar" || tipo === "google_maps") return conectarGoogle();
+    showToast("Esta integración estará disponible pronto", "info");
+  };
+
+  const onDesconectar = async (tipo) => {
+    const token = getToken(tipo);
+    if (!token) return;
+    if (!confirm(`¿Desconectar ${tipo}?`)) return;
+    setSaving(tipo);
+    try {
+      let url = "";
+      if (["gmail","google_calendar","google_maps"].includes(tipo)) url = "/api/integraciones/google/disconnect";
+      if (!url) return;
+      await fetch(url, { method:"DELETE", headers:{"Content-Type":"application/json"}, body:JSON.stringify({tenant_id:tenantId}) });
+      showToast("Integración desconectada");
+      cargarTokens();
+    } catch { showToast("Error al desconectar", "error"); }
+    setSaving(null);
+  };
+
+  // Contar conectadas
+  const totalConectadas = tokens.filter(t => t.estado === "conectado" || t.wsp_status === "open").length;
+
+  return (
+    <div className="view-anim" style={{maxWidth:820}}>
+      {/* Header */}
+      <div className="vh">
+        <div>
+          <div className="vh-title">Integraciones</div>
+          <div className="vh-sub">{totalConectadas > 0 ? `${totalConectadas} conexión${totalConectadas > 1 ? "es" : ""} activa${totalConectadas > 1 ? "s" : ""}` : "Sin conexiones activas"}</div>
+        </div>
+        <button className="btn btn-out btn-sm" onClick={cargarTokens}><i className="bi bi-arrow-clockwise" /></button>
+      </div>
+
+      {/* Banner si no hay nada */}
+      {!loading && totalConectadas === 0 && (
         <div style={{background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.9rem 1.1rem",display:"flex",alignItems:"flex-start",gap:"0.75rem",marginBottom:"1.2rem"}}>
-          <i className="bi bi-plug" style={{color:"#4AB880",fontSize:"1.1rem",marginTop:2}} />
+          <i className="bi bi-plug" style={{color:"#4AB880",fontSize:"1.1rem",marginTop:2,flexShrink:0}} />
           <div>
             <div style={{fontSize:"0.7rem",fontWeight:700,color:"rgba(255,255,255,.55)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.2rem"}}>Maia · Sin conexiones activas</div>
-            <div style={{fontSize:"0.8rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>Conectá al menos un canal para empezar a recibir y gestionar conversaciones con IA. Te recomendamos empezar por <strong>WhatsApp</strong>.</div>
+            <div style={{fontSize:"0.8rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>
+              Conectá al menos un canal para empezar a recibir y gestionar conversaciones con IA. Te recomendamos empezar por <strong>WhatsApp</strong>.
+            </div>
           </div>
         </div>
       )}
 
-      {loading ? <Cargando texto="Cargando integraciones…" /> : (
-        Object.entries(porGrupo).map(([grupo, ints]) => (
-          <div key={grupo} style={{marginBottom:"1.4rem"}}>
-            <div style={{fontSize:"0.67rem",fontWeight:700,color:"var(--muted)",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:"0.6rem"}}>{INT_GRUPOS[grupo]||grupo}</div>
-            <div style={{display:"flex",flexDirection:"column",gap:"0.45rem"}}>
-              {ints.map(int => {
-                const meta    = INT_META[int.tipo] || {};
-                const esPrx   = int.estado==="proximamente" || meta.proximamente;
-                const esConec = int.estado==="conectado" || int.wsp_status==="open";
-                return (
-                  <div key={int.id} className="int-card" style={{borderColor:esPrx?"var(--border)":esConec?"#BBF7D0":"var(--border)",opacity:esPrx?0.75:1}}>
-                    <div className="int-ico" style={{background:meta.bg||"var(--bg)"}}>
-                      <i className={`bi ${meta.icono||"bi-plug"}`} style={{color:meta.color||"var(--muted)"}} />
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:"0.82rem",fontWeight:700,color:"#111827"}}>{meta.label||int.nombre}</div>
-                      <div style={{fontSize:"0.7rem",color:"#6B7280",marginTop:2}}>{meta.desc}</div>
-                      {int.metadata?.email && <div style={{fontSize:"0.67rem",color:"#9CA3AF",marginTop:2}}><i className="bi bi-person-circle" style={{marginRight:3}} />{int.metadata.email}</div>}
-                      {int.error_msg && <div style={{fontSize:"0.67rem",color:"#DC2626",marginTop:2}}>{int.error_msg}</div>}
-                    </div>
-                    <IntEstadoBadge estado={int.estado} wspStatus={int.wsp_status} />
-                    {!esPrx && (
-                      esConec ? (
-                        <button onClick={()=>onDesconectar(int)} disabled={saving===int.id} className="btn btn-out btn-sm">{saving===int.id?"…":"Desconectar"}</button>
-                      ) : (
-                        <button onClick={()=>onConectar(int)} disabled={saving===int.id} className="btn btn-sm" style={{background:"#1A7A4A",color:"#fff",border:"none"}}>{saving===int.id?"…":"Conectar"}</button>
-                      )
-                    )}
+      {loading ? <div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>Cargando integraciones…</div> : (
+        <>
+          {/* ── WhatsApp (multi) ── */}
+          <SeccionWhatsApp tenantId={tenantId} onToast={showToast} />
+
+          {/* ── Secciones estándar ── */}
+          {INT_SECCIONES.filter(s => s.items).map(sec => {
+            // Filtrar Email/SMTP si Gmail está conectado
+            const items = sec.items.filter(item => {
+              if (item.tipo === "email" && gmailConectado) return false;
+              return true;
+            });
+            if (!items.length) return null;
+
+            return (
+              <div key={sec.id} style={{marginBottom:"1.5rem"}}>
+                <div style={{marginBottom:"0.6rem"}}>
+                  <div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}>
+                    <i className={`bi ${sec.icono}`} style={{color:"var(--pr)"}} /> {sec.titulo}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        ))
+                  <div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>{sec.desc}</div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"0.6rem"}}>
+                  {items.map(item => (
+                    <IntTarjeta
+                      key={item.tipo}
+                      item={item}
+                      tokenData={getToken(item.tipo)}
+                      onConectar={() => onConectar(item.tipo)}
+                      onDesconectar={() => onDesconectar(item.tipo)}
+                      saving={saving === item.tipo}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* ── Importar datos ── */}
+          <SeccionImportar onToast={showToast} />
+        </>
       )}
 
-      {modalWsp && <ModalWhatsApp tenantId={tenantId} onClose={()=>{setModalWsp(false);cargar();}} />}
-
+      {/* Toast */}
       {toast && (
-        <div style={{position:"fixed",bottom:"1.5rem",right:"1.5rem",background:toast.tipo==="error"?"#FEE2E2":toast.tipo==="info"?"#DBEAFE":"#DCFCE7",color:toast.tipo==="error"?"#991B1B":toast.tipo==="info"?"#1E40AF":"#166534",border:`1px solid ${toast.tipo==="error"?"#FCA5A5":toast.tipo==="info"?"#93C5FD":"#86EFAC"}`,borderRadius:10,padding:"0.7rem 1.1rem",fontSize:"0.82rem",fontWeight:600,zIndex:2000,boxShadow:"0 4px 20px rgba(0,0,0,0.1)"}}>
+        <div style={{
+          position:"fixed", bottom:"1.5rem", right:"1.5rem",
+          background: toast.tipo==="error" ? "#FEE2E2" : toast.tipo==="info" ? "#DBEAFE" : "#DCFCE7",
+          color:      toast.tipo==="error" ? "#991B1B" : toast.tipo==="info" ? "#1E40AF" : "#166534",
+          border:     `1px solid ${toast.tipo==="error" ? "#FCA5A5" : toast.tipo==="info" ? "#93C5FD" : "#86EFAC"}`,
+          borderRadius:10, padding:"0.7rem 1.1rem", fontSize:"0.82rem", fontWeight:600,
+          zIndex:2000, boxShadow:"0 4px 20px rgba(0,0,0,0.1)",
+        }}>
           {toast.msg}
         </div>
       )}
