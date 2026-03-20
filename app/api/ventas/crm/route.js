@@ -1,8 +1,4 @@
 // app/api/ventas/crm/route.js
-// Endpoint unificado para el módulo CRM
-// Retorna leads, funnel y conversaciones en una sola llamada
-// o individualmente según el parámetro ?vista=
-
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
@@ -15,87 +11,76 @@ export async function GET(req) {
   if (!session) return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const vista      = searchParams.get("vista") || "todo"; // todo | leads | funnel | conversaciones
-  const rol        = session.user.rol;
-const usuario_id = session.user.id || session.user.sub || null;
+  const vista      = searchParams.get("vista") || "todo";
+  const rol        = session?.user?.rol || "";
+  const usuario_id = session?.user?.id || null;
   const esAdmin    = ["superadmin","admin"].includes(rol);
+
+  console.log("CRM SESSION rol:", rol, "id:", usuario_id, "esAdmin:", esAdmin);
 
   try {
     const resultado = {};
 
     // ── LEADS (sin tomar) ────────────────────────────────────
     if (["todo","leads"].includes(vista)) {
-      let q = `
-        SELECT
-          vl.*,
-          u.nombre AS vendedor_nombre
+      const [leads] = await db.query(`
+        SELECT vl.*, u.nombre AS vendedor_nombre
         FROM ventas_leads vl
         LEFT JOIN usuarios u ON u.id = vl.asignado_a
         WHERE vl.asignado_a IS NULL AND vl.estado = 'nuevo'
         ORDER BY vl.creado_en DESC
-      `;
-      const [leads] = await db.query(q);
+      `);
       resultado.leads = leads;
 
-      // Conteos por fuente para el admin
       if (esAdmin) {
         const [porFuente] = await db.query(
-          `SELECT fuente, COUNT(*) AS total
-           FROM ventas_leads
-           WHERE asignado_a IS NULL AND estado = 'nuevo'
-           GROUP BY fuente`
+          `SELECT fuente, COUNT(*) AS total FROM ventas_leads
+           WHERE asignado_a IS NULL AND estado = 'nuevo' GROUP BY fuente`
         );
         resultado.leads_por_fuente = porFuente;
       }
     }
 
-    // ── FUNNEL (leads tomados por etapa) ─────────────────────
+    // ── FUNNEL ───────────────────────────────────────────────
     if (["todo","funnel"].includes(vista)) {
-  let q = `
-    SELECT
-      vl.id, vl.nombre, vl.empresa, vl.telefono, vl.email,
-      vl.rubro_interes, vl.plan_interes, vl.fuente,
-      vl.estado AS estado,
-      vl.notas, vl.sitio_web, vl.instagram, vl.facebook, vl.ubicacion,
-      vl.asignado_a, vl.actualizado_en,
-      DATEDIFF(NOW(), vl.fecha_ultimo_contacto) AS dias_sin_contacto,
-      u.nombre AS vendedor_nombre,
-      vc.id    AS conversacion_id,
-      vc.canal AS conv_canal,
-      vc.ultimo_mensaje,
-      vc.ultimo_mensaje_at
-    FROM ventas_leads vl
-    LEFT JOIN usuarios u ON u.id = vl.asignado_a
-    LEFT JOIN ventas_conversaciones vc ON vc.lead_id = vl.id
-      AND vc.estado != 'cerrada'
-    WHERE vl.estado IN ('contactado','interesado','seguimiento')
-      AND vl.asignado_a IS NOT NULL
-  `;
-  const params = [];
+      let q = `
+        SELECT
+          vl.id, vl.nombre, vl.empresa, vl.telefono, vl.email,
+          vl.rubro_interes, vl.plan_interes, vl.fuente,
+          vl.estado AS estado,
+          vl.notas, vl.sitio_web, vl.instagram, vl.facebook, vl.ubicacion,
+          vl.asignado_a, vl.actualizado_en,
+          DATEDIFF(NOW(), vl.fecha_ultimo_contacto) AS dias_sin_contacto,
+          u.nombre AS vendedor_nombre,
+          vc.id    AS conversacion_id,
+          vc.canal AS conv_canal,
+          vc.ultimo_mensaje,
+          vc.ultimo_mensaje_at
+        FROM ventas_leads vl
+        LEFT JOIN usuarios u ON u.id = vl.asignado_a
+        LEFT JOIN ventas_conversaciones vc ON vc.lead_id = vl.id
+          AND vc.estado != 'cerrada'
+        WHERE vl.estado IN ('contactado','interesado','seguimiento')
+          AND vl.asignado_a IS NOT NULL
+      `;
+      const params = [];
 
-  if (!esAdmin) {
-    q += ` AND vl.asignado_a = ?`;
-    params.push(usuario_id);
-  }
+      if (!esAdmin) {
+        q += ` AND vl.asignado_a = ?`;
+        params.push(usuario_id);
+      }
 
-  q += ` ORDER BY vl.actualizado_en DESC`;
+      q += ` ORDER BY vl.actualizado_en DESC`;
 
-console.log("FUNNEL QUERY:", q, params);
-const [funnel] = await db.query(q, params);
-console.log("FUNNEL RESULT:", JSON.stringify(funnel));
-      console.log("SESSION:", session.user.rol, session.user.id);
-  const etapas = {
-    contactado:  [],
-    interesado:  [],
-    seguimiento: [],
-  };
-  funnel.forEach(l => {
-    if (etapas[l.estado]) etapas[l.estado].push(l);
-  });
+      const [funnel] = await db.query(q, params);
+      console.log("FUNNEL rows:", funnel.length);
 
-  resultado.funnel = etapas;
-  resultado.funnel_total = funnel.length;
-}
+      const etapas = { contactado:[], interesado:[], seguimiento:[] };
+      funnel.forEach(l => { if (etapas[l.estado]) etapas[l.estado].push(l); });
+
+      resultado.funnel       = etapas;
+      resultado.funnel_total = funnel.length;
+    }
 
     // ── CONVERSACIONES ───────────────────────────────────────
     if (["todo","conversaciones"].includes(vista)) {
@@ -105,12 +90,8 @@ console.log("FUNNEL RESULT:", JSON.stringify(funnel));
           u.nombre   AS vendedor_nombre,
           vl.nombre  AS lead_nombre,
           vl.empresa AS lead_empresa,
-          vl.rubro_interes,
-          vl.plan_interes,
-          vl.sitio_web,
-          vl.instagram,
-          vl.facebook,
-          vl.ubicacion,
+          vl.rubro_interes, vl.plan_interes,
+          vl.sitio_web, vl.instagram, vl.facebook, vl.ubicacion,
           vl.estado  AS lead_estado,
           vl.fuente  AS lead_fuente,
           vl.notas   AS lead_notas
@@ -121,7 +102,6 @@ console.log("FUNNEL RESULT:", JSON.stringify(funnel));
       `;
       const params = [];
 
-      // Vendedor solo ve las suyas
       if (!esAdmin) {
         q += ` AND vc.asignado_a = ?`;
         params.push(usuario_id);
@@ -133,18 +113,18 @@ console.log("FUNNEL RESULT:", JSON.stringify(funnel));
       resultado.conversaciones = convs;
     }
 
-    // ── STATS RÁPIDAS ────────────────────────────────────────
+    // ── STATS ────────────────────────────────────────────────
     if (vista === "todo") {
       let statsQ = `
         SELECT
-          COUNT(CASE WHEN estado = 'nuevo' AND asignado_a IS NULL THEN 1 END)     AS leads_sin_tomar,
-          COUNT(CASE WHEN estado = 'contactado'  THEN 1 END)                      AS en_contactado,
-          COUNT(CASE WHEN estado = 'interesado'  THEN 1 END)                      AS en_interesado,
-          COUNT(CASE WHEN estado = 'seguimiento' THEN 1 END)                      AS en_seguimiento,
+          COUNT(CASE WHEN estado = 'nuevo' AND asignado_a IS NULL THEN 1 END) AS leads_sin_tomar,
+          COUNT(CASE WHEN estado = 'contactado'  THEN 1 END)                  AS en_contactado,
+          COUNT(CASE WHEN estado = 'interesado'  THEN 1 END)                  AS en_interesado,
+          COUNT(CASE WHEN estado = 'seguimiento' THEN 1 END)                  AS en_seguimiento,
           COUNT(CASE WHEN estado = 'cerrado'
             AND MONTH(actualizado_en) = MONTH(NOW())
-            AND YEAR(actualizado_en)  = YEAR(NOW())  THEN 1 END)                  AS cerrados_mes,
-          COUNT(CASE WHEN estado = 'perdido'     THEN 1 END)                      AS perdidos
+            AND YEAR(actualizado_en)  = YEAR(NOW()) THEN 1 END)               AS cerrados_mes,
+          COUNT(CASE WHEN estado = 'perdido' THEN 1 END)                      AS perdidos
         FROM ventas_leads
       `;
       const statsParams = [];
@@ -152,7 +132,6 @@ console.log("FUNNEL RESULT:", JSON.stringify(funnel));
         statsQ += ` WHERE asignado_a = ? OR (asignado_a IS NULL AND estado = 'nuevo')`;
         statsParams.push(usuario_id);
       }
-
       const [[stats]] = await db.query(statsQ, statsParams);
       resultado.stats = stats;
     }
@@ -160,7 +139,7 @@ console.log("FUNNEL RESULT:", JSON.stringify(funnel));
     return NextResponse.json({ ok: true, ...resultado });
 
   } catch (err) {
-    console.error("CRM GET:", err);
+    console.error("CRM GET error:", err);
     return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
   }
 }
