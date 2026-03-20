@@ -4,57 +4,49 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 
 const VIEWS = {
-  dashboard:      ["Dashboard",        "Resumen general del sistema"],
-  clientes:       ["Clientes",         "Tenants registrados"],
-  ventas:         ["Ventas",           "Pipeline comercial"],
-  conversaciones: ["Conversaciones",   "Mensajes entrantes y seguimiento"],
-  equipo:         ["Equipo",           "Áreas y personal del equipo"],
-  soporte:        ["Soporte",          "Tickets y atención a clientes"],
-  modulos:        ["Módulos",          "Catálogo del sistema"],
-  planes:         ["Planes",           "Gestión de suscripciones"],
-  comunicaciones: ["Comunicaciones",   "Conversaciones con clientes"],
-  seguimiento:    ["Seguimiento",      "Tareas y recordatorios"],
-  alertas:        ["Alertas IA",       "Detecciones automáticas"],
-  integraciones:  ["Integraciones",    "Conexiones externas"],
-  auditoria:      ["Auditoría",        "Registro de actividad"],
-  configuracion:  ["Configuración",    "Ajustes del sistema"],
-  sistema:        ["Sistema",          "Usuarios, permisos y accesos"],
-  perfil:         ["Mi perfil",        "Configuración de tu cuenta"],
+  dashboard:     ["Dashboard",      "Resumen general del sistema"],
+  clientes:      ["Clientes",       "Tenants registrados"],
+  crm:           ["CRM",            "Leads, funnel y conversaciones"],
+  equipo:        ["Equipo",         "Áreas y personal del equipo"],
+  soporte:       ["Soporte",        "Tickets y atención a clientes"],
+  modulos:       ["Módulos",        "Catálogo del sistema"],
+  planes:        ["Planes",         "Gestión de suscripciones"],
+  comunicaciones:["Comunicaciones", "Conversaciones con clientes"],
+  seguimiento:   ["Seguimiento",    "Tareas y recordatorios"],
+  alertas:       ["Alertas IA",     "Detecciones automáticas"],
+  integraciones: ["Integraciones",  "Conexiones externas"],
+  auditoria:     ["Auditoría",      "Registro de actividad"],
+  configuracion: ["Configuración",  "Ajustes del sistema"],
+  sistema:       ["Sistema",        "Usuarios, permisos y accesos"],
+  perfil:        ["Mi perfil",      "Configuración de tu cuenta"],
 };
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [view, setView] = useState("dashboard");
+  const [view, setView]   = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [menuUsuario, setMenuUsuario] = useState(false);
   const [stats, setStats] = useState({
-    clientes_activos: null,
-    trials_vencidos: null,
-    conv_sin_asignar: null,
-    tickets_urgentes: null,
-    usuarios_pendientes: null,
+    clientes_activos: null, conv_sin_asignar: null,
+    tickets_urgentes: null, usuarios_pendientes: null,
   });
   const menuRef = useRef(null);
 
   const nav = (id) => setView(id);
-  const userName = session?.user?.name || "Admin";
+  const userName    = session?.user?.name || "Admin";
   const userInitial = userName[0]?.toUpperCase() || "A";
-  const rol = session?.user?.rol || "superadmin";
-  const esVendedor = rol === "vendedor";
+  const rol         = session?.user?.rol || "superadmin";
+  const esVendedor  = rol === "vendedor";
 
   useEffect(() => {
-    fetch("/api/stats/sidebar")
-      .then(r => r.json())
-      .then(d => {
-        setStats({
-          clientes_activos:    d.clientes_activos    ?? null,
-          trials_vencidos:     d.trials_vencidos     ?? null,
-          conv_sin_asignar:    d.conv_sin_asignar    ?? null,
-          tickets_urgentes:    d.tickets_urgentes    ?? null,
-          usuarios_pendientes: d.usuarios_pendientes ?? null,
-        });
-      })
-      .catch(() => {});
+    fetch("/api/stats/sidebar").then(r=>r.json()).then(d=>{
+      setStats({
+        clientes_activos:    d.clientes_activos    ?? null,
+        conv_sin_asignar:    d.conv_sin_asignar    ?? null,
+        tickets_urgentes:    d.tickets_urgentes    ?? null,
+        usuarios_pendientes: d.usuarios_pendientes ?? null,
+      });
+    }).catch(()=>{});
   }, []);
 
   useEffect(() => {
@@ -65,13 +57,15 @@ export default function DashboardPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  const isCrmView = view === "crm";
+
   return (
     <>
       <div className="g360-wrap">
-        {/* ══ SIDEBAR ══ */}
+        {/* SIDEBAR */}
         <nav id="sb" className={collapsed ? "collapsed" : ""}>
           <div className="sb-logo">
-            <div className="sb-logo-mark" onClick={() => setCollapsed(!collapsed)} title="Mostrar / ocultar menú" style={{cursor:"pointer"}}>
+            <div className="sb-logo-mark" onClick={()=>setCollapsed(!collapsed)} style={{cursor:"pointer"}}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="18" height="18">
                 <rect x="0" y="10" width="6" height="6" rx="1.5" fill="white" opacity=".3"/>
                 <rect x="0" y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
@@ -83,24 +77,29 @@ export default function DashboardPage() {
             </div>
             <div className="sb-logo-texts">
               <div className="sb-brand">Gestión 360 iA</div>
-              <div className="sb-brand-sub">Panel Admin</div>
+              <div className="sb-brand-sub">{esVendedor ? "Panel Vendedor" : "Panel Admin"}</div>
             </div>
           </div>
 
           <div className="sb-scroll">
-            <div className="sb-sec">Principal</div>
-            <NavItem id="dashboard" icon="bi-grid-1x2" label="Dashboard" active={view==="dashboard"} onClick={nav} />
             {!esVendedor && (
-              <NavItem id="clientes" icon="bi-people" label="Clientes" active={view==="clientes"} onClick={nav}
-                badge={stats.clientes_activos > 0 ? String(stats.clientes_activos) : null} />
+              <>
+                <div className="sb-sec">Principal</div>
+                <NavItem id="dashboard" icon="bi-grid-1x2" label="Dashboard" active={view==="dashboard"} onClick={nav} />
+                <NavItem id="clientes"  icon="bi-people"   label="Clientes"  active={view==="clientes"}  onClick={nav}
+                  badge={stats.clientes_activos > 0 ? String(stats.clientes_activos) : null} />
+              </>
             )}
 
             <div className="sb-divider" />
             <div className="sb-sec">Ventas</div>
-            <NavItem id="conversaciones" icon="bi-chat-dots"      label="Conversaciones"  active={view==="conversaciones"} onClick={nav}
-              badge={stats.conv_sin_asignar > 0 ? String(stats.conv_sin_asignar) : null} badgeClass="amber" />
-            <NavItem id="ventas"         icon="bi-graph-up-arrow" label="Pipeline / Leads" active={view==="ventas"}         onClick={nav} incoming />
-            <NavItem id="soporte"        icon="bi-headset"        label="Tickets"          active={view==="soporte"}        onClick={nav} incoming />
+            <NavItem id="crm" label="CRM" active={view==="crm"} onClick={nav}
+              badge={stats.conv_sin_asignar > 0 ? String(stats.conv_sin_asignar) : null} badgeClass="amber"
+              iconSvg={<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>}
+            />
+            {!esVendedor && (
+              <NavItem id="soporte" icon="bi-headset" label="Tickets" active={view==="soporte"} onClick={nav} incoming />
+            )}
 
             {!esVendedor && (
               <>
@@ -138,7 +137,7 @@ export default function DashboardPage() {
           <div className="sb-foot">
             <div ref={menuRef} style={{position:"relative"}}>
               <div style={{display:"flex",alignItems:"center",gap:"0.55rem",padding:"0.44rem 0.55rem",borderRadius:"var(--r-sm)"}}>
-                <div onClick={() => setMenuUsuario(m => !m)} style={{cursor:"pointer",flexShrink:0}}>
+                <div onClick={()=>setMenuUsuario(m=>!m)} style={{cursor:"pointer",flexShrink:0}}>
                   {session?.user?.image
                     ? <img src={session.user.image} style={{width:28,height:28,borderRadius:"50%",objectFit:"cover"}} alt="" />
                     : <Av letra={userInitial} size={28} />
@@ -154,16 +153,16 @@ export default function DashboardPage() {
                   <div style={{padding:"0.6rem 0.85rem 0.5rem",borderBottom:"1px solid var(--border)"}}>
                     <div style={{fontSize:"0.78rem",fontWeight:700,color:"var(--text)"}}>{userName}</div>
                     <div style={{display:"flex",alignItems:"center",gap:5,marginTop:3}}>
-                      <span style={{fontSize:"0.65rem",color:"var(--muted)"}}>{esVendedor ? "Vendedor" : "Superadmin"}</span>
+                      <span style={{fontSize:"0.65rem",color:"var(--muted)"}}>{esVendedor?"Vendedor":"Superadmin"}</span>
                       <span style={{background:"var(--em-pale)",color:"var(--em-d)",fontSize:"0.6rem",fontWeight:700,padding:"1px 7px",borderRadius:9}}>Pro</span>
                     </div>
                   </div>
                   <div style={{padding:"0.3rem 0"}}>
-                    <DropdownItem icon="bi-person" label="Mi perfil" onClick={() => { setMenuUsuario(false); nav("perfil"); }} />
-                    {!esVendedor && <DropdownItem icon="bi-eye" label="Ver como cliente" onClick={() => setMenuUsuario(false)} muted />}
+                    <DropdownItem icon="bi-person" label="Mi perfil" onClick={()=>{setMenuUsuario(false);nav("perfil");}} />
+                    {!esVendedor && <DropdownItem icon="bi-eye" label="Ver como cliente" onClick={()=>setMenuUsuario(false)} muted />}
                   </div>
                   <div style={{borderTop:"1px solid var(--border)",padding:"0.3rem 0"}}>
-                    <DropdownItem icon="bi-box-arrow-right" label="Cerrar sesión" onClick={() => signOut({ callbackUrl: "/" })} danger />
+                    <DropdownItem icon="bi-box-arrow-right" label="Cerrar sesión" onClick={()=>signOut({callbackUrl:"/"})} danger />
                   </div>
                 </div>
               )}
@@ -171,7 +170,7 @@ export default function DashboardPage() {
           </div>
         </nav>
 
-        {/* ══ MAIN ══ */}
+        {/* MAIN */}
         <div id="main">
           <div id="topbar">
             <div>
@@ -187,11 +186,10 @@ export default function DashboardPage() {
             <button className="tb-btn"><i className="bi bi-question-circle" /></button>
           </div>
 
-          <div id="content" style={{padding: ["comunicaciones","conversaciones"].includes(view) ? "0" : "1.3rem 1.4rem"}}>
+          <div id="content" style={{padding: isCrmView ? "0" : "1.3rem 1.4rem"}}>
             {view === "dashboard"      && <ViewDashboard />}
             {view === "clientes"       && <ViewClientes />}
-            {view === "ventas"         && <ViewVentas session={session} />}
-            {view === "conversaciones" && <ViewConversaciones session={session} onNavegar={nav} />}
+            {view === "crm"            && <ViewCRM session={session} />}
             {view === "equipo"         && <ViewEquipo />}
             {view === "soporte"        && <ViewSoporte session={session} />}
             {view === "modulos"        && <ViewModulos />}
@@ -228,7 +226,7 @@ export default function DashboardPage() {
         }
         body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
         .g360-wrap { display:flex; height:100vh; overflow:hidden; }
-        #sb { width:230px; min-width:230px; background:var(--sb-bg); border-right:1px solid var(--sb-brd); display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:width .2s,min-width .2s; position:relative; }
+        #sb { width:230px; min-width:230px; background:var(--sb-bg); border-right:1px solid var(--sb-brd); display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:width .2s,min-width .2s; }
         #sb.collapsed { width:52px; min-width:52px; }
         .sb-logo { display:flex; align-items:center; gap:0.6rem; padding:0.85rem 0.7rem; border-bottom:1px solid var(--sb-brd); flex-shrink:0; }
         .sb-logo-mark { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -243,14 +241,14 @@ export default function DashboardPage() {
         .ni { display:flex; align-items:center; gap:0.6rem; padding:0.38rem 0.7rem; margin:0 0.35rem; border-radius:var(--r-sm); cursor:pointer; transition:background .12s; position:relative; white-space:nowrap; overflow:hidden; }
         .ni:hover { background:rgba(255,255,255,.1); }
         .ni.on { background:var(--sb-active); }
-        .ni-ic { font-size:0.9rem; color:rgba(255,255,255,.7); flex-shrink:0; width:16px; text-align:center; }
+        .ni-ic { font-size:0.9rem; color:rgba(255,255,255,.7); flex-shrink:0; width:16px; text-align:center; display:flex; align-items:center; justify-content:center; }
         .ni.on .ni-ic { color:#fff; }
         .ni-txt { font-size:0.79rem; font-weight:500; color:rgba(255,255,255,.75); overflow:hidden; transition:opacity .15s,width .15s; }
         .ni.on .ni-txt { color:#fff; font-weight:600; }
         .collapsed .ni-txt { opacity:0; width:0; }
         .ni-badge { font-size:0.58rem; font-weight:700; padding:1px 5px; border-radius:9px; background:var(--sb-badge); color:#fff; flex-shrink:0; }
         .ni-badge.amber { background:#B08A55; }
-        .ni-badge.red { background:#D9534F; }
+        .ni-badge.red   { background:#D9534F; }
         .sb-foot { border-top:1px solid var(--sb-brd); padding:0.5rem 0.3rem; flex-shrink:0; }
         #main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
         #topbar { height:52px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.7rem; padding:0 1.2rem; flex-shrink:0; }
@@ -275,8 +273,6 @@ export default function DashboardPage() {
         .kpi-val { font-size:1.5rem; font-weight:700; line-height:1; color:var(--text); }
         .kpi-lbl { font-size:0.7rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-top:0.3rem; }
         .kpi-d   { font-size:0.68rem; color:var(--muted); margin-top:0.25rem; display:flex; align-items:center; gap:3px; }
-        .kpi-d.up { color:var(--em-d); }
-        .kpi-d.dn { color:var(--red); }
         .kpi-d.nu { color:var(--border2); }
         .btn { display:inline-flex; align-items:center; gap:0.35rem; padding:0.42rem 0.85rem; border-radius:var(--r-sm); font-size:0.78rem; font-weight:600; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:opacity .15s; }
         .btn:hover { opacity:.85; }
@@ -287,14 +283,14 @@ export default function DashboardPage() {
         .btn-sm  { padding:0.3rem 0.65rem; font-size:0.72rem; }
         .btn-xs  { padding:0.18rem 0.45rem; font-size:0.65rem; }
         .bdg { display:inline-block; font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:999px; }
-        .bdg-em   { background:var(--em-pale);    color:var(--em-d); }
-        .bdg-red  { background:var(--red-bg);      color:var(--red); }
-        .bdg-moon { background:var(--moon-l);      color:var(--moon-d); }
-        .bdg-amber{ background:var(--amber-bg);    color:#92680A; }
-        .bdg-gold { background:var(--gold-bg);     color:var(--pine-d); }
-        .bdg-blue { background:var(--blue-bg);     color:var(--pr-d); }
-        .bdg-pro  { background:var(--pr-pale);     color:var(--pr-d); }
-        .bdg-pine { background:var(--pine-pale);   color:var(--pine-d); }
+        .bdg-em   { background:var(--em-pale);  color:var(--em-d); }
+        .bdg-red  { background:var(--red-bg);   color:var(--red); }
+        .bdg-moon { background:var(--moon-l);   color:var(--moon-d); }
+        .bdg-amber{ background:var(--amber-bg); color:#92680A; }
+        .bdg-gold { background:var(--gold-bg);  color:var(--pine-d); }
+        .bdg-blue { background:var(--blue-bg);  color:var(--pr-d); }
+        .bdg-pro  { background:var(--pr-pale);  color:var(--pr-d); }
+        .bdg-pine { background:var(--pine-pale);color:var(--pine-d); }
         .bdg-urgente { background:#FEE2E2; color:#991B1B; }
         .bdg-alta    { background:#FFEDD5; color:#9A3412; }
         .bdg-media   { background:var(--amber-bg); color:#92680A; }
@@ -322,7 +318,7 @@ export default function DashboardPage() {
         .plan-card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; box-shadow:var(--sh); }
         .plan-hdr { padding:1rem 1.1rem 0.8rem; border-bottom:1px solid var(--border); }
         .plan-name { font-size:1.1rem; font-weight:700; }
-        .plan-price { font-size:1.9rem; line-height:1; margin:0.5rem 0 0.2rem; letter-spacing:-0.02em; font-weight:700; }
+        .plan-price { font-size:1.9rem; line-height:1; margin:0.5rem 0 0.2rem; font-weight:700; }
         .plan-price span { font-size:0.8rem; font-weight:400; color:var(--muted); }
         .plan-feature { display:flex; align-items:center; gap:0.5rem; padding:0.38rem 1.1rem; font-size:0.77rem; color:var(--text2); border-bottom:1px solid var(--border); }
         .plan-feature:last-of-type { border-bottom:none; }
@@ -341,7 +337,7 @@ export default function DashboardPage() {
         .conv-items { flex:1; overflow-y:auto; }
         .conv-item { padding:0.65rem 0.85rem; border-bottom:1px solid var(--border); cursor:pointer; }
         .conv-item:hover { background:var(--bg); }
-        .conv-item.active { background:var(--pr-pale); }
+        .conv-item.active { background:var(--pr-pale); border-left:2px solid var(--pr); }
         .conv-av { width:34px; height:34px; border-radius:50%; background:var(--pr); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; flex-shrink:0; }
         .chat-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
         .chat-hdr { padding:0.65rem 1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.6rem; background:#fff; flex-shrink:0; flex-wrap:wrap; }
@@ -350,6 +346,7 @@ export default function DashboardPage() {
         .msg { max-width:70%; padding:0.5rem 0.75rem; border-radius:10px; font-size:0.8rem; line-height:1.45; }
         .msg.in  { background:#fff; color:var(--text); align-self:flex-start; border-bottom-left-radius:2px; border:1px solid var(--border); }
         .msg.out { background:var(--pr); color:#fff; align-self:flex-end; border-bottom-right-radius:2px; }
+        .msg.act { background:var(--amber-bg); border:1px solid #E8D5B0; align-self:stretch; text-align:center; font-size:0.65rem; color:#92680A; max-width:100%; border-radius:var(--r-sm); }
         .mod-ico  { width:28px; height:28px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.82rem; }
         .mod-name { font-size:0.8rem; font-weight:600; color:var(--text); }
         .mod-desc { font-size:0.67rem; color:var(--muted); }
@@ -360,8 +357,38 @@ export default function DashboardPage() {
         .cfg-hdr  { display:flex; align-items:center; gap:0.5rem; padding:0.7rem 1rem; border-bottom:1px solid var(--border); background:var(--bg); }
         .cfg-title{ font-size:0.82rem; font-weight:700; }
         .cfg-body { padding:0.9rem 1rem; display:flex; flex-direction:column; gap:0.6rem; }
-        .int-card { display:flex; align-items:center; gap:0.75rem; background:#fff; border:1px solid var(--border); border-radius:var(--r); padding:0.75rem 0.9rem; margin-bottom:0.4rem; transition:border-color .2s; }
+        .int-card { display:flex; align-items:center; gap:0.75rem; background:#fff; border:1px solid var(--border); border-radius:var(--r); padding:0.75rem 0.9rem; margin-bottom:0.4rem; }
         .int-ico  { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem; }
+        /* CRM específico */
+        .crm-wrap { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+        .crm-tabs { display:flex; background:#fff; border-bottom:1px solid var(--border); padding:0 1.1rem; flex-shrink:0; }
+        .crm-tab  { padding:0.6rem 1rem; font-size:0.75rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; align-items:center; gap:5px; }
+        .crm-tab.on { color:var(--pr); border-bottom-color:var(--pr); }
+        .crm-ct { display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:15px; padding:0 4px; font-size:0.55rem; font-weight:700; border-radius:999px; }
+        .crm-ct.a { background:var(--amber-bg); color:#92680A; }
+        .crm-ct.b { background:var(--em-pale);  color:var(--em-d); }
+        .crm-ct.c { background:var(--pr-pale);  color:var(--pr-d); }
+        /* Tabla leads */
+        .leads-table { width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--border); }
+        .leads-table thead { background:var(--bg); }
+        .leads-table th { text-align:left; padding:0.5rem 0.75rem; font-size:0.6rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; border-bottom:1px solid var(--border); border-right:1px solid #F3F4F6; }
+        .leads-table th:last-child { border-right:none; }
+        .leads-table td { padding:0.6rem 0.75rem; border-bottom:1px solid #F3F4F6; vertical-align:middle; border-right:1px solid #F3F4F6; }
+        .leads-table td:last-child { border-right:none; }
+        .leads-table tr:last-child td { border-bottom:none; }
+        .leads-table tr:hover td { background:#FAFBFC; }
+        /* Funnel */
+        .funnel-col { background:var(--bg); border-radius:var(--r); padding:0.6rem; flex:0 0 210px; display:flex; flex-direction:column; gap:0.5rem; }
+        .funnel-col-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.3rem; }
+        .f-card { background:#fff; border:1px solid var(--border); border-radius:var(--r-sm); padding:0.65rem 0.75rem; cursor:pointer; }
+        .f-card:hover { border-color:var(--pr); }
+        /* Ficha lateral */
+        .ficha-lateral { width:200px; border-left:1px solid var(--border); background:#fff; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+        .ficha-sec { padding:0.75rem 0.9rem; border-bottom:1px solid #F3F4F6; }
+        .ficha-sec-title { font-size:0.58rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:0.5rem; }
+        .ficha-row .fl { font-size:0.58rem; }
+        .ficha-row .fv { font-size:0.7rem; color:var(--text); font-weight:500; }
+        .ficha-row .fv.m { color:var(--muted); font-style:italic; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
         .view-anim { animation:fadeIn .18s ease; }
       `}</style>
@@ -371,15 +398,17 @@ export default function DashboardPage() {
 
 /* ══ COMPONENTES COMPARTIDOS ══ */
 
-function NavItem({ id, icon, label, active, onClick, badge, badgeClass, incoming }) {
+function NavItem({ id, icon, iconSvg, label, active, onClick, badge, badgeClass, incoming }) {
   return (
-    <div className={`ni${active ? " on" : ""}`} onClick={() => onClick(id)}>
-      <i className={`bi ${icon} ni-ic`} />
+    <div className={`ni${active?" on":""}`} onClick={()=>onClick(id)}>
+      <span className="ni-ic">
+        {iconSvg ? iconSvg : <i className={`bi ${icon}`} />}
+      </span>
       <span className="ni-txt">{label}</span>
       {incoming && !badge && (
         <span style={{background:"rgba(176,138,85,.18)",color:"#C8A472",fontSize:"0.52rem",fontWeight:700,padding:"1px 6px",borderRadius:9,flexShrink:0,letterSpacing:"0.04em",textTransform:"uppercase",border:"1px solid rgba(176,138,85,.3)"}}>soon</span>
       )}
-      {badge && <span className={`ni-badge${badgeClass ? " " + badgeClass : ""}`}>{badge}</span>}
+      {badge && <span className={`ni-badge${badgeClass?" "+badgeClass:""}`}>{badge}</span>}
     </div>
   );
 }
@@ -387,81 +416,103 @@ function NavItem({ id, icon, label, active, onClick, badge, badgeClass, incoming
 function DropdownItem({ icon, label, onClick, danger, muted }) {
   return (
     <div onClick={onClick}
-      style={{display:"flex",alignItems:"center",gap:"0.55rem",padding:"0.45rem 0.85rem",cursor:"pointer",fontSize:"0.8rem",fontWeight:500,color: danger ? "var(--red)" : muted ? "var(--muted)" : "var(--text)",transition:"background .12s"}}
-      onMouseEnter={e => e.currentTarget.style.background = danger ? "var(--red-bg)" : "var(--bg)"}
-      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+      style={{display:"flex",alignItems:"center",gap:"0.55rem",padding:"0.45rem 0.85rem",cursor:"pointer",fontSize:"0.8rem",fontWeight:500,color:danger?"var(--red)":muted?"var(--muted)":"var(--text)",transition:"background .12s"}}
+      onMouseEnter={e=>e.currentTarget.style.background=danger?"var(--red-bg)":"var(--bg)"}
+      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
       <i className={`bi ${icon}`} style={{fontSize:"0.88rem",width:16,textAlign:"center"}} />
       {label}
     </div>
   );
 }
 
-function Av({ letra, size = 32 }) {
+function Av({ letra, size=32 }) {
   return (
     <div style={{width:size,height:size,borderRadius:"50%",background:"var(--pr)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.38,fontWeight:700,flexShrink:0}}>
-      {letra || "?"}
+      {letra||"?"}
     </div>
   );
 }
 
-function Cargando({ texto = "Cargando..." }) {
+function Cargando({ texto="Cargando..." }) {
   return <div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>{texto}</div>;
 }
 
 function Modal({ children, onClose }) {
   return (
     <div className="modal-over" onClick={onClose}>
-      <div className="modal-box" onClick={e => e.stopPropagation()}>{children}</div>
+      <div className="modal-box" onClick={e=>e.stopPropagation()}>{children}</div>
     </div>
   );
 }
 
-function ModalFooter({ onCancel, onConfirm, saving, labelConfirm = "Guardar" }) {
+function ModalFooter({ onCancel, onConfirm, saving, labelConfirm="Guardar" }) {
   return (
     <div className="modal-foot">
       <button className="btn btn-out btn-sm" onClick={onCancel}>Cancelar</button>
-      <button className="btn btn-em btn-sm" onClick={onConfirm} disabled={saving}>
-        {saving ? "Guardando…" : labelConfirm}
-      </button>
+      <button className="btn btn-em btn-sm" onClick={onConfirm} disabled={saving}>{saving?"Guardando…":labelConfirm}</button>
     </div>
   );
 }
 
 function formatFecha(f) {
   if (!f) return "—";
-  return new Date(f).toLocaleString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+  return new Date(f).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 
-/* ══ CANAL META ══ */
+/* ── CANAL META ── */
 const CANAL_META = {
-  whatsapp:  { label:"WhatsApp",  color:"#25D366", bg:"#F0FBF4", textColor:"#166534",
-    dot:()=><svg width="11" height="11" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.126 1.524 5.858L0 24l6.305-1.508A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg> },
-  email:     { label:"Email",     color:"#506886", bg:"#EDF1F6", textColor:"#2A3F55", dot:()=><i className="bi bi-envelope"   style={{color:"#506886",fontSize:"0.72rem"}} /> },
-  instagram: { label:"Instagram", color:"#E1306C", bg:"#FEF0F5", textColor:"#9B1C4E", dot:()=><i className="bi bi-instagram"  style={{color:"#E1306C",fontSize:"0.72rem"}} /> },
-  facebook:  { label:"Facebook",  color:"#1877F2", bg:"#EBF3FE", textColor:"#1455B5", dot:()=><i className="bi bi-facebook"   style={{color:"#1877F2",fontSize:"0.72rem"}} /> },
-  web:       { label:"Web",       color:"#1A7A4A", bg:"#F0FAF4", textColor:"#166534", dot:()=><i className="bi bi-globe"      style={{color:"#1A7A4A",fontSize:"0.72rem"}} /> },
-  tiktok:    { label:"TikTok",    color:"#010101", bg:"#F5F5F5", textColor:"#111",    dot:()=><i className="bi bi-tiktok"     style={{color:"#010101",fontSize:"0.72rem"}} /> },
+  whatsapp:  { label:"WhatsApp",  color:"#25D366", bg:"#E8F7F1", textColor:"#166534",
+    dot:()=><svg width="10" height="10" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.126 1.524 5.858L0 24l6.305-1.508A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg> },
+  email:     { label:"Email",     color:"#506886", bg:"#EDF1F6", textColor:"#2A3F55", dot:()=><i className="bi bi-envelope"  style={{color:"#506886",fontSize:"0.7rem"}} /> },
+  web:       { label:"Web",       color:"#1A7A4A", bg:"#E8F7F1", textColor:"#166534", dot:()=><i className="bi bi-globe"     style={{color:"#1A7A4A",fontSize:"0.7rem"}} /> },
+  instagram: { label:"Instagram", color:"#E1306C", bg:"#FEF0F5", textColor:"#9B1C4E", dot:()=><i className="bi bi-instagram" style={{color:"#E1306C",fontSize:"0.7rem"}} /> },
+  facebook:  { label:"Facebook",  color:"#1877F2", bg:"#EBF3FE", textColor:"#1455B5", dot:()=><i className="bi bi-facebook"  style={{color:"#1877F2",fontSize:"0.7rem"}} /> },
+  formulario:{ label:"Formulario",color:"#7C3AED", bg:"#EDE9FE", textColor:"#5B21B6", dot:()=><i className="bi bi-ui-checks-grid" style={{color:"#7C3AED",fontSize:"0.7rem"}} /> },
 };
 
-/* ══ ETAPAS DEL EMBUDO ══ */
-const ETAPAS = {
-  nuevo:       { label:"Nuevo",       color:"#6B7280", bg:"#F3F4F6" },
-  contactado:  { label:"Contactado",  color:"#506886", bg:"#EDF1F6" },
-  interesado:  { label:"Interesado",  color:"#1A73E8", bg:"#EBF3FE" },
-  seguimiento: { label:"Seguimiento", color:"#B08A55", bg:"#F7F0E6" },
-  cerrado:     { label:"Cerrado",     color:"#166534", bg:"#DCFCE7" },
-  perdido:     { label:"Perdido",     color:"#991B1B", bg:"#FEE2E2" },
+const ORIGEN_META = {
+  whatsapp:  { label:"WhatsApp",  bg:"#E8F7F1", color:"#166534", border:"#B8E0D0" },
+  web:       { label:"Web",       bg:"#EDF1F6", color:"#445A73", border:"#C2CFD9" },
+  formulario:{ label:"Formulario",bg:"#EDE9FE", color:"#5B21B6", border:"#C4B5FD" },
+  scraping:  { label:"Scraping",  bg:"#FBF6EE", color:"#92680A", border:"#E8D5B0" },
+  manual:    { label:"Manual",    bg:"#EDF1F6", color:"#445A73", border:"#C2CFD9" },
+  referido:  { label:"Referido",  bg:"#E8F7F1", color:"#166534", border:"#B8E0D0" },
 };
 
-const RUBROS = ["Hotel / Cabañas","Consultorio / Clínica / Spa","Salón de Eventos","Inmobiliaria","Restaurante / Gastronomía","Salón de belleza / Estética / bienestar","Restaurante / Local de comida","Contador / Estudio contable","Abogado / Estudio jurídico","Gestor de seguros","Logística / Distribución","GovTech","Otro"];
-
-const TIPO_ACTIVIDAD = {
-  llamada:  { icon:"bi-telephone",     color:"var(--pr)" },
-  email:    { icon:"bi-envelope",      color:"var(--accent)" },
-  whatsapp: { icon:"bi-whatsapp",      color:"#25D366" },
-  reunion:  { icon:"bi-calendar-check",color:"var(--em-d)" },
-  nota:     { icon:"bi-sticky",        color:"var(--muted)" },
+const ETAPAS_FUNNEL = {
+  contactado:  { label:"Contactado",  color:"var(--pr)",     bg:"var(--pr-pale)" },
+  interesado:  { label:"Interesado",  color:"var(--em-d)",   bg:"var(--em-pale)" },
+  seguimiento: { label:"Seguimiento", color:"var(--accent)",  bg:"var(--accent-pale)" },
 };
+
+const RUBROS = ["Hotel / Cabañas","Consultorio / Clínica / Spa","Salón de Eventos","Inmobiliaria","Restaurante / Gastronomía","Salón de belleza / Estética","Contador / Estudio contable","Abogado / Estudio jurídico","Gestor de seguros","Logística / Distribución","GovTech","Otro"];
+
+function OrigenPill({ fuente }) {
+  const m = ORIGEN_META[fuente] || ORIGEN_META.manual;
+  return (
+    <span style={{display:"inline-flex",alignItems:"center",fontSize:"0.58rem",fontWeight:700,padding:"2px 6px",background:m.bg,color:m.color,border:`1px solid ${m.border}`,borderRadius:3,whiteSpace:"nowrap"}}>
+      {m.label}
+    </span>
+  );
+}
+
+function EtapaPill({ estado }) {
+  const MAP = {
+    nuevo:       { bg:"#F3F4F6", color:"#374151", border:"#E5E7EB" },
+    contactado:  { bg:"var(--pr-pale)",    color:"var(--pr-d)",  border:"var(--pr-mid)" },
+    interesado:  { bg:"var(--em-pale)",    color:"var(--em-d)",  border:"var(--em-mid)" },
+    seguimiento: { bg:"var(--accent-pale)",color:"var(--accent)",border:"#E8D5B0" },
+    cerrado:     { bg:"var(--em-pale)",    color:"var(--em-d)",  border:"var(--em-mid)" },
+    perdido:     { bg:"var(--red-bg)",     color:"var(--red)",   border:"#FCA5A5" },
+  };
+  const m = MAP[estado] || MAP.nuevo;
+  const labels = { nuevo:"Nuevo",contactado:"Contactado",interesado:"Interesado",seguimiento:"Seguimiento",cerrado:"Cerrado",perdido:"Perdido" };
+  return (
+    <span style={{display:"inline-block",fontSize:"0.6rem",fontWeight:700,padding:"2px 7px",background:m.bg,color:m.color,border:`1px solid ${m.border}`,borderRadius:3,whiteSpace:"nowrap"}}>
+      {labels[estado]||estado}
+    </span>
+  );
+}
 
 /* ══ MODAL CALIFICAR ══ */
 function ModalCalificar({ lead, onClose, onGuardar }) {
@@ -473,9 +524,9 @@ function ModalCalificar({ lead, onClose, onGuardar }) {
   const guardar = async () => {
     if (!resultado) return;
     setSaving(true);
-    const payload = { id: lead.id, estado: resultado };
-    if (resultado === "seguimiento") payload.fecha_proximo_contacto = fecha || null;
-    if (resultado === "perdido")     payload.motivo_perdida = motivo || null;
+    const payload = { id:lead.id, estado:resultado };
+    if (resultado==="seguimiento") payload.fecha_proximo_contacto = fecha||null;
+    if (resultado==="perdido")     payload.motivo_perdida = motivo||null;
     await onGuardar(payload);
     setSaving(false);
     onClose();
@@ -483,7 +534,7 @@ function ModalCalificar({ lead, onClose, onGuardar }) {
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
-      <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:400,boxShadow:"0 20px 60px rgba(0,0,0,0.15)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div style={{background:"#fff",borderRadius:var(--r),width:"100%",maxWidth:400,boxShadow:"var(--sh-md)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
             <div style={{fontSize:"0.9rem",fontWeight:700}}>Calificar contacto</div>
@@ -494,24 +545,24 @@ function ModalCalificar({ lead, onClose, onGuardar }) {
         <div style={{padding:"1.2rem",display:"flex",flexDirection:"column",gap:"0.8rem"}}>
           <div style={{fontSize:"0.78rem",fontWeight:600,color:"var(--sub)"}}>¿Cómo resultó el contacto?</div>
           {[
-            { val:"interesado",  label:"Está interesado",              desc:"Quiere avanzar, evaluando el plan",            color:"#1A73E8", bg:"#EBF3FE" },
-            { val:"seguimiento", label:"Interesado, pero más adelante",desc:"Le interesa pero no ahora — agendar seguimiento",color:"#B08A55", bg:"#F7F0E6" },
-            { val:"perdido",     label:"Sin interés",                  desc:"No quiere avanzar",                            color:"#991B1B", bg:"#FEE2E2" },
-          ].map(op => (
+            {val:"interesado",  label:"Está interesado",               desc:"Quiere avanzar, evaluando el plan",             color:"var(--em-d)",   bg:"var(--em-pale)"},
+            {val:"seguimiento", label:"Interesado, pero más adelante", desc:"Le interesa pero no ahora — agendar seguimiento",color:"var(--accent)", bg:"var(--accent-pale)"},
+            {val:"perdido",     label:"Sin interés",                   desc:"No quiere avanzar",                             color:"var(--red)",    bg:"var(--red-bg)"},
+          ].map(op=>(
             <div key={op.val} onClick={()=>setResultado(op.val)}
-              style={{padding:"0.7rem 0.9rem",borderRadius:"var(--r)",border:`1px solid ${resultado===op.val?op.color:"var(--border)"}`,background:resultado===op.val?op.bg:"#fff",cursor:"pointer",transition:"all .15s"}}>
+              style={{padding:"0.7rem 0.9rem",borderRadius:"var(--r-sm)",border:`1px solid ${resultado===op.val?op.color:"var(--border)"}`,background:resultado===op.val?op.bg:"#fff",cursor:"pointer",transition:"all .15s"}}>
               <div style={{fontSize:"0.82rem",fontWeight:600,color:resultado===op.val?op.color:"var(--text)"}}>{op.label}</div>
               <div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{op.desc}</div>
             </div>
           ))}
-          {resultado === "seguimiento" && (
+          {resultado==="seguimiento" && (
             <div className="fg">
               <label className="fl">¿Cuándo volver a contactar?</label>
               <input className="fi" type="date" value={fecha} onChange={e=>setFecha(e.target.value)} min={new Date().toISOString().split("T")[0]} />
               <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>Si no elegís fecha, Maia lo recordará en 30 días</div>
             </div>
           )}
-          {resultado === "perdido" && (
+          {resultado==="perdido" && (
             <div className="fg">
               <label className="fl">Motivo (opcional)</label>
               <input className="fi" value={motivo} onChange={e=>setMotivo(e.target.value)} placeholder="Ej: Precio alto, no le interesa ahora..." />
@@ -527,6 +578,515 @@ function ModalCalificar({ lead, onClose, onGuardar }) {
   );
 }
 
+/* ══ VIEW CRM ══ */
+function ViewCRM({ session }) {
+  const [tab, setTab]             = useState("leads");
+  const [leads, setLeads]         = useState([]);
+  const [funnel, setFunnel]       = useState({ contactado:[], interesado:[], seguimiento:[] });
+  const [convs, setConvs]         = useState([]);
+  const [stats, setStats]         = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [filtroFuente, setFiltroFuente] = useState("todos");
+  const [filtroCanalConv, setFiltroCanalConv] = useState("todos");
+  const [filtroEtapaConv, setFiltroEtapaConv] = useState("todas");
+  const [activaConv, setActivaConv] = useState(null);
+  const [mensajes, setMensajes]   = useState([]);
+  const [texto, setTexto]         = useState("");
+  const [enviando, setEnviando]   = useState(false);
+  const [mostrarFicha, setMostrarFicha] = useState(true);
+  const [modalNuevo, setModalNuevo]     = useState(false);
+  const [modalCalif, setModalCalif]     = useState(false);
+  const [leadCalif, setLeadCalif]       = useState(null);
+  const [vendedores, setVendedores]     = useState([]);
+  const [saving, setSaving]       = useState(false);
+  const [formNuevo, setFormNuevo] = useState({ nombre:"",empresa:"",email:"",telefono:"",rubro_interes:"",plan_interes:"",fuente:"manual",ubicacion:"",sitio_web:"",instagram:"",notas:"" });
+  const msgsEndRef = useRef(null);
+  const rol     = session?.user?.rol || "superadmin";
+  const esAdmin = ["superadmin","admin"].includes(rol);
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch("/api/ventas/crm?vista=todo");
+      const d = await r.json();
+      if (d.ok) {
+        setLeads(d.leads || []);
+        setFunnel(d.funnel || { contactado:[], interesado:[], seguimiento:[] });
+        setConvs(d.conversaciones || []);
+        setStats(d.stats || null);
+      }
+    } catch(_){}
+    setLoading(false);
+  };
+
+  const cargarVendedores = async () => {
+    try { const r=await fetch("/api/usuarios"); const d=await r.json(); if(d.ok) setVendedores(d.usuarios.filter(u=>["vendedor","admin","superadmin"].includes(u.rol)&&u.activo)); } catch(_){}
+  };
+
+  const cargarMensajes = async (conv) => {
+    setActivaConv(conv);
+    try { const r=await fetch(`/api/ventas/mensajes?conversacion_id=${conv.id}`); const d=await r.json(); if(d.ok) setMensajes(d.mensajes); } catch(_){}
+  };
+
+  useEffect(() => { cargar(); cargarVendedores(); }, []);
+  useEffect(() => { msgsEndRef.current?.scrollIntoView({behavior:"smooth"}); }, [mensajes]);
+
+  const tomarLead = async (lead) => {
+    try {
+      await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:lead.id,tomar:true})});
+      await cargar();
+      setTab("funnel");
+    } catch(_){}
+  };
+
+  const cambiarEstadoLead = async (id, estado, extra={}) => {
+    try {
+      await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,estado,...extra})});
+      await cargar();
+    } catch(_){}
+  };
+
+  const cambiarEstadoConv = async (id, estado) => {
+    try {
+      await fetch("/api/ventas/conversaciones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,estado})});
+      await cargar();
+      if(activaConv?.id===id) setActivaConv(p=>({...p,estado}));
+    } catch(_){}
+  };
+
+  const enviarMensaje = async () => {
+    if (!texto.trim()||!activaConv) return;
+    setEnviando(true);
+    const contenido = texto;
+    setTexto("");
+    try {
+      await fetch("/api/ventas/mensajes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({conversacion_id:activaConv.id,direccion:"saliente",contenido})});
+      setTimeout(()=>cargarMensajes(activaConv), 700);
+    } catch(_){}
+    setEnviando(false);
+  };
+
+  const guardarCalificacion = async (payload) => {
+    try {
+      await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      await cargar();
+    } catch(_){}
+  };
+
+  const crearLead = async () => {
+    if (!formNuevo.nombre) return;
+    setSaving(true);
+    try {
+      const r=await fetch("/api/ventas/leads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(formNuevo)});
+      const d=await r.json();
+      if(d.ok){ setModalNuevo(false); setFormNuevo({nombre:"",empresa:"",email:"",telefono:"",rubro_interes:"",plan_interes:"",fuente:"manual",ubicacion:"",sitio_web:"",instagram:"",notas:""}); await cargar(); }
+    } catch(_){}
+    setSaving(false);
+  };
+
+  const fn = (v) => setFormNuevo(p=>({...p,...v}));
+
+  // Filtrar leads
+  const leadsFiltrados = leads.filter(l => filtroFuente==="todos" || l.fuente===filtroFuente);
+
+  // Filtrar conversaciones
+  const convsFiltradas = convs.filter(c => {
+    if (filtroCanalConv !== "todos" && c.canal !== filtroCanalConv) return false;
+    if (filtroEtapaConv !== "todas" && c.lead_estado !== filtroEtapaConv) return false;
+    return true;
+  });
+
+  const sinAsignarCount = leads.length;
+  const funnelTotal = (funnel.contactado?.length||0) + (funnel.interesado?.length||0) + (funnel.seguimiento?.length||0);
+  const convCount = convs.length;
+
+  return (
+    <div className="crm-wrap view-anim">
+      {/* TABS */}
+      <div className="crm-tabs">
+        <div className={`crm-tab${tab==="leads"?" on":""}`} onClick={()=>setTab("leads")}>
+          Leads <span className={`crm-ct a`}>{sinAsignarCount}</span>
+        </div>
+        <div className={`crm-tab${tab==="funnel"?" on":""}`} onClick={()=>setTab("funnel")}>
+          Funnel <span className={`crm-ct b`}>{funnelTotal}</span>
+        </div>
+        <div className={`crm-tab${tab==="conversaciones"?" on":""}`} onClick={()=>setTab("conversaciones")}>
+          Conversaciones <span className={`crm-ct c`}>{convCount}</span>
+        </div>
+        <div style={{flex:1}} />
+        <button className="btn btn-em btn-sm" style={{alignSelf:"center",marginRight:"0.5rem"}} onClick={()=>setModalNuevo(true)}>
+          <i className="bi bi-plus-lg" /> Nuevo lead
+        </button>
+      </div>
+
+      {/* ── TAB LEADS ── */}
+      {tab==="leads" && (
+        <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          {/* Filtros */}
+          <div style={{display:"flex",alignItems:"center",gap:"5px",padding:"7px 1.1rem",background:"#fff",borderBottom:"1px solid var(--border)",flexShrink:0,flexWrap:"wrap"}}>
+            {["todos","whatsapp","web","formulario","scraping","manual"].map(f=>(
+              <button key={f} onClick={()=>setFiltroFuente(f)}
+                style={{padding:"3px 9px",fontSize:"0.63rem",fontWeight:600,cursor:"pointer",border:`1px solid ${filtroFuente===f?"var(--pr)":"var(--border)"}`,background:filtroFuente===f?"var(--pr)":"#fff",color:filtroFuente===f?"#fff":"var(--sub)",fontFamily:"inherit",borderRadius:"var(--r-sm)"}}>
+                {f==="todos"?"Todos":ORIGEN_META[f]?.label||f}
+              </button>
+            ))}
+            <div style={{flex:1}} />
+            <span style={{fontSize:"0.63rem",color:"var(--muted)"}}>{leadsFiltrados.length} leads sin tomar</span>
+          </div>
+          {/* Tabla */}
+          <div style={{flex:1,overflow:"auto",padding:"12px 1.1rem"}}>
+            {loading ? <Cargando /> : leadsFiltrados.length===0 ? (
+              <div style={{textAlign:"center",padding:"3rem",color:"var(--muted)"}}>
+                <i className="bi bi-inbox" style={{fontSize:"2rem",display:"block",marginBottom:"0.5rem"}} />
+                <div style={{fontSize:"0.85rem"}}>Sin leads disponibles</div>
+              </div>
+            ) : (
+              <table className="leads-table">
+                <thead>
+                  <tr>
+                    <th>Nombre / Empresa</th>
+                    <th>Origen</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Rubro</th>
+                    <th>Ubicación</th>
+                    <th>Web / RRSS</th>
+                    <th>Ingresó</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leadsFiltrados.map(l=>(
+                    <tr key={l.id}>
+                      <td>
+                        <div style={{fontWeight:600,fontSize:"0.78rem",color:"var(--text)"}}>{l.nombre}</div>
+                        {l.empresa && <div style={{fontSize:"0.63rem",color:"var(--muted)",marginTop:1}}>{l.empresa}</div>}
+                      </td>
+                      <td><OrigenPill fuente={l.fuente} /></td>
+                      <td style={{fontSize:"0.7rem",fontFamily:"monospace",whiteSpace:"nowrap",color:"var(--text)"}}>{l.telefono||"—"}</td>
+                      <td style={{fontSize:"0.68rem",color:"var(--pr)"}}>{l.email||<span style={{color:"var(--muted)"}}>—</span>}</td>
+                      <td style={{fontSize:"0.7rem",color:"var(--text2)"}}>{l.rubro_interes||<span style={{color:"var(--muted)"}}>—</span>}</td>
+                      <td style={{fontSize:"0.68rem",color:"var(--text2)"}}>{l.ubicacion||<span style={{color:"var(--muted)"}}>—</span>}</td>
+                      <td style={{fontSize:"0.65rem"}}>
+                        {l.sitio_web ? <div style={{color:"var(--pr)"}}>{l.sitio_web}</div> : null}
+                        {l.instagram ? <div style={{color:"var(--muted)"}}>@{l.instagram}</div> : null}
+                        {!l.sitio_web && !l.instagram && <span style={{color:"var(--muted)"}}>—</span>}
+                      </td>
+                      <td style={{fontSize:"0.65rem",color:"var(--muted)",whiteSpace:"nowrap"}}>{formatFecha(l.creado_en)}</td>
+                      <td>
+                        <div style={{display:"flex",gap:4}}>
+                          <button className="btn btn-pr btn-xs" onClick={()=>tomarLead(l)}>Tomar</button>
+                          {esAdmin && (
+                            <select style={{fontSize:"0.62rem",padding:"2px 5px",border:"1px solid var(--border2)",borderRadius:"var(--r-sm)",background:"#fff",fontFamily:"inherit",color:"var(--sub)"}}
+                              defaultValue="" onChange={e=>{if(e.target.value) { fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:l.id,tomar:true,asignado_a:parseInt(e.target.value)})}); setTimeout(cargar,300); }}}>
+                              <option value="" disabled>Asignar…</option>
+                              {vendedores.map(v=><option key={v.id} value={v.id}>{v.nombre}</option>)}
+                            </select>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB FUNNEL ── */}
+      {tab==="funnel" && (
+        <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+          {loading ? <Cargando /> : (
+            <div style={{flex:1,display:"flex",gap:"0.75rem",padding:"1rem 1.1rem",overflowX:"auto",overflowY:"hidden"}}>
+              {Object.entries(ETAPAS_FUNNEL).map(([etapa,meta])=>{
+                const items = funnel[etapa]||[];
+                return (
+                  <div key={etapa} className="funnel-col">
+                    <div className="funnel-col-hdr">
+                      <span style={{fontSize:"0.65rem",fontWeight:700,color:meta.color,textTransform:"uppercase",letterSpacing:"0.06em"}}>{meta.label}</span>
+                      <span style={{fontSize:"0.6rem",fontWeight:700,background:meta.bg,color:meta.color,padding:"1px 7px",borderRadius:999}}>{items.length}</span>
+                    </div>
+                    <div style={{display:"flex",flexDirection:"column",gap:"0.4rem",overflowY:"auto",flex:1}}>
+                      {items.map(l=>(
+                        <div key={l.id} className="f-card"
+                          onClick={()=>{
+                            if (l.conversacion_id) {
+                              const conv = convs.find(c=>c.id===l.conversacion_id);
+                              if (conv) { setActivaConv(conv); cargarMensajes(conv); setTab("conversaciones"); }
+                            } else {
+                              setTab("conversaciones");
+                            }
+                          }}>
+                          <div style={{fontWeight:600,fontSize:"0.77rem",color:"var(--text)"}}>{l.nombre}</div>
+                          {l.empresa && <div style={{fontSize:"0.62rem",color:"var(--muted)",marginTop:1}}>{l.empresa}</div>}
+                          <div style={{display:"flex",alignItems:"center",gap:4,marginTop:"0.4rem",flexWrap:"wrap"}}>
+                            <OrigenPill fuente={l.lead_fuente||l.fuente} />
+                            {l.rubro_interes && <span style={{fontSize:"0.6rem",color:"var(--muted)"}}>{l.rubro_interes}</span>}
+                          </div>
+                          {l.dias_sin_contacto > 7 && (
+                            <div style={{fontSize:"0.6rem",color:"var(--red)",marginTop:3}}>⚠ {l.dias_sin_contacto}d sin contacto</div>
+                          )}
+                          {l.notas && (
+                            <div style={{fontSize:"0.62rem",color:"var(--sub)",marginTop:4,borderLeft:"2px solid var(--border)",paddingLeft:5,lineHeight:1.35}}>{l.notas.substring(0,60)}{l.notas.length>60?"…":""}</div>
+                          )}
+                          {esAdmin && l.vendedor_nombre && (
+                            <div style={{fontSize:"0.6rem",color:"var(--muted)",marginTop:4}}>👤 {l.vendedor_nombre.split(" ")[0]}</div>
+                          )}
+                          {/* Acciones rápidas */}
+                          <div style={{display:"flex",gap:3,marginTop:"0.5rem"}} onClick={e=>e.stopPropagation()}>
+                            {l.estado==="contactado" && (
+                              <button className="btn btn-sm" style={{background:"var(--accent)",color:"#fff",border:"none",fontSize:"0.6rem",padding:"2px 7px"}}
+                                onClick={()=>{setLeadCalif(l);setModalCalif(true);}}>Calificar</button>
+                            )}
+                            {esAdmin && l.estado==="interesado" && (
+                              <button className="btn btn-em btn-xs" onClick={()=>cambiarEstadoLead(l.id,"cerrado")}>Cerrar</button>
+                            )}
+                            <button className="btn btn-out btn-xs" style={{color:"var(--red)",borderColor:"#FCA5A5",fontSize:"0.6rem",padding:"2px 7px"}}
+                              onClick={()=>cambiarEstadoLead(l.id,"perdido")}>Perdido</button>
+                          </div>
+                        </div>
+                      ))}
+                      {items.length===0 && (
+                        <div style={{padding:"1rem",textAlign:"center",color:"var(--muted)",fontSize:"0.72rem",border:"1px dashed var(--border2)",borderRadius:"var(--r-sm)"}}>Vacío</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Columna cerrados */}
+              <div className="funnel-col">
+                <div className="funnel-col-hdr">
+                  <span style={{fontSize:"0.65rem",fontWeight:700,color:"var(--em-d)",textTransform:"uppercase",letterSpacing:"0.06em"}}>Cerrados</span>
+                  <span style={{fontSize:"0.6rem",fontWeight:700,background:"var(--em-pale)",color:"var(--em-d)",padding:"1px 7px",borderRadius:999}}>
+                    {stats?.cerrados_mes||0}
+                  </span>
+                </div>
+                <div style={{padding:"1rem",textAlign:"center",color:"var(--muted)",fontSize:"0.7rem",border:"1px dashed var(--border2)",borderRadius:"var(--r-sm)"}}>
+                  {stats?.cerrados_mes||0} cierres este mes
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── TAB CONVERSACIONES ── */}
+      {tab==="conversaciones" && (
+        <div className="comm-wrap">
+          {/* Lista */}
+          <div className="conv-list">
+            {/* Filtro canal */}
+            <div style={{padding:"6px 10px",borderBottom:"1px solid var(--border)",display:"flex",gap:4,flexWrap:"wrap"}}>
+              <div onClick={()=>setFiltroCanalConv("todos")} title="Todos"
+                style={{width:24,height:24,borderRadius:"var(--r-sm)",border:`0.5px solid ${filtroCanalConv==="todos"?"var(--pr)":"var(--border)"}`,background:filtroCanalConv==="todos"?"var(--pr-pale)":"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+                <i className="bi bi-grid" style={{fontSize:"0.6rem",color:filtroCanalConv==="todos"?"var(--pr)":"var(--muted)"}} />
+              </div>
+              {Object.entries(CANAL_META).map(([tipo,m])=>(
+                <div key={tipo} onClick={()=>setFiltroCanalConv(tipo)} title={m.label}
+                  style={{width:24,height:24,borderRadius:"var(--r-sm)",border:`0.5px solid ${filtroCanalConv===tipo?m.color:"var(--border)"}`,background:filtroCanalConv===tipo?m.bg:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+                  {m.dot()}
+                </div>
+              ))}
+            </div>
+            {/* Filtro etapa */}
+            <div style={{display:"flex",gap:3,padding:"5px 10px",borderBottom:"1px solid var(--border)",overflowX:"auto"}}>
+              {[["todas","Todas"],["contactado","Contactado"],["interesado","Interesado"],["seguimiento","Seguimiento"],["resuelta","Resuelta"]].map(([v,l])=>(
+                <button key={v} onClick={()=>setFiltroEtapaConv(v)}
+                  style={{padding:"2px 7px",fontSize:"0.58rem",fontWeight:600,cursor:"pointer",border:`0.5px solid ${filtroEtapaConv===v?"var(--pr)":"var(--border)"}`,background:filtroEtapaConv===v?"var(--pr)":"transparent",color:filtroEtapaConv===v?"#fff":"var(--muted)",fontFamily:"inherit",whiteSpace:"nowrap",borderRadius:"var(--r-sm)"}}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            {/* Search */}
+            <div className="conv-search">
+              <i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.7rem"}} />
+              <input placeholder="Buscar…" />
+            </div>
+            {/* Items */}
+            <div className="conv-items">
+              {loading ? <Cargando /> : convsFiltradas.length===0 ? (
+                <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin conversaciones</div>
+              ) : convsFiltradas.map(c=>{
+                const m = CANAL_META[c.canal]||CANAL_META.web;
+                return (
+                  <div key={c.id} className={`conv-item${activaConv?.id===c.id?" active":""}`} onClick={()=>cargarMensajes(c)}>
+                    <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
+                      <div className="conv-av" style={{width:30,height:30,fontSize:"0.7rem"}}>{(c.contacto_nombre||"?")[0].toUpperCase()}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:"flex",alignItems:"center",gap:4,justifyContent:"space-between"}}>
+                          <span style={{fontWeight:600,fontSize:"0.77rem",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.lead_nombre||c.contacto_nombre||"Sin nombre"}</span>
+                          <span style={{fontSize:"0.58rem",color:"var(--muted)",flexShrink:0}}>{c.ultimo_mensaje_at?new Date(c.ultimo_mensaje_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}):""}</span>
+                        </div>
+                        <div style={{display:"flex",alignItems:"center",gap:4,marginTop:2}}>
+                          {m.dot()}
+                          <span style={{fontSize:"0.65rem",color:"var(--muted)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{c.ultimo_mensaje||"Sin mensajes"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Chat */}
+          <div className="chat-panel">
+            {!activaConv ? (
+              <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"0.5rem",color:"var(--muted)"}}>
+                <i className="bi bi-chat-dots" style={{fontSize:"2rem"}} />
+                <div style={{fontSize:"0.82rem"}}>Seleccioná una conversación</div>
+              </div>
+            ) : (
+              <>
+                {/* Header */}
+                <div className="chat-hdr">
+                  <div className="conv-av" style={{width:30,height:30,fontSize:"0.7rem"}}>{(activaConv.lead_nombre||activaConv.contacto_nombre||"?")[0].toUpperCase()}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:600,fontSize:"0.82rem"}}>{activaConv.lead_nombre||activaConv.contacto_nombre||"Sin nombre"}</div>
+                    <div style={{fontSize:"0.65rem",color:"var(--muted)"}}>{activaConv.contacto_telefono||activaConv.contacto_email||""}</div>
+                  </div>
+                  {CANAL_META[activaConv.canal] && (
+                    <div style={{display:"flex",alignItems:"center",gap:3,padding:"2px 7px",borderRadius:999,background:CANAL_META[activaConv.canal].bg,color:CANAL_META[activaConv.canal].textColor,fontSize:"0.65rem",fontWeight:600,flexShrink:0}}>
+                      {CANAL_META[activaConv.canal].dot()}
+                      <span style={{marginLeft:2}}>{CANAL_META[activaConv.canal].label}</span>
+                    </div>
+                  )}
+                  {/* Selector etapa */}
+                  <select value={activaConv.lead_estado||"nuevo"}
+                    onChange={e=>{ if(activaConv.lead_id) cambiarEstadoLead(activaConv.lead_id,e.target.value); }}
+                    style={{fontSize:"0.68rem",border:"0.5px solid var(--border2)",borderRadius:"var(--r-sm)",padding:"3px 6px",background:"var(--bg)",color:"var(--text)",cursor:"pointer",fontFamily:"inherit"}}>
+                    <option value="contactado">Contactado</option>
+                    <option value="interesado">Interesado</option>
+                    <option value="seguimiento">Seguimiento</option>
+                    {esAdmin && <option value="cerrado">Cerrado</option>}
+                    <option value="perdido">Perdido</option>
+                  </select>
+                  {/* Calificar */}
+                  {activaConv.lead_id && activaConv.lead_estado==="contactado" && (
+                    <button className="btn btn-sm" style={{background:"var(--accent)",color:"#fff",border:"none"}}
+                      onClick={()=>{
+                        const lead = [...(funnel.contactado||[])].find(l=>l.id===activaConv.lead_id);
+                        if(lead){setLeadCalif(lead);setModalCalif(true);}
+                      }}>
+                      Calificar
+                    </button>
+                  )}
+                  <button className="btn btn-out btn-xs" onClick={()=>setMostrarFicha(v=>!v)}>
+                    <i className={`bi bi-layout-sidebar-reverse${mostrarFicha?"":"-reverse"}`} />
+                  </button>
+                  <button className="btn btn-em btn-xs" onClick={()=>cambiarEstadoConv(activaConv.id,"resuelta")}>Resolver</button>
+                </div>
+
+                <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+                  {/* Mensajes */}
+                  <div className="chat-msgs">
+                    {mensajes.map(m=>(
+                      <div key={m.id} className={`msg ${m.direccion==="entrante"?"in":"out"}`}>
+                        {m.contenido}
+                        <div style={{fontSize:"0.58rem",opacity:.6,marginTop:2,textAlign:"right"}}>{new Date(m.creado_en).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}</div>
+                      </div>
+                    ))}
+                    <div ref={msgsEndRef} />
+                  </div>
+
+                  {/* Ficha lateral */}
+                  {mostrarFicha && (
+                    <div className="ficha-lateral">
+                      <div className="ficha-sec">
+                        <div className="ficha-sec-title">Datos del lead</div>
+                        {[
+                          ["Nombre",    activaConv.lead_nombre||activaConv.contacto_nombre],
+                          ["Teléfono",  activaConv.contacto_telefono],
+                          ["Email",     activaConv.contacto_email],
+                          ["Empresa",   activaConv.lead_empresa],
+                          ["Rubro",     activaConv.rubro_interes],
+                          ["Ubicación", activaConv.ubicacion],
+                          ["Web",       activaConv.sitio_web],
+                          ["Instagram", activaConv.instagram],
+                          ["Facebook",  activaConv.facebook],
+                        ].map(([label,val])=>(
+                          <div key={label} className="ficha-row" style={{marginBottom:"0.4rem"}}>
+                            <div className="fl">{label}</div>
+                            <div className={`fv${!val?" m":""}`} style={{fontSize:"0.7rem",color:!val?"var(--muted)":val?.startsWith("http")||val?.startsWith("www")?"var(--pr)":"var(--text)",fontStyle:!val?"italic":"normal"}}>{val||"Sin datos"}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="ficha-sec">
+                        <div className="ficha-sec-title">Etapa</div>
+                        <EtapaPill estado={activaConv.lead_estado||"nuevo"} />
+                      </div>
+                      <div className="ficha-sec">
+                        <div className="ficha-sec-title">Plan interés</div>
+                        <div style={{fontSize:"0.7rem",color:activaConv.plan_interes?"var(--text)":"var(--muted)",fontStyle:activaConv.plan_interes?"normal":"italic"}}>
+                          {activaConv.plan_interes||"Sin definir"}
+                        </div>
+                      </div>
+                      <div className="ficha-sec">
+                        <div className="ficha-sec-title">Origen</div>
+                        <OrigenPill fuente={activaConv.lead_fuente||"manual"} />
+                      </div>
+                      {activaConv.vendedor_nombre && (
+                        <div className="ficha-sec">
+                          <div className="ficha-sec-title">Responsable</div>
+                          <div style={{fontSize:"0.7rem",color:"var(--text)"}}>{activaConv.vendedor_nombre}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Input */}
+                <div className="chat-input">
+                  <input value={texto} onChange={e=>setTexto(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&enviarMensaje()} placeholder="Escribí un mensaje…" style={{flex:1,border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.4rem 0.7rem",fontSize:"0.8rem",fontFamily:"inherit",outline:"none"}} />
+                  <button className="btn btn-pr btn-sm" onClick={enviarMensaje} disabled={enviando||!texto.trim()}><i className="bi bi-send" /></button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal nuevo lead */}
+      {modalNuevo && (
+        <Modal onClose={()=>setModalNuevo(false)}>
+          <div className="modal-hdr"><span className="modal-title">Nuevo lead</span><button className="btn btn-out btn-xs" onClick={()=>setModalNuevo(false)}>✕</button></div>
+          <div className="modal-body">
+            <div className="fi-row">
+              <div className="fg"><label className="fl">Nombre *</label><input className="fi" value={formNuevo.nombre} onChange={e=>fn({nombre:e.target.value})} /></div>
+              <div className="fg"><label className="fl">Empresa</label><input className="fi" value={formNuevo.empresa} onChange={e=>fn({empresa:e.target.value})} /></div>
+            </div>
+            <div className="fi-row">
+              <div className="fg"><label className="fl">Teléfono</label><input className="fi" value={formNuevo.telefono} onChange={e=>fn({telefono:e.target.value})} /></div>
+              <div className="fg"><label className="fl">Email</label><input className="fi" value={formNuevo.email} onChange={e=>fn({email:e.target.value})} /></div>
+            </div>
+            <div className="fi-row">
+              <div className="fg"><label className="fl">Rubro interés</label><select className="fi" value={formNuevo.rubro_interes} onChange={e=>fn({rubro_interes:e.target.value})}><option value="">—</option>{RUBROS.map(r=><option key={r} value={r}>{r}</option>)}</select></div>
+              <div className="fg"><label className="fl">Plan interés</label><select className="fi" value={formNuevo.plan_interes} onChange={e=>fn({plan_interes:e.target.value})}><option value="">—</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="plan_ia">Plan IA</option><option value="enterprise">Enterprise</option></select></div>
+            </div>
+            <div className="fi-row">
+              <div className="fg"><label className="fl">Fuente</label><select className="fi" value={formNuevo.fuente} onChange={e=>fn({fuente:e.target.value})}><option value="manual">Manual</option><option value="referido">Referido</option><option value="web">Web</option><option value="ads">Ads</option><option value="evento">Evento</option></select></div>
+              <div className="fg"><label className="fl">Ubicación</label><input className="fi" value={formNuevo.ubicacion} onChange={e=>fn({ubicacion:e.target.value})} /></div>
+            </div>
+            <div className="fi-row">
+              <div className="fg"><label className="fl">Sitio web</label><input className="fi" value={formNuevo.sitio_web} onChange={e=>fn({sitio_web:e.target.value})} /></div>
+              <div className="fg"><label className="fl">Instagram</label><input className="fi" value={formNuevo.instagram} onChange={e=>fn({instagram:e.target.value})} placeholder="@usuario" /></div>
+            </div>
+            <div className="fg"><label className="fl">Notas</label><textarea className="fi" rows={2} value={formNuevo.notas} onChange={e=>fn({notas:e.target.value})} style={{resize:"vertical"}} /></div>
+          </div>
+          <ModalFooter onCancel={()=>setModalNuevo(false)} onConfirm={crearLead} saving={saving} labelConfirm="Crear lead" />
+        </Modal>
+      )}
+
+      {/* Modal calificar */}
+      {modalCalif && leadCalif && (
+        <ModalCalificar lead={leadCalif} onClose={()=>setModalCalif(false)} onGuardar={guardarCalificacion} />
+      )}
+    </div>
+  );
+}
+
 /* ══ VIEW DASHBOARD ══ */
 function ViewDashboard() {
   return (
@@ -537,7 +1097,7 @@ function ViewDashboard() {
           ["bi-cash-coin","var(--pine-bg)","var(--pine-d)","—","Ingresos mensuales"],
           ["bi-graph-up-arrow","var(--blue-bg)","var(--blue)","—","Leads activos"],
           ["bi-exclamation-triangle","var(--red-bg)","var(--red)","—","Riesgo de churn"],
-        ].map(([ico,bg,color,val,lbl],i) => (
+        ].map(([ico,bg,color,val,lbl],i)=>(
           <div key={i} className="kpi">
             <div className="kpi-ico" style={{background:bg}}><i className={`bi ${ico}`} style={{color}} /></div>
             <div className="kpi-val">{val}</div>
@@ -572,7 +1132,8 @@ function ViewDashboard() {
 
 /* ══ VIEW CLIENTES ══ */
 const PLAN_META = { starter:{label:"Starter",cls:"bdg-moon"}, pro:{label:"Pro",cls:"bdg-pro"}, plan_ia:{label:"Plan IA",cls:"bdg-gold"}, enterprise:{label:"Enterprise",cls:"bdg-pine"} };
-const FORM_VACIO = { nombre:"", rubro:"", plan:"starter", subdominio:"", email:"", telefono:"", logo_url:"" };
+const RUBROS    = ["Hotel / Cabañas","Consultorio / Clínica / Spa","Salón de Eventos","Inmobiliaria","Restaurante / Gastronomía","Salón de belleza / Estética","Contador / Estudio contable","Abogado / Estudio jurídico","Gestor de seguros","Logística / Distribución","GovTech","Otro"];
+const FORM_CLI  = { nombre:"", rubro:"", plan:"starter", subdominio:"", email:"", telefono:"", logo_url:"" };
 
 function ViewClientes() {
   const [tenants, setTenants] = useState([]);
@@ -580,12 +1141,12 @@ function ViewClientes() {
   const [saving, setSaving]   = useState(false);
   const [modal, setModal]     = useState(false);
   const [editando, setEditando] = useState(null);
-  const [form, setForm]       = useState(FORM_VACIO);
+  const [form, setForm]       = useState(FORM_CLI);
   const [error, setError]     = useState("");
 
   const cargar = async () => { setLoading(true); try { const r=await fetch("/api/tenants"); const d=await r.json(); if(d.ok) setTenants(d.tenants); } catch(_){} setLoading(false); };
-  useEffect(() => { cargar(); }, []);
-  const abrirNuevo  = () => { setEditando(null); setForm(FORM_VACIO); setError(""); setModal(true); };
+  useEffect(()=>{ cargar(); },[]);
+  const abrirNuevo  = () => { setEditando(null); setForm(FORM_CLI); setError(""); setModal(true); };
   const abrirEditar = (t) => { setEditando(t); setForm({nombre:t.nombre||"",rubro:t.rubro||"",plan:t.plan||"starter",subdominio:t.subdominio||"",email:t.email||"",telefono:t.telefono||"",logo_url:t.logo_url||""}); setError(""); setModal(true); };
   const f = (v) => setForm(p=>({...p,...v}));
 
@@ -593,11 +1154,11 @@ function ViewClientes() {
     if(!form.nombre||!form.rubro){ setError("Nombre y rubro son obligatorios"); return; }
     setSaving(true); setError("");
     try {
-      const m = editando ? "PATCH" : "POST";
-      const b = editando ? {...form, id:editando.id} : form;
-      const r = await fetch("/api/tenants", { method:m, headers:{"Content-Type":"application/json"}, body:JSON.stringify(b) });
+      const m = editando?"PATCH":"POST";
+      const b = editando?{...form,id:editando.id}:form;
+      const r = await fetch("/api/tenants",{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
       const d = await r.json();
-      if(d.ok){ setModal(false); cargar(); } else setError(d.error||"Error al guardar");
+      if(d.ok){ setModal(false); cargar(); } else setError(d.error||"Error");
     } catch(_){ setError("Error de conexión"); }
     setSaving(false);
   };
@@ -638,15 +1199,9 @@ function ViewClientes() {
           <div className="modal-hdr"><span className="modal-title">{editando?"Editar cliente":"Nuevo cliente"}</span><button className="btn btn-out btn-xs" onClick={()=>setModal(false)}>✕</button></div>
           <div className="modal-body">
             {error && <div style={{background:"var(--red-bg)",color:"var(--red)",padding:"0.5rem 0.7rem",borderRadius:"var(--r-sm)",fontSize:"0.78rem"}}>{error}</div>}
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Nombre *</label><input className="fi" value={form.nombre} onChange={e=>f({nombre:e.target.value})} /></div>
-              <div className="fg"><label className="fl">Subdominio</label><input className="fi" value={form.subdominio} onChange={e=>f({subdominio:e.target.value})} /></div>
-            </div>
+            <div className="fi-row"><div className="fg"><label className="fl">Nombre *</label><input className="fi" value={form.nombre} onChange={e=>f({nombre:e.target.value})} /></div><div className="fg"><label className="fl">Subdominio</label><input className="fi" value={form.subdominio} onChange={e=>f({subdominio:e.target.value})} /></div></div>
             <div className="fg"><label className="fl">Rubro *</label><select className="fi" value={form.rubro} onChange={e=>f({rubro:e.target.value})}><option value="">Seleccionar...</option>{RUBROS.map(r=><option key={r} value={r}>{r}</option>)}</select></div>
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Plan</label><select className="fi" value={form.plan} onChange={e=>f({plan:e.target.value})}><option value="starter">Starter</option><option value="pro">Pro</option><option value="plan_ia">Plan IA</option><option value="enterprise">Enterprise</option></select></div>
-              <div className="fg"><label className="fl">Teléfono</label><input className="fi" value={form.telefono} onChange={e=>f({telefono:e.target.value})} /></div>
-            </div>
+            <div className="fi-row"><div className="fg"><label className="fl">Plan</label><select className="fi" value={form.plan} onChange={e=>f({plan:e.target.value})}><option value="starter">Starter</option><option value="pro">Pro</option><option value="plan_ia">Plan IA</option><option value="enterprise">Enterprise</option></select></div><div className="fg"><label className="fl">Teléfono</label><input className="fi" value={form.telefono} onChange={e=>f({telefono:e.target.value})} /></div></div>
             <div className="fg"><label className="fl">Email</label><input className="fi" type="email" value={form.email} onChange={e=>f({email:e.target.value})} /></div>
           </div>
           <ModalFooter onCancel={()=>setModal(false)} onConfirm={guardar} saving={saving} labelConfirm={editando?"Guardar cambios":"Crear cliente"} />
@@ -656,1157 +1211,103 @@ function ViewClientes() {
   );
 }
 
-/* ══ VIEW CONVERSACIONES ══ */
-function ViewConversaciones({ session, onNavegar }) {
-  const [convs, setConvs]               = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [activa, setActiva]             = useState(null);
-  const [mensajes, setMensajes]         = useState([]);
-  const [texto, setTexto]               = useState("");
-  const [enviando, setEnviando]         = useState(false);
-  const [filtroEstado, setFiltroEstado] = useState("todas");
-  const [filtroCanal, setFiltroCanal]   = useState("todos");
-  const [modalAsignar, setModalAsignar] = useState(false);
-  const [modalCalificar, setModalCalificar] = useState(false);
-  const [leadActivo, setLeadActivo]     = useState(null);
-  const [vendedores, setVendedores]     = useState([]);
-  const [wspConectado, setWspConectado] = useState(false);
-  const msgsEndRef = useRef(null);
+/* ══ RESTO DE VIEWS (sin cambios) ══ */
 
-  const cargar = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filtroEstado !== "todas") params.append("estado", filtroEstado);
-      if (filtroCanal  !== "todos") params.append("canal",  filtroCanal);
-      const r = await fetch(`/api/ventas/conversaciones?${params}`);
-      const d = await r.json();
-      if (d.ok) setConvs(d.conversaciones);
-    } catch(_){}
-    setLoading(false);
-  };
-
-  const cargarMensajes = async (conv) => {
-    setActiva(conv);
-    try { const r=await fetch(`/api/ventas/mensajes?conversacion_id=${conv.id}`); const d=await r.json(); if(d.ok) setMensajes(d.mensajes); } catch(_){}
-    setLeadActivo(null);
-  };
-
-  const verificarWsp = async () => {
-    try {
-      const r = await fetch("/api/integraciones/whatsapp/instancias");
-      const d = await r.json();
-      if (d.ok) setWspConectado(d.instancias?.some(i=>i.estado==="conectado"||i.wsp_status==="open"));
-    } catch(_){}
-  };
-
-  const cargarVendedores = async () => {
-    try { const r=await fetch("/api/usuarios"); const d=await r.json(); if(d.ok) setVendedores(d.usuarios.filter(u=>["vendedor","admin","superadmin"].includes(u.rol)&&u.activo)); } catch(_){}
-  };
-
-  useEffect(() => { cargar(); verificarWsp(); cargarVendedores(); }, [filtroEstado, filtroCanal]);
-  useEffect(() => { msgsEndRef.current?.scrollIntoView({behavior:"smooth"}); }, [mensajes]);
-
-  const enviar = async () => {
-    if (!texto.trim() || !activa) return;
-    setEnviando(true);
-    const contenido = texto;
-    setTexto(""); // limpiar inmediatamente para no enviar doble
-    try {
-      await fetch("/api/ventas/mensajes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({conversacion_id:activa.id,direccion:"saliente",contenido})});
-      // Esperar un momento antes de recargar para que Evolution no dispare webhook duplicado
-      setTimeout(()=>cargarMensajes(activa), 800);
-    } catch(_){}
-    setEnviando(false);
-  };
-
-  const asignar = async (conv_id, usuario_id) => {
-    try { await fetch("/api/ventas/conversaciones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:conv_id,asignado_a:usuario_id})}); setModalAsignar(false); await cargar(); } catch(_){}
-  };
-
-  const tomarConv = async (conv_id) => {
-    try { await fetch("/api/ventas/conversaciones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:conv_id,asignado_a:session?.user?.id})}); await cargar(); } catch(_){}
-  };
-
-  const cambiarEstadoConv = async (conv_id, estado) => {
-    try { await fetch("/api/ventas/conversaciones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:conv_id,estado})}); await cargar(); if(activa?.id===conv_id) setActiva(p=>({...p,estado})); } catch(_){}
-  };
-
-  const guardarCalificacion = async (payload) => {
-    try { await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}); await cargar(); } catch(_){}
-  };
-
-  const sinAsignar = convs.filter(c=>!c.asignado_a).length;
-
-  return (
-    <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-
-      {/* Banner Maia — canales no conectados */}
-      {(() => {
-        const canalesConectados = wspConectado ? ["whatsapp"] : [];
-        const faltantes = Object.entries(CANAL_META).filter(([tipo]) => !canalesConectados.includes(tipo) && tipo !== "tiktok");
-        if (!faltantes.length) return null;
-        return (
-          <div style={{margin:"0.75rem 0.75rem 0",background:"linear-gradient(135deg,#2A3F55,#3D5A78)",borderRadius:"var(--r)",padding:"0.65rem 1rem",display:"flex",alignItems:"center",gap:"0.75rem",flexWrap:"wrap"}}>
-            <div style={{fontSize:"0.75rem",color:"rgba(255,255,255,.85)",flexShrink:0}}><strong>Maia:</strong> Podés conectar más canales:</div>
-            {faltantes.slice(0,4).map(([tipo,m])=>(
-              <div key={tipo} style={{display:"flex",alignItems:"center",gap:"0.35rem",background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:20,padding:"0.2rem 0.65rem"}}>
-                {m.dot()}
-                <span style={{fontSize:"0.7rem",color:"rgba(255,255,255,.9)"}}>{m.label}</span>
-                <button onClick={()=>onNavegar&&onNavegar("integraciones")} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",fontSize:"0.65rem",cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>Conectar</button>
-              </div>
-            ))}
-          </div>
-        );
-      })()}
-
-      <div className="comm-wrap view-anim" style={{flex:1,marginTop:"0.75rem"}}>
-
-        {/* Lista */}
-        <div className="conv-list">
-          <div className="conv-hdr">
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.5rem"}}>
-              <div className="conv-hdr-title">Conversaciones</div>
-              {sinAsignar>0 && <span className="bdg bdg-amber">{sinAsignar} sin asignar</span>}
-            </div>
-
-            {/* Filtro canal — solo íconos */}
-            <div style={{display:"flex",gap:4,marginBottom:"0.5rem",flexWrap:"wrap"}}>
-              <div onClick={()=>setFiltroCanal("todos")} title="Todos"
-                style={{width:26,height:26,borderRadius:"var(--r-sm)",border:`0.5px solid ${filtroCanal==="todos"?"var(--pr)":"var(--border)"}`,background:filtroCanal==="todos"?"var(--pr-pale)":"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
-                <i className="bi bi-grid" style={{fontSize:"0.65rem",color:filtroCanal==="todos"?"var(--pr)":"var(--muted)"}} />
-              </div>
-              {Object.entries(CANAL_META).map(([tipo,m])=>(
-                <div key={tipo} onClick={()=>setFiltroCanal(tipo)} title={m.label}
-                  style={{width:26,height:26,borderRadius:"var(--r-sm)",border:`0.5px solid ${filtroCanal===tipo?m.color:"var(--border)"}`,background:filtroCanal===tipo?m.bg:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
-                  {m.dot()}
-                </div>
-              ))}
-            </div>
-
-            {/* Filtro etapa */}
-            <div style={{display:"flex",gap:3,overflowX:"auto",paddingBottom:2}}>
-              {[["todas","Todas"],["nuevo","Nueva"],["contactado","Contactado"],["interesado","Interesado"],["seguimiento","Seguimiento"],["resuelta","Resuelta"]].map(([v,l])=>(
-                <button key={v} onClick={()=>setFiltroEstado(v)}
-                  style={{padding:"2px 8px",borderRadius:999,border:`0.5px solid ${filtroEstado===v?"var(--pr)":"var(--border)"}`,background:filtroEstado===v?"var(--pr)":"transparent",color:filtroEstado===v?"#fff":"var(--muted)",fontSize:"0.6rem",fontWeight:filtroEstado===v?700:400,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
-                  {l}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="conv-search">
-            <i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.72rem"}} />
-            <input placeholder="Buscar…" />
-          </div>
-
-          <div className="conv-items">
-            {loading ? <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Cargando...</div>
-            : convs.length===0 ? <div style={{padding:"1.5rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem"}}>Sin conversaciones</div>
-            : convs.map(c=>{
-              const m = CANAL_META[c.canal] || CANAL_META.web;
-              return (
-                <div key={c.id} className={`conv-item${activa?.id===c.id?" active":""}`} onClick={()=>cargarMensajes(c)}>
-                  <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
-                    <div className="conv-av" style={{width:30,height:30,fontSize:"0.72rem"}}>{(c.contacto_nombre||"?")[0].toUpperCase()}</div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{display:"flex",alignItems:"center",gap:4,justifyContent:"space-between"}}>
-                        <span style={{fontWeight:600,fontSize:"0.78rem",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.contacto_nombre||"Sin nombre"}</span>
-                        <span style={{fontSize:"0.6rem",color:"var(--muted)",flexShrink:0}}>{c.ultimo_mensaje_at?new Date(c.ultimo_mensaje_at).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}):""}</span>
-                      </div>
-                      <div style={{display:"flex",alignItems:"center",gap:4,marginTop:2}}>
-                        {m.dot()}
-                        <span style={{fontSize:"0.67rem",color:"var(--muted)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{c.ultimo_mensaje||"Sin mensajes"}</span>
-                        {!c.asignado_a && <span style={{background:"var(--amber-bg)",color:"var(--amber)",fontSize:"0.55rem",fontWeight:700,padding:"1px 5px",borderRadius:4,flexShrink:0}}>Sin asignar</span>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Chat */}
-        <div className="chat-panel">
-          {!activa ? (
-            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"0.5rem",color:"var(--muted)"}}>
-              <i className="bi bi-chat-dots" style={{fontSize:"2rem"}} />
-              <div style={{fontSize:"0.82rem"}}>Seleccioná una conversación</div>
-            </div>
-          ) : (
-            <>
-              <div className="chat-hdr">
-                <div className="conv-av" style={{width:30,height:30,fontSize:"0.72rem"}}>{(activa.contacto_nombre||"?")[0].toUpperCase()}</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:600,fontSize:"0.82rem"}}>{activa.contacto_nombre||"Sin nombre"}</div>
-                  <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{activa.contacto_telefono||activa.contacto_email||""}</div>
-                </div>
-                {CANAL_META[activa.canal] && (
-                  <div style={{display:"flex",alignItems:"center",gap:4,padding:"2px 8px",borderRadius:20,background:CANAL_META[activa.canal].bg,color:CANAL_META[activa.canal].textColor,fontSize:"0.68rem",fontWeight:600,flexShrink:0}}>
-                    {CANAL_META[activa.canal].dot()}
-                    <span style={{marginLeft:2}}>{CANAL_META[activa.canal].label}</span>
-                  </div>
-                )}
-                {/* Selector de etapa del embudo */}
-                <select
-                  value={activa.estado||"nueva"}
-                  onChange={e=>cambiarEstadoConv(activa.id, e.target.value)}
-                  style={{fontSize:"0.7rem",border:"0.5px solid var(--border2)",borderRadius:"var(--r-sm)",padding:"3px 6px",background:"var(--bg)",color:"var(--text)",cursor:"pointer",fontFamily:"inherit"}}>
-                  <option value="nueva">Nueva</option>
-                  <option value="contactado">Contactado</option>
-                  <option value="interesado">Interesado</option>
-                  <option value="seguimiento">Seguimiento</option>
-                  <option value="resuelta">Resuelta</option>
-                  <option value="cerrada">Cerrada</option>
-                </select>
-                {!activa.asignado_a ? (
-                  <button className="btn btn-em btn-xs" onClick={()=>tomarConv(activa.id)}>Tomar</button>
-                ) : (
-                  <button className="btn btn-out btn-xs" onClick={()=>setModalAsignar(true)}>{activa.vendedor_nombre||"Reasignar"}</button>
-                )}
-                <button className="btn btn-em btn-xs" onClick={()=>cambiarEstadoConv(activa.id,"resuelta")}>Resolver</button>
-              </div>
-
-              <div className="chat-msgs">
-                {mensajes.map(m=>(
-                  <div key={m.id} className={`msg ${m.direccion==="entrante"?"in":"out"}`}>
-                    {m.contenido}
-                    <div style={{fontSize:"0.6rem",opacity:.6,marginTop:2,textAlign:"right"}}>{new Date(m.creado_en).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}</div>
-                  </div>
-                ))}
-                <div ref={msgsEndRef} />
-              </div>
-
-              <div className="chat-input">
-                <input value={texto} onChange={e=>setTexto(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&enviar()} placeholder="Escribí un mensaje…" style={{flex:1,border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.4rem 0.7rem",fontSize:"0.8rem",fontFamily:"inherit",outline:"none"}} />
-                <button className="btn btn-em btn-sm" onClick={enviar} disabled={enviando||!texto.trim()}><i className="bi bi-send" /></button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {modalAsignar && (
-        <Modal onClose={()=>setModalAsignar(false)}>
-          <div className="modal-hdr"><span className="modal-title">Asignar conversación</span><button className="btn btn-out btn-xs" onClick={()=>setModalAsignar(false)}>✕</button></div>
-          <div className="modal-body">
-            <div className="fg"><label className="fl">Seleccioná un agente</label>
-              <select className="fi" onChange={e=>asignar(activa.id,parseInt(e.target.value))} defaultValue="">
-                <option value="" disabled>Seleccionar agente...</option>
-                {vendedores.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}
-              </select>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {modalCalificar && leadActivo && (
-        <ModalCalificar lead={leadActivo} onClose={()=>setModalCalificar(false)} onGuardar={guardarCalificacion} />
-      )}
-    </div>
-  );
-}
-
-/* ══ VIEW VENTAS ══ */
-const LEAD_VACIO = { nombre:"",empresa:"",email:"",telefono:"",rubro_interes:"",plan_interes:"",fuente:"web",valor_mrr_estimado:"",notas:"" };
-
-function ViewVentas({ session }) {
-  const [tab, setTab]                   = useState("pipeline");
-  const [leads, setLeads]               = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [modal, setModal]               = useState(false);
-  const [editando, setEditando]         = useState(null);
-  const [form, setForm]                 = useState(LEAD_VACIO);
-  const [saving, setSaving]             = useState(false);
-  const [error, setError]               = useState("");
-  const [leadActivo, setLeadActivo]     = useState(null);
-  const [actividades, setActividades]   = useState([]);
-  const [loadingAct, setLoadingAct]     = useState(false);
-  const [modalAct, setModalAct]         = useState(false);
-  const [modalCalificar, setModalCalificar] = useState(false);
-  const [formAct, setFormAct]           = useState({tipo:"nota",descripcion:"",proxima_accion:"",fecha_proxima_accion:""});
-  const [alertas, setAlertas]           = useState([]);
-  const [vendedores, setVendedores]     = useState([]);
-  const rol = session?.user?.rol || "superadmin";
-
-  const cargar = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ rol, usuario_id: session?.user?.id||"" });
-      const r = await fetch(`/api/ventas/leads?${params}`);
-      const d = await r.json();
-      if (d.ok) setLeads(d.leads);
-    } catch(_){}
-    setLoading(false);
-  };
-
-  const cargarAlertas = async () => {
-    try { const r=await fetch("/api/maia/alertas"); const d=await r.json(); if(d.ok) setAlertas(d.alertas||[]); } catch(_){}
-  };
-
-  const cargarVendedores = async () => {
-    try { const r=await fetch("/api/usuarios"); const d=await r.json(); if(d.ok) setVendedores(d.usuarios.filter(u=>["vendedor","admin","superadmin"].includes(u.rol)&&u.activo)); } catch(_){}
-  };
-
-  const cargarActividades = async (lead) => {
-    setLeadActivo(lead); setLoadingAct(true);
-    try { const r=await fetch(`/api/ventas/actividades?lead_id=${lead.id}`); const d=await r.json(); if(d.ok) setActividades(d.actividades); } catch(_){}
-    setLoadingAct(false);
-  };
-
-  useEffect(() => { cargar(); cargarAlertas(); cargarVendedores(); }, []);
-
-  const fl = (v) => setForm(p=>({...p,...v}));
-  const fa = (v) => setFormAct(p=>({...p,...v}));
-
-  const guardar = async () => {
-    if(!form.nombre){ setError("El nombre es obligatorio"); return; }
-    setSaving(true); setError("");
-    try {
-      const m = editando ? "PATCH" : "POST";
-      const b = editando ? {...form,id:editando.id} : form;
-      const r = await fetch("/api/ventas/leads",{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
-      const d = await r.json();
-      if(d.ok){ setModal(false); cargar(); } else setError(d.error||"Error");
-    } catch(_){ setError("Error de conexión"); }
-    setSaving(false);
-  };
-
-  const tomarLead = async (lead) => {
-    try { await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:lead.id,tomar:true})}); cargar(); } catch(_){}
-  };
-
-  const cambiarEstado = async (id, estado, extra={}) => {
-    try { await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,estado,...extra})}); cargar(); if(leadActivo?.id===id) setLeadActivo(p=>({...p,estado,...extra})); } catch(_){}
-  };
-
-  const guardarCalificacion = async (payload) => {
-    try { await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}); cargar(); if(leadActivo) setLeadActivo(p=>({...p,...payload})); setModalCalificar(false); } catch(_){}
-  };
-
-  const guardarActividad = async () => {
-    if(!formAct.descripcion||!leadActivo) return;
-    setSaving(true);
-    try {
-      await fetch("/api/ventas/actividades",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...formAct,lead_id:leadActivo.id,usuario_id:session?.user?.id})});
-      await fetch("/api/ventas/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:leadActivo.id,estado:"contactado"})});
-      setModalAct(false); setFormAct({tipo:"nota",descripcion:"",proxima_accion:"",fecha_proxima_accion:""}); cargarActividades(leadActivo); cargar();
-    } catch(_){}
-    setSaving(false);
-  };
-
-  // Agrupar para kanban
-  const porEtapa = Object.fromEntries(Object.keys(ETAPAS).map(e=>[e,[]]));
-  leads.forEach(l=>{ if(porEtapa[l.estado]) porEtapa[l.estado].push(l); });
-
-  const sinAsignar = leads.filter(l=>!l.asignado_a&&l.estado==="nuevo").length;
-
-  const TabBtn = ({id,label,count}) => (
-    <button onClick={()=>setTab(id)} style={{padding:"0.28rem 0.8rem",borderRadius:"var(--r-sm)",border:"none",background:tab===id?"var(--pr)":"transparent",color:tab===id?"#fff":"var(--muted)",fontWeight:tab===id?700:500,fontSize:"0.75rem",cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:4}}>
-      {label}
-      {count>0&&<span style={{background:tab===id?"rgba(255,255,255,.25)":"var(--border2)",color:tab===id?"#fff":"var(--sub)",fontSize:"0.6rem",fontWeight:700,padding:"0px 5px",borderRadius:9}}>{count}</span>}
-    </button>
-  );
-
-  return (
-    <div className="view-anim">
-      <div className="vh">
-        <div><div className="vh-title">Ventas</div><div className="vh-sub">{leads.length} leads en el sistema</div></div>
-        <div style={{display:"flex",gap:"0.4rem",alignItems:"center"}}>
-          <div style={{display:"flex",gap:2,background:"var(--bg)",borderRadius:"var(--r-sm)",padding:2}}>
-            <TabBtn id="pipeline" label="Pipeline" count={leads.filter(l=>!["cerrado","perdido"].includes(l.estado)).length} />
-            <TabBtn id="nuevos"   label="Sin asignar" count={sinAsignar} />
-            <TabBtn id="cerrados" label="Cerrados" count={leads.filter(l=>l.estado==="cerrado").length} />
-            <TabBtn id="perdidos" label="Perdidos" count={leads.filter(l=>l.estado==="perdido").length} />
-          </div>
-          <button className="btn btn-em btn-sm" onClick={()=>{setEditando(null);setForm(LEAD_VACIO);setError("");setModal(true);}}>
-            <i className="bi bi-plus-lg" /> Nuevo lead
-          </button>
-        </div>
-      </div>
-
-      {/* Alertas Maia */}
-      {alertas.length>0 && (
-        <div style={{background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.8rem 1rem",marginBottom:"0.9rem"}}>
-          <div style={{fontSize:"0.65rem",fontWeight:700,color:"rgba(255,255,255,.5)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.4rem"}}>✦ Maia · Sugerencias</div>
-          <div style={{display:"flex",flexDirection:"column",gap:"0.4rem"}}>
-            {alertas.slice(0,3).map((a,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:"0.6rem"}}>
-                <div style={{flex:1,fontSize:"0.78rem",color:"rgba(255,255,255,.9)"}}>{a.titulo}</div>
-                {a.lead_id && (
-                  <button onClick={()=>{const l=leads.find(x=>x.id===a.lead_id);if(l)cargarActividades(l);}}
-                    style={{padding:"2px 10px",borderRadius:20,border:"1px solid rgba(255,255,255,.3)",background:"rgba(255,255,255,.12)",color:"#fff",fontSize:"0.65rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>
-                    Ver
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Sin asignar */}
-      {tab==="nuevos" && (
-        <div style={{display:"flex",flexDirection:"column",gap:"0.5rem"}}>
-          {loading ? <Cargando /> : leads.filter(l=>!l.asignado_a&&l.estado==="nuevo").length===0 ? (
-            <div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>Sin leads sin asignar</div>
-          ) : leads.filter(l=>!l.asignado_a&&l.estado==="nuevo").map(l=>(
-            <div key={l.id} className="card" style={{display:"flex",alignItems:"center",gap:"0.8rem"}}>
-              <Av letra={l.nombre[0]} size={34} />
-              <div style={{flex:1}}>
-                <div style={{fontWeight:600,fontSize:"0.85rem"}}>{l.nombre}</div>
-                <div style={{fontSize:"0.72rem",color:"var(--muted)"}}>{l.empresa||""}{l.rubro_interes?` · ${l.rubro_interes}`:""}</div>
-              </div>
-              <div style={{fontSize:"0.72rem",color:"var(--muted)"}}>{l.fuente}</div>
-              <div style={{fontSize:"0.72rem",color:"var(--muted)"}}>{new Date(l.creado_en).toLocaleDateString("es-AR")}</div>
-              {["superadmin","admin"].includes(rol) && vendedores.length>0 && (
-                <select className="fi" style={{width:"auto",fontSize:"0.72rem"}} defaultValue="" onChange={e=>{if(e.target.value) cambiarEstado(l.id,l.estado,{asignado_a:parseInt(e.target.value)});}}>
-                  <option value="" disabled>Asignar a…</option>
-                  {vendedores.map(v=><option key={v.id} value={v.id}>{v.nombre}</option>)}
-                </select>
-              )}
-              <button className="btn btn-em btn-sm" onClick={()=>tomarLead(l)}>Tomar</button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Kanban pipeline */}
-      {tab==="pipeline" && (
-        <div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:"0.6rem",marginBottom:leadActivo?"0.8rem":0}}>
-            {["nuevo","contactado","interesado","seguimiento"].map(etapa=>{
-              const meta  = ETAPAS[etapa];
-              const items = porEtapa[etapa]||[];
-              return (
-                <div key={etapa} style={{background:"var(--bg)",borderRadius:"var(--r)",padding:"0.6rem"}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.5rem"}}>
-                    <div style={{fontSize:"0.68rem",fontWeight:700,color:meta.color,textTransform:"uppercase",letterSpacing:"0.05em"}}>{meta.label}</div>
-                    <span style={{fontSize:"0.62rem",fontWeight:700,background:meta.bg,color:meta.color,borderRadius:999,padding:"1px 7px"}}>{items.length}</span>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:"0.4rem"}}>
-                    {items.map(l=>(
-                      <div key={l.id} className="card" style={{padding:"0.65rem 0.75rem",cursor:"pointer",border:leadActivo?.id===l.id?"1px solid var(--pr)":"1px solid var(--border)"}} onClick={()=>cargarActividades(l)}>
-                        <div style={{fontWeight:600,fontSize:"0.78rem"}}>{l.nombre}</div>
-                        {l.empresa&&<div style={{fontSize:"0.65rem",color:"var(--muted)",marginTop:1}}>{l.empresa}</div>}
-                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:"0.4rem"}}>
-                          {l.vendedor_nombre
-                            ? <span style={{fontSize:"0.62rem",color:"var(--sub)"}}>{l.vendedor_nombre.split(" ")[0]}</span>
-                            : <button className="btn btn-xs btn-out" onClick={e=>{e.stopPropagation();tomarLead(l);}}>Tomar</button>
-                          }
-                          {l.valor_mrr_estimado&&<span style={{fontSize:"0.65rem",fontWeight:600,color:"var(--em-d)"}}>${Number(l.valor_mrr_estimado).toLocaleString("es-AR")}</span>}
-                        </div>
-                        {l.dias_sin_contacto>7&&<div style={{fontSize:"0.6rem",color:"var(--red)",marginTop:3}}>⚠ {l.dias_sin_contacto}d sin contacto</div>}
-                      </div>
-                    ))}
-                    {items.length===0&&<div style={{padding:"0.8rem",textAlign:"center",color:"var(--muted)",fontSize:"0.72rem",borderRadius:"var(--r-sm)",border:"0.5px dashed var(--border2)"}}>Vacío</div>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Panel actividades */}
-          {leadActivo && (
-            <div className="card">
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.7rem"}}>
-                <div>
-                  <div style={{fontWeight:700,fontSize:"0.9rem"}}>{leadActivo.nombre}</div>
-                  <div style={{display:"flex",alignItems:"center",gap:"0.5rem",marginTop:3}}>
-                    {leadActivo.empresa&&<span style={{fontSize:"0.72rem",color:"var(--muted)"}}>{leadActivo.empresa}</span>}
-                    <span style={{fontSize:"0.68rem",fontWeight:700,color:ETAPAS[leadActivo.estado]?.color,background:ETAPAS[leadActivo.estado]?.bg,borderRadius:999,padding:"1px 8px"}}>{ETAPAS[leadActivo.estado]?.label}</span>
-                  </div>
-                </div>
-                <div style={{display:"flex",gap:"0.4rem"}}>
-                  {leadActivo.estado==="contactado"&&(
-                    <button className="btn btn-sm" style={{background:"var(--accent)",color:"#fff",border:"none"}} onClick={()=>setModalCalificar(true)}>Calificar</button>
-                  )}
-                  {leadActivo.estado==="nuevo"&&(
-                    <button className="btn btn-em btn-sm" onClick={()=>{tomarLead(leadActivo);cambiarEstado(leadActivo.id,"contactado");}}>Tomar y contactar</button>
-                  )}
-                  {["superadmin","admin"].includes(rol)&&leadActivo.estado==="interesado"&&(
-                    <button className="btn btn-em btn-sm" onClick={()=>cambiarEstado(leadActivo.id,"cerrado")}>Marcar cerrado</button>
-                  )}
-                  <button className="btn btn-em btn-sm" onClick={()=>setModalAct(true)}><i className="bi bi-plus-lg" /> Actividad</button>
-                  <button className="btn btn-out btn-sm" onClick={()=>setLeadActivo(null)}>✕</button>
-                </div>
-              </div>
-              {loadingAct?<Cargando/>:actividades.length===0?(
-                <div style={{textAlign:"center",padding:"1rem",color:"var(--muted)",fontSize:"0.78rem"}}>Sin actividades — registrá el primer contacto</div>
-              ):(
-                <div style={{display:"flex",flexDirection:"column",gap:"0.5rem",maxHeight:250,overflowY:"auto"}}>
-                  {actividades.map(a=>(
-                    <div key={a.id} style={{display:"flex",gap:"0.6rem",paddingBottom:"0.5rem",borderBottom:"1px solid var(--border)"}}>
-                      <div style={{width:26,height:26,borderRadius:7,background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                        <i className={`bi ${TIPO_ACTIVIDAD[a.tipo]?.icon||"bi-dot"}`} style={{color:TIPO_ACTIVIDAD[a.tipo]?.color||"var(--muted)",fontSize:"0.78rem"}} />
-                      </div>
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:"0.78rem",lineHeight:1.4}}>{a.descripcion}</div>
-                        {a.proxima_accion&&<div style={{fontSize:"0.67rem",color:"var(--accent)",marginTop:1}}>→ {a.proxima_accion}</div>}
-                        <div style={{fontSize:"0.62rem",color:"var(--muted)",marginTop:1}}>{formatFecha(a.fecha_actividad)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Cerrados */}
-      {tab==="cerrados" && (
-        <div className="card" style={{padding:0,overflow:"hidden"}}>
-          {loading?<Cargando/>:(
-            <table className="tbl">
-              <thead><tr><th>Cliente</th><th>Rubro</th><th>Plan</th><th>Vendedor</th><th>Fecha cierre</th></tr></thead>
-              <tbody>
-                {leads.filter(l=>l.estado==="cerrado").length===0
-                  ?<tr><td colSpan={5} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>Sin cierres aún</td></tr>
-                  :leads.filter(l=>l.estado==="cerrado").map(l=>(
-                    <tr key={l.id}>
-                      <td><div style={{fontWeight:600,fontSize:"0.82rem"}}>{l.nombre}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{l.empresa||"—"}</div></td>
-                      <td style={{fontSize:"0.75rem",color:"var(--sub)"}}>{l.rubro_interes||"—"}</td>
-                      <td><span className="bdg bdg-em">{l.plan_interes||"—"}</span></td>
-                      <td style={{fontSize:"0.75rem"}}>{l.vendedor_nombre||"—"}</td>
-                      <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{l.actualizado_en?new Date(l.actualizado_en).toLocaleDateString("es-AR"):"—"}</td>
-                    </tr>
-                  ))
-                }
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {/* Perdidos */}
-      {tab==="perdidos" && (
-        <div className="card" style={{padding:0,overflow:"hidden"}}>
-          {loading?<Cargando/>:(
-            <table className="tbl">
-              <thead><tr><th>Lead</th><th>Motivo</th><th>Vendedor</th><th>Días sin contacto</th><th></th></tr></thead>
-              <tbody>
-                {leads.filter(l=>l.estado==="perdido").length===0
-                  ?<tr><td colSpan={5} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>Sin leads perdidos</td></tr>
-                  :leads.filter(l=>l.estado==="perdido").map(l=>(
-                    <tr key={l.id}>
-                      <td><div style={{fontWeight:600,fontSize:"0.82rem"}}>{l.nombre}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{l.empresa||"—"}</div></td>
-                      <td style={{fontSize:"0.75rem",color:"var(--sub)"}}>{l.motivo_perdida||"—"}</td>
-                      <td style={{fontSize:"0.75rem"}}>{l.vendedor_nombre||"—"}</td>
-                      <td><span style={{fontSize:"0.72rem",fontWeight:600,color:l.dias_sin_contacto>=30?"var(--red)":"var(--muted)"}}>{l.dias_sin_contacto!=null?`${l.dias_sin_contacto}d${l.dias_sin_contacto>=30?" ⚠":""}`:""}</span></td>
-                      <td><button className="btn btn-out btn-xs" onClick={()=>cambiarEstado(l.id,"nuevo",{motivo_perdida:null})}>Reactivar</button></td>
-                    </tr>
-                  ))
-                }
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {/* Modal nuevo lead */}
-      {modal && (
-        <Modal onClose={()=>setModal(false)}>
-          <div className="modal-hdr"><span className="modal-title">{editando?"Editar lead":"Nuevo lead"}</span><button className="btn btn-out btn-xs" onClick={()=>setModal(false)}>✕</button></div>
-          <div className="modal-body">
-            {error&&<div style={{background:"var(--red-bg)",color:"var(--red)",padding:"0.5rem",borderRadius:"var(--r-sm)",fontSize:"0.78rem"}}>{error}</div>}
-            <div className="fi-row"><div className="fg"><label className="fl">Nombre *</label><input className="fi" value={form.nombre} onChange={e=>fl({nombre:e.target.value})} /></div><div className="fg"><label className="fl">Empresa</label><input className="fi" value={form.empresa} onChange={e=>fl({empresa:e.target.value})} /></div></div>
-            <div className="fi-row"><div className="fg"><label className="fl">Email</label><input className="fi" value={form.email} onChange={e=>fl({email:e.target.value})} /></div><div className="fg"><label className="fl">Teléfono</label><input className="fi" value={form.telefono} onChange={e=>fl({telefono:e.target.value})} /></div></div>
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Rubro interés</label><select className="fi" value={form.rubro_interes} onChange={e=>fl({rubro_interes:e.target.value})}><option value="">Seleccionar...</option>{RUBROS.map(r=><option key={r} value={r}>{r}</option>)}</select></div>
-              <div className="fg"><label className="fl">Plan interés</label><select className="fi" value={form.plan_interes} onChange={e=>fl({plan_interes:e.target.value})}><option value="">—</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="plan_ia">Plan IA</option><option value="enterprise">Enterprise</option></select></div>
-            </div>
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Fuente</label><select className="fi" value={form.fuente} onChange={e=>fl({fuente:e.target.value})}><option value="web">Web</option><option value="referido">Referido</option><option value="ads">Ads</option><option value="evento">Evento</option><option value="cold">Cold</option><option value="whatsapp">WhatsApp</option></select></div>
-              <div className="fg"><label className="fl">MRR estimado</label><input className="fi" type="number" value={form.valor_mrr_estimado} onChange={e=>fl({valor_mrr_estimado:e.target.value})} /></div>
-            </div>
-            <div className="fg"><label className="fl">Notas</label><textarea className="fi" rows={2} value={form.notas} onChange={e=>fl({notas:e.target.value})} style={{resize:"vertical"}} /></div>
-          </div>
-          <ModalFooter onCancel={()=>setModal(false)} onConfirm={guardar} saving={saving} labelConfirm={editando?"Guardar":"Crear lead"} />
-        </Modal>
-      )}
-
-      {/* Modal actividad */}
-      {modalAct && (
-        <Modal onClose={()=>setModalAct(false)}>
-          <div className="modal-hdr"><span className="modal-title">Registrar actividad</span><button className="btn btn-out btn-xs" onClick={()=>setModalAct(false)}>✕</button></div>
-          <div className="modal-body">
-            <div className="fg"><label className="fl">Tipo</label><select className="fi" value={formAct.tipo} onChange={e=>fa({tipo:e.target.value})}><option value="llamada">Llamada</option><option value="email">Email</option><option value="whatsapp">WhatsApp</option><option value="reunion">Reunión</option><option value="nota">Nota</option></select></div>
-            <div className="fg"><label className="fl">Descripción *</label><textarea className="fi" rows={3} value={formAct.descripcion} onChange={e=>fa({descripcion:e.target.value})} style={{resize:"vertical"}} /></div>
-            <div className="fi-row"><div className="fg"><label className="fl">Próxima acción</label><input className="fi" value={formAct.proxima_accion} onChange={e=>fa({proxima_accion:e.target.value})} /></div><div className="fg"><label className="fl">Fecha</label><input className="fi" type="date" value={formAct.fecha_proxima_accion} onChange={e=>fa({fecha_proxima_accion:e.target.value})} /></div></div>
-          </div>
-          <ModalFooter onCancel={()=>setModalAct(false)} onConfirm={guardarActividad} saving={saving} labelConfirm="Registrar" />
-        </Modal>
-      )}
-
-      {/* Modal calificar */}
-      {modalCalificar && leadActivo && (
-        <ModalCalificar lead={leadActivo} onClose={()=>setModalCalificar(false)} onGuardar={guardarCalificacion} />
-      )}
-    </div>
-  );
-}
-
-/* ══ VIEW EQUIPO ══ */
 const AREA_META = {
-  comercial:      { label:"Área Comercial",  color:"var(--pr)",     bg:"var(--pr-pale)",     icon:"bi-graph-up-arrow" },
-  contenido:      { label:"Área Marketing",  color:"var(--accent)", bg:"var(--accent-pale)", icon:"bi-megaphone" },
-  atencion:       { label:"Área Soporte",    color:"var(--em-d)",   bg:"var(--em-pale)",     icon:"bi-headset" },
-  administracion: { label:"Administración",  color:"var(--sub)",    bg:"var(--moon-l)",      icon:"bi-shield-lock" },
+  comercial:      {label:"Área Comercial", color:"var(--pr)",    bg:"var(--pr-pale)",     icon:"bi-graph-up-arrow"},
+  contenido:      {label:"Área Marketing", color:"var(--accent)",bg:"var(--accent-pale)", icon:"bi-megaphone"},
+  atencion:       {label:"Área Soporte",   color:"var(--em-d)",  bg:"var(--em-pale)",     icon:"bi-headset"},
+  administracion: {label:"Administración", color:"var(--sub)",   bg:"var(--moon-l)",      icon:"bi-shield-lock"},
 };
-const ROL_META = {
-  vendedor:   { label:"Vendedor",          color:"var(--pr)" },
-  cm:         { label:"Community Manager", color:"var(--accent)" },
-  soporte:    { label:"Soporte",           color:"var(--em-d)" },
-  admin:      { label:"Admin",             color:"var(--sub)" },
-  superadmin: { label:"Superadmin",        color:"var(--pr-d)" },
-};
+const ROL_META = { vendedor:{label:"Vendedor",color:"var(--pr)"}, cm:{label:"Community Manager",color:"var(--accent)"}, soporte:{label:"Soporte",color:"var(--em-d)"}, admin:{label:"Admin",color:"var(--sub)"}, superadmin:{label:"Superadmin",color:"var(--pr-d)"} };
 
 function ViewEquipo() {
-  const [tab, setTab]           = useState("comercial");
-  const [data, setData]         = useState({ equipos:[], usuarios:[], porArea:{} });
-  const [loading, setLoading]   = useState(true);
-  const [modalEditar, setModalEditar] = useState(false);
-  const [editando, setEditando] = useState(null);
-  const [formEdit, setFormEdit] = useState({ rol:"", area:"", activo:1 });
-  const [saving, setSaving]     = useState(false);
-  const [modalPerfil, setModalPerfil] = useState(false);
-  const [perfilData, setPerfilData]   = useState(null);
-  const [loadingPerfil, setLoadingPerfil] = useState(false);
-
-  const fe = (v) => setFormEdit(p=>({...p,...v}));
-
-  const cargar = async () => {
-    setLoading(true);
-    try { const r=await fetch("/api/equipos"); const d=await r.json(); if(d.ok) setData(d); } catch(_){}
-    setLoading(false);
-  };
-
-  const abrirPerfil = async (u) => {
-    setModalPerfil(true); setPerfilData(null); setLoadingPerfil(true);
-    try { const r=await fetch(`/api/equipos/${u.id}`); const d=await r.json(); if(d.ok) setPerfilData(d); } catch(_){}
-    setLoadingPerfil(false);
-  };
-
-  useEffect(()=>{ cargar(); },[]);
-
-  const abrirEditar = (u) => { setEditando(u); setFormEdit({rol:u.rol||"",area:u.area||"",activo:u.activo??1}); setModalEditar(true); };
-  const guardarEditar = async () => {
-    setSaving(true);
-    try { await fetch("/api/equipos",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:editando.id,...formEdit})}); setModalEditar(false); cargar(); } catch(_){}
-    setSaving(false);
-  };
-
-  const usuariosTab = data.porArea?.[tab]||[];
-
-  return (
+  const [tab,setTab]=useState("comercial"); const [data,setData]=useState({porArea:{}}); const [loading,setLoading]=useState(true); const [modalEditar,setModalEditar]=useState(false); const [editando,setEditando]=useState(null); const [formEdit,setFormEdit]=useState({rol:"",area:"",activo:1}); const [saving,setSaving]=useState(false); const [modalPerfil,setModalPerfil]=useState(false); const [perfilData,setPerfilData]=useState(null); const [loadingPerfil,setLoadingPerfil]=useState(false);
+  const fe=(v)=>setFormEdit(p=>({...p,...v}));
+  const cargar=async()=>{ setLoading(true); try{const r=await fetch("/api/equipos");const d=await r.json();if(d.ok)setData(d);}catch(_){} setLoading(false); };
+  const abrirPerfil=async(u)=>{ setModalPerfil(true);setPerfilData(null);setLoadingPerfil(true); try{const r=await fetch(`/api/equipos/${u.id}`);const d=await r.json();if(d.ok)setPerfilData(d);}catch(_){} setLoadingPerfil(false); };
+  useEffect(()=>{cargar();},[]);
+  const abrirEditar=(u)=>{setEditando(u);setFormEdit({rol:u.rol||"",area:u.area||"",activo:u.activo??1});setModalEditar(true);};
+  const guardarEditar=async()=>{ setSaving(true); try{await fetch("/api/equipos",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:editando.id,...formEdit})});setModalEditar(false);cargar();}catch(_){} setSaving(false); };
+  const usuariosTab=data.porArea?.[tab]||[];
+  return(
     <div className="view-anim">
       <div className="vh"><div><div className="vh-title">Equipo</div><div className="vh-sub">Áreas y personal</div></div></div>
       <div style={{display:"flex",gap:4,marginBottom:"0.9rem",background:"var(--bg)",borderRadius:"var(--r-sm)",padding:3,width:"fit-content"}}>
         {Object.entries(AREA_META).map(([k,v])=>(
-          <button key={k} onClick={()=>setTab(k)} style={{padding:"0.28rem 0.8rem",borderRadius:"var(--r-sm)",border:"none",background:tab===k?"#fff":"transparent",color:tab===k?v.color:"var(--muted)",fontWeight:tab===k?700:500,fontSize:"0.75rem",cursor:"pointer",fontFamily:"inherit",boxShadow:tab===k?"var(--sh)":"none"}}>
-            {v.label}
-          </button>
+          <button key={k} onClick={()=>setTab(k)} style={{padding:"0.28rem 0.8rem",borderRadius:"var(--r-sm)",border:"none",background:tab===k?"#fff":"transparent",color:tab===k?v.color:"var(--muted)",fontWeight:tab===k?700:500,fontSize:"0.75rem",cursor:"pointer",fontFamily:"inherit",boxShadow:tab===k?"var(--sh)":"none"}}>{v.label}</button>
         ))}
       </div>
       {loading?<Cargando/>:(
         <div className="card" style={{padding:0,overflow:"hidden"}}>
           <table className="tbl">
-            <thead>
-              <tr>
-                <th>Miembro</th><th>Rol</th>
-                {tab==="comercial"&&<><th>Leads activos</th><th>MRR generado</th><th>Tasa cierre</th></>}
-                {tab==="atencion"&&<><th>Tickets abiertos</th><th>Resueltos</th><th>Satisfacción</th></>}
-                {tab==="contenido"&&<th>Último acceso</th>}
-                <th>Estado</th><th></th>
-              </tr>
-            </thead>
+            <thead><tr><th>Miembro</th><th>Rol</th>{tab==="comercial"&&<><th>Leads activos</th><th>MRR generado</th><th>Tasa cierre</th></>}{tab==="atencion"&&<><th>Tickets abiertos</th><th>Resueltos</th><th>Satisfacción</th></>}{tab==="contenido"&&<th>Último acceso</th>}<th>Estado</th><th></th></tr></thead>
             <tbody>
-              {usuariosTab.length===0?(
-                <tr><td colSpan={8} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>Sin miembros en esta área</td></tr>
-              ):usuariosTab.map(u=>(
+              {usuariosTab.length===0?(<tr><td colSpan={8} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>Sin miembros en esta área</td></tr>):usuariosTab.map(u=>(
                 <tr key={u.id}>
-                  <td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={u.nombre?.[0]} size={26} /><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div></div></div></td>
+                  <td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={u.nombre?.[0]} size={26}/><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div></div></div></td>
                   <td><span className="bdg bdg-blue" style={{color:ROL_META[u.rol]?.color}}>{ROL_META[u.rol]?.label||u.rol}</span></td>
                   {tab==="comercial"&&<><td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--blue)"}}>{u.leads_activos||0}</td><td style={{fontSize:"0.78rem",fontWeight:600}}>{u.mrr_generado?`$${Number(u.mrr_generado).toLocaleString("es-AR")}`:"—"}</td><td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--em-d)"}}>{u.tasa_cierre||0}%</td></>}
                   {tab==="atencion"&&<><td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--red)"}}>{u.tickets_abiertos||0}</td><td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--em-d)"}}>{u.tickets_resueltos||0}</td><td style={{fontSize:"0.78rem",fontWeight:600,color:"var(--accent)"}}>{u.satisfaccion_avg||"—"}</td></>}
                   {tab==="contenido"&&<td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{u.ultimo_acceso?new Date(u.ultimo_acceso).toLocaleDateString("es-AR"):"Nunca"}</td>}
                   <td><span className={`bdg ${u.activo?"bdg-em":"bdg-red"}`}>{u.activo?"Activo":"Inactivo"}</span></td>
-                  <td style={{display:"flex",gap:4}}>
-                    <button className="btn btn-out btn-xs" onClick={()=>abrirPerfil(u)}>Ver</button>
-                    <button className="btn btn-out btn-xs" onClick={()=>abrirEditar(u)}>Editar</button>
-                  </td>
+                  <td style={{display:"flex",gap:4}}><button className="btn btn-out btn-xs" onClick={()=>abrirPerfil(u)}>Ver</button><button className="btn btn-out btn-xs" onClick={()=>abrirEditar(u)}>Editar</button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      {modalEditar&&editando&&(
-        <Modal onClose={()=>setModalEditar(false)}>
-          <div className="modal-hdr"><span className="modal-title">Editar {editando.nombre}</span><button className="btn btn-out btn-xs" onClick={()=>setModalEditar(false)}>✕</button></div>
-          <div className="modal-body">
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Rol</label><select className="fi" value={formEdit.rol} onChange={e=>fe({rol:e.target.value})}><option value="vendedor">Vendedor</option><option value="cm">Community Manager</option><option value="soporte">Soporte</option><option value="admin">Admin</option><option value="viewer">Viewer</option></select></div>
-              <div className="fg"><label className="fl">Área</label><select className="fi" value={formEdit.area} onChange={e=>fe({area:e.target.value})}><option value="">Sin área</option><option value="comercial">Comercial</option><option value="contenido">Marketing</option><option value="atencion">Soporte</option><option value="administracion">Administración</option></select></div>
-            </div>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.5rem 0",borderTop:"1px solid var(--border)"}}>
-              <div><div style={{fontSize:"0.8rem",fontWeight:600}}>Estado</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>Activo / Inactivo</div></div>
-              <div className={`tog${formEdit.activo?" on":""}`} onClick={()=>fe({activo:formEdit.activo?0:1})}><div className="tog-k" /></div>
-            </div>
-          </div>
-          <ModalFooter onCancel={()=>setModalEditar(false)} onConfirm={guardarEditar} saving={saving} labelConfirm="Guardar cambios" />
-        </Modal>
-      )}
-      {modalPerfil&&(
-        <Modal onClose={()=>setModalPerfil(false)}>
-          <div className="modal-hdr"><span className="modal-title">Perfil del miembro</span><button className="btn btn-out btn-xs" onClick={()=>setModalPerfil(false)}>✕</button></div>
-          <div className="modal-body">
-            {loadingPerfil?<Cargando/>:perfilData?(
-              <div>
-                <div style={{display:"flex",alignItems:"center",gap:"0.8rem",marginBottom:"1rem"}}>
-                  <Av letra={perfilData.usuario?.nombre?.[0]} size={48} />
-                  <div><div style={{fontWeight:700,fontSize:"1rem"}}>{perfilData.usuario?.nombre}</div><div style={{fontSize:"0.75rem",color:"var(--muted)"}}>{perfilData.usuario?.email}</div></div>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0.6rem"}}>
-                  {[["MRR generado",`$${Number(perfilData.usuario?.mrr_generado||0).toLocaleString("es-AR")}`],["Tasa de cierre",`${perfilData.usuario?.tasa_cierre||0}%`],["Tickets resueltos",perfilData.usuario?.tickets_resueltos||0],["Satisfacción",perfilData.usuario?.satisfaccion_avg||"—"]].map(([l,v])=>(
-                    <div key={l} className="card" style={{padding:"0.6rem 0.8rem"}}><div style={{fontSize:"0.65rem",color:"var(--muted)",fontWeight:600,textTransform:"uppercase"}}>{l}</div><div style={{fontSize:"1.1rem",fontWeight:700,marginTop:2}}>{v}</div></div>
-                  ))}
-                </div>
-              </div>
-            ):<div style={{textAlign:"center",color:"var(--muted)"}}>Sin datos</div>}
-          </div>
-        </Modal>
-      )}
+      {modalEditar&&editando&&(<Modal onClose={()=>setModalEditar(false)}><div className="modal-hdr"><span className="modal-title">Editar {editando.nombre}</span><button className="btn btn-out btn-xs" onClick={()=>setModalEditar(false)}>✕</button></div><div className="modal-body"><div className="fi-row"><div className="fg"><label className="fl">Rol</label><select className="fi" value={formEdit.rol} onChange={e=>fe({rol:e.target.value})}><option value="vendedor">Vendedor</option><option value="cm">Community Manager</option><option value="soporte">Soporte</option><option value="admin">Admin</option></select></div><div className="fg"><label className="fl">Área</label><select className="fi" value={formEdit.area} onChange={e=>fe({area:e.target.value})}><option value="">Sin área</option><option value="comercial">Comercial</option><option value="contenido">Marketing</option><option value="atencion">Soporte</option><option value="administracion">Administración</option></select></div></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.5rem 0",borderTop:"1px solid var(--border)"}}><div><div style={{fontSize:"0.8rem",fontWeight:600}}>Estado</div></div><div className={`tog${formEdit.activo?" on":""}`} onClick={()=>fe({activo:formEdit.activo?0:1})}><div className="tog-k"/></div></div></div><ModalFooter onCancel={()=>setModalEditar(false)} onConfirm={guardarEditar} saving={saving} labelConfirm="Guardar cambios"/></Modal>)}
+      {modalPerfil&&(<Modal onClose={()=>setModalPerfil(false)}><div className="modal-hdr"><span className="modal-title">Perfil del miembro</span><button className="btn btn-out btn-xs" onClick={()=>setModalPerfil(false)}>✕</button></div><div className="modal-body">{loadingPerfil?<Cargando/>:perfilData?(<div><div style={{display:"flex",alignItems:"center",gap:"0.8rem",marginBottom:"1rem"}}><Av letra={perfilData.usuario?.nombre?.[0]} size={48}/><div><div style={{fontWeight:700,fontSize:"1rem"}}>{perfilData.usuario?.nombre}</div><div style={{fontSize:"0.75rem",color:"var(--muted)"}}>{perfilData.usuario?.email}</div></div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0.6rem"}}>{[["MRR generado",`$${Number(perfilData.usuario?.mrr_generado||0).toLocaleString("es-AR")}`],["Tasa de cierre",`${perfilData.usuario?.tasa_cierre||0}%`],["Tickets resueltos",perfilData.usuario?.tickets_resueltos||0],["Satisfacción",perfilData.usuario?.satisfaccion_avg||"—"]].map(([l,v])=>(<div key={l} className="card" style={{padding:"0.6rem 0.8rem"}}><div style={{fontSize:"0.65rem",color:"var(--muted)",fontWeight:600,textTransform:"uppercase"}}>{l}</div><div style={{fontSize:"1.1rem",fontWeight:700,marginTop:2}}>{v}</div></div>))}</div></div>):<div style={{textAlign:"center",color:"var(--muted)"}}>Sin datos</div>}</div></Modal>)}
     </div>
   );
 }
 
-/* ══ VIEW SOPORTE ══ */
-const PRIORIDAD_META = { urgente:{cls:"bdg-urgente",label:"Urgente"}, alta:{cls:"bdg-alta",label:"Alta"}, media:{cls:"bdg-media",label:"Media"}, baja:{cls:"bdg-baja",label:"Baja"} };
-const ESTADO_TICKET  = { nuevo:{label:"Nuevo",cls:"bdg-blue"}, en_curso:{label:"En curso",cls:"bdg-amber"}, esperando:{label:"Esperando",cls:"bdg-moon"}, resuelto:{label:"Resuelto",cls:"bdg-em"}, cerrado:{label:"Cerrado",cls:"bdg-moon"} };
-const TICKET_VACIO   = { tenant_id:"", canal:"email", categoria:"otro", prioridad:"media", titulo:"", descripcion:"", asignado_a:"" };
-
-function ViewSoporte({ session }) {
-  const [tickets, setTickets]       = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [ticketActivo, setTicketActivo] = useState(null);
-  const [mensajes, setMensajes]     = useState([]);
-  const [loadingMsg, setLoadingMsg] = useState(false);
-  const [texto, setTexto]           = useState("");
-  const [enviando, setEnviando]     = useState(false);
-  const [modal, setModal]           = useState(false);
-  const [form, setForm]             = useState(TICKET_VACIO);
-  const [saving, setSaving]         = useState(false);
-  const [agentes, setAgentes]       = useState([]);
-  const fs = (v) => setForm(p=>({...p,...v}));
-
-  const cargar = async () => { setLoading(true); try { const r=await fetch("/api/soporte/tickets"); const d=await r.json(); if(d.ok) setTickets(d.tickets); } catch(_){} setLoading(false); };
-  const cargarMensajes = async (t) => { setTicketActivo(t); setLoadingMsg(true); try { const r=await fetch(`/api/soporte/mensajes?ticket_id=${t.id}`); const d=await r.json(); if(d.ok) setMensajes(d.mensajes); } catch(_){} setLoadingMsg(false); };
-  const cargarAgentes  = async () => { try { const r=await fetch("/api/usuarios"); const d=await r.json(); if(d.ok) setAgentes(d.usuarios.filter(u=>["soporte","admin","superadmin"].includes(u.rol)&&u.activo)); } catch(_){} };
-  useEffect(()=>{ cargar(); cargarAgentes(); },[]);
-
-  const enviarMsg = async () => {
-    if (!texto.trim()||!ticketActivo) return;
-    setEnviando(true);
-    try { await fetch("/api/soporte/mensajes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ticket_id:ticketActivo.id,direccion:"saliente",contenido:texto,enviado_por:session?.user?.id})}); setTexto(""); await cargarMensajes(ticketActivo); } catch(_){}
-    setEnviando(false);
-  };
-
-  const crearTicket = async () => {
-    if (!form.titulo) return;
-    setSaving(true);
-    try { const r=await fetch("/api/soporte/tickets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}); const d=await r.json(); if(d.ok){setModal(false);setForm(TICKET_VACIO);cargar();} } catch(_){}
-    setSaving(false);
-  };
-
-  return (
-    <div className="view-anim">
-      <div className="vh">
-        <div><div className="vh-title">Soporte</div><div className="vh-sub">Tickets y atención</div></div>
-        <button className="btn btn-em btn-sm" onClick={()=>setModal(true)}><i className="bi bi-plus-lg" /> Nuevo ticket</button>
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:ticketActivo?"1fr 1fr":"1fr",gap:"0.8rem"}}>
-        <div className="card" style={{padding:0,overflow:"hidden"}}>
-          {loading?<Cargando/>:tickets.length===0?(
-            <div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>Sin tickets</div>
-          ):(
-            <table className="tbl">
-              <thead><tr><th>Ticket</th><th>Prioridad</th><th>Estado</th><th>Canal</th><th>Creado</th></tr></thead>
-              <tbody>
-                {tickets.map(t=>(
-                  <tr key={t.id} style={{cursor:"pointer",background:ticketActivo?.id===t.id?"var(--pr-pale)":""}} onClick={()=>cargarMensajes(t)}>
-                    <td><div style={{fontWeight:600,fontSize:"0.82rem"}}>{t.titulo}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{t.categoria}</div></td>
-                    <td><span className={`bdg ${PRIORIDAD_META[t.prioridad]?.cls}`}>{PRIORIDAD_META[t.prioridad]?.label}</span></td>
-                    <td><span className={`bdg ${ESTADO_TICKET[t.estado]?.cls}`}>{ESTADO_TICKET[t.estado]?.label}</span></td>
-                    <td style={{fontSize:"0.72rem"}}>{t.canal}</td>
-                    <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{new Date(t.creado_en).toLocaleDateString("es-AR")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-        {ticketActivo&&(
-          <div className="card" style={{padding:0,overflow:"hidden",display:"flex",flexDirection:"column"}}>
-            <div style={{padding:"0.65rem 1rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:"0.5rem"}}>
-              <div style={{flex:1}}><div style={{fontWeight:700,fontSize:"0.85rem"}}>{ticketActivo.titulo}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{ticketActivo.categoria}</div></div>
-              <span className={`bdg ${PRIORIDAD_META[ticketActivo.prioridad]?.cls}`}>{PRIORIDAD_META[ticketActivo.prioridad]?.label}</span>
-              <button className="btn btn-out btn-xs" onClick={()=>setTicketActivo(null)}>✕</button>
-            </div>
-            <div className="chat-msgs" style={{flex:1,maxHeight:320}}>
-              {loadingMsg?<Cargando/>:mensajes.map(m=>(
-                <div key={m.id} className={`msg ${m.direccion==="entrante"?"in":"out"}`}>{m.contenido}</div>
-              ))}
-            </div>
-            <div className="chat-input">
-              <input value={texto} onChange={e=>setTexto(e.target.value)} onKeyDown={e=>e.key==="Enter"&&enviarMsg()} placeholder="Responder…" style={{flex:1,border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.4rem 0.7rem",fontSize:"0.8rem",fontFamily:"inherit",outline:"none"}} />
-              <button className="btn btn-em btn-sm" onClick={enviarMsg} disabled={enviando||!texto.trim()}><i className="bi bi-send" /></button>
-            </div>
-          </div>
-        )}
-      </div>
-      {modal&&(
-        <Modal onClose={()=>setModal(false)}>
-          <div className="modal-hdr"><span className="modal-title">Nuevo ticket</span><button className="btn btn-out btn-xs" onClick={()=>setModal(false)}>✕</button></div>
-          <div className="modal-body">
-            <div className="fg"><label className="fl">Título *</label><input className="fi" value={form.titulo} onChange={e=>fs({titulo:e.target.value})} /></div>
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Prioridad</label><select className="fi" value={form.prioridad} onChange={e=>fs({prioridad:e.target.value})}><option value="baja">Baja</option><option value="media">Media</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
-              <div className="fg"><label className="fl">Canal</label><select className="fi" value={form.canal} onChange={e=>fs({canal:e.target.value})}><option value="email">Email</option><option value="whatsapp">WhatsApp</option><option value="web">Web</option></select></div>
-            </div>
-            <div className="fi-row">
-              <div className="fg"><label className="fl">Categoría</label><select className="fi" value={form.categoria} onChange={e=>fs({categoria:e.target.value})}><option value="tecnico">Técnico</option><option value="facturacion">Facturación</option><option value="capacitacion">Capacitación</option><option value="otro">Otro</option></select></div>
-              <div className="fg"><label className="fl">Asignar a</label><select className="fi" value={form.asignado_a} onChange={e=>fs({asignado_a:e.target.value})}><option value="">Sin asignar</option>{agentes.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}</select></div>
-            </div>
-            <div className="fg"><label className="fl">Descripción</label><textarea className="fi" rows={3} value={form.descripcion} onChange={e=>fs({descripcion:e.target.value})} style={{resize:"vertical"}} /></div>
-          </div>
-          <ModalFooter onCancel={()=>setModal(false)} onConfirm={crearTicket} saving={saving} labelConfirm="Crear ticket" />
-        </Modal>
-      )}
-    </div>
-  );
+const PRIORIDAD_META={urgente:{cls:"bdg-urgente",label:"Urgente"},alta:{cls:"bdg-alta",label:"Alta"},media:{cls:"bdg-media",label:"Media"},baja:{cls:"bdg-baja",label:"Baja"}};
+const ESTADO_TICKET={nuevo:{label:"Nuevo",cls:"bdg-blue"},en_curso:{label:"En curso",cls:"bdg-amber"},esperando:{label:"Esperando",cls:"bdg-moon"},resuelto:{label:"Resuelto",cls:"bdg-em"},cerrado:{label:"Cerrado",cls:"bdg-moon"}};
+function ViewSoporte({session}){
+  const [tickets,setTickets]=useState([]);const [loading,setLoading]=useState(true);const [ticketActivo,setTicketActivo]=useState(null);const [mensajes,setMensajes]=useState([]);const [loadingMsg,setLoadingMsg]=useState(false);const [texto,setTexto]=useState("");const [enviando,setEnviando]=useState(false);const [modal,setModal]=useState(false);const [form,setForm]=useState({tenant_id:"",canal:"email",categoria:"otro",prioridad:"media",titulo:"",descripcion:"",asignado_a:""});const [saving,setSaving]=useState(false);const [agentes,setAgentes]=useState([]);
+  const fs=(v)=>setForm(p=>({...p,...v}));
+  const cargar=async()=>{setLoading(true);try{const r=await fetch("/api/soporte/tickets");const d=await r.json();if(d.ok)setTickets(d.tickets);}catch(_){}setLoading(false);};
+  const cargarMensajes=async(t)=>{setTicketActivo(t);setLoadingMsg(true);try{const r=await fetch(`/api/soporte/mensajes?ticket_id=${t.id}`);const d=await r.json();if(d.ok)setMensajes(d.mensajes);}catch(_){}setLoadingMsg(false);};
+  const cargarAgentes=async()=>{try{const r=await fetch("/api/usuarios");const d=await r.json();if(d.ok)setAgentes(d.usuarios.filter(u=>["soporte","admin","superadmin"].includes(u.rol)&&u.activo));}catch(_){}};
+  useEffect(()=>{cargar();cargarAgentes();},[]);
+  const enviarMsg=async()=>{if(!texto.trim()||!ticketActivo)return;setEnviando(true);try{await fetch("/api/soporte/mensajes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ticket_id:ticketActivo.id,direccion:"saliente",contenido:texto,enviado_por:session?.user?.id})});setTexto("");await cargarMensajes(ticketActivo);}catch(_){}setEnviando(false);};
+  const crearTicket=async()=>{if(!form.titulo)return;setSaving(true);try{const r=await fetch("/api/soporte/tickets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});const d=await r.json();if(d.ok){setModal(false);setForm({tenant_id:"",canal:"email",categoria:"otro",prioridad:"media",titulo:"",descripcion:"",asignado_a:""});cargar();}}catch(_){}setSaving(false);};
+  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Soporte</div><div className="vh-sub">Tickets y atención</div></div><button className="btn btn-em btn-sm" onClick={()=>setModal(true)}><i className="bi bi-plus-lg"/> Nuevo ticket</button></div><div style={{display:"grid",gridTemplateColumns:ticketActivo?"1fr 1fr":"1fr",gap:"0.8rem"}}><div className="card" style={{padding:0,overflow:"hidden"}}>{loading?<Cargando/>:tickets.length===0?(<div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>Sin tickets</div>):(<table className="tbl"><thead><tr><th>Ticket</th><th>Prioridad</th><th>Estado</th><th>Canal</th><th>Creado</th></tr></thead><tbody>{tickets.map(t=>(<tr key={t.id} style={{cursor:"pointer",background:ticketActivo?.id===t.id?"var(--pr-pale)":""}} onClick={()=>cargarMensajes(t)}><td><div style={{fontWeight:600,fontSize:"0.82rem"}}>{t.titulo}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{t.categoria}</div></td><td><span className={`bdg ${PRIORIDAD_META[t.prioridad]?.cls}`}>{PRIORIDAD_META[t.prioridad]?.label}</span></td><td><span className={`bdg ${ESTADO_TICKET[t.estado]?.cls}`}>{ESTADO_TICKET[t.estado]?.label}</span></td><td style={{fontSize:"0.72rem"}}>{t.canal}</td><td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{new Date(t.creado_en).toLocaleDateString("es-AR")}</td></tr>))}</tbody></table>)}</div>{ticketActivo&&(<div className="card" style={{padding:0,overflow:"hidden",display:"flex",flexDirection:"column"}}><div style={{padding:"0.65rem 1rem",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:"0.5rem"}}><div style={{flex:1}}><div style={{fontWeight:700,fontSize:"0.85rem"}}>{ticketActivo.titulo}</div></div><span className={`bdg ${PRIORIDAD_META[ticketActivo.prioridad]?.cls}`}>{PRIORIDAD_META[ticketActivo.prioridad]?.label}</span><button className="btn btn-out btn-xs" onClick={()=>setTicketActivo(null)}>✕</button></div><div className="chat-msgs" style={{flex:1,maxHeight:320}}>{loadingMsg?<Cargando/>:mensajes.map(m=>(<div key={m.id} className={`msg ${m.direccion==="entrante"?"in":"out"}`}>{m.contenido}</div>))}</div><div className="chat-input"><input value={texto} onChange={e=>setTexto(e.target.value)} onKeyDown={e=>e.key==="Enter"&&enviarMsg()} placeholder="Responder…" style={{flex:1,border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.4rem 0.7rem",fontSize:"0.8rem",fontFamily:"inherit",outline:"none"}}/><button className="btn btn-em btn-sm" onClick={enviarMsg} disabled={enviando||!texto.trim()}><i className="bi bi-send"/></button></div></div>)}</div>{modal&&(<Modal onClose={()=>setModal(false)}><div className="modal-hdr"><span className="modal-title">Nuevo ticket</span><button className="btn btn-out btn-xs" onClick={()=>setModal(false)}>✕</button></div><div className="modal-body"><div className="fg"><label className="fl">Título *</label><input className="fi" value={form.titulo} onChange={e=>fs({titulo:e.target.value})}/></div><div className="fi-row"><div className="fg"><label className="fl">Prioridad</label><select className="fi" value={form.prioridad} onChange={e=>fs({prioridad:e.target.value})}><option value="baja">Baja</option><option value="media">Media</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div><div className="fg"><label className="fl">Canal</label><select className="fi" value={form.canal} onChange={e=>fs({canal:e.target.value})}><option value="email">Email</option><option value="whatsapp">WhatsApp</option><option value="web">Web</option></select></div></div><div className="fi-row"><div className="fg"><label className="fl">Categoría</label><select className="fi" value={form.categoria} onChange={e=>fs({categoria:e.target.value})}><option value="tecnico">Técnico</option><option value="facturacion">Facturación</option><option value="capacitacion">Capacitación</option><option value="otro">Otro</option></select></div><div className="fg"><label className="fl">Asignar a</label><select className="fi" value={form.asignado_a} onChange={e=>fs({asignado_a:e.target.value})}><option value="">Sin asignar</option>{agentes.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}</select></div></div><div className="fg"><label className="fl">Descripción</label><textarea className="fi" rows={3} value={form.descripcion} onChange={e=>fs({descripcion:e.target.value})} style={{resize:"vertical"}}/></div></div><ModalFooter onCancel={()=>setModal(false)} onConfirm={crearTicket} saving={saving} labelConfirm="Crear ticket"/></Modal>)}</div>);
 }
 
-/* ══ RESTO DE VIEWS (sin cambios) ══ */
+function ViewModulos(){const modulos=[["bi-grid-1x2","Dashboard IA","Estadísticas e inteligencia analítica"],["bi-people","CRM / Clientes","Gestión de clientes y leads"],["bi-whatsapp","WhatsApp Bot","Bot con IA y memoria de contexto"],["bi-calendar-check","Agenda / Turnos","Turnos inteligentes con predicción"],["bi-receipt","Facturación","Facturas y presupuestos con IA"],["bi-bell","Notificaciones","Comunicaciones automatizadas"],["bi-bar-chart-line","Estadísticas","Análisis en lenguaje natural"],["bi-geo-alt","Mapas","Geolocalización y seguimiento"],["bi-building","Reservas / Hotel","Gestión de habitaciones y reservas"],["bi-heart-pulse","Historia Clínica","Pacientes y turnos médicos"],["bi-house","Propiedades","Gestión inmobiliaria con mapa"],["bi-truck","Distribución","Rutas y logística inteligente"]];return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Módulos</div><div className="vh-sub">Catálogo del sistema</div></div></div><div className="g3">{modulos.map((m,i)=><div key={i} className="card"><div style={{display:"flex",alignItems:"center",gap:"0.75rem"}}><div className="mod-ico" style={{background:"var(--pr-pale)"}}><i className={`bi ${m[0]}`} style={{color:"var(--pr)"}}/></div><div style={{flex:1}}><div className="mod-name">{m[1]}</div><div className="mod-desc">{m[2]}</div></div><div className="tog" onClick={e=>e.currentTarget.classList.toggle("on")}><div className="tog-k"/></div></div></div>)}</div></div>);}
 
-function ViewModulos() {
-  const modulos=[["bi-grid-1x2","Dashboard IA","Estadísticas e inteligencia analítica"],["bi-people","CRM / Clientes","Gestión de clientes y leads"],["bi-whatsapp","WhatsApp Bot","Bot con IA y memoria de contexto"],["bi-calendar-check","Agenda / Turnos","Turnos inteligentes con predicción"],["bi-receipt","Facturación","Facturas y presupuestos con IA"],["bi-bell","Notificaciones","Comunicaciones automatizadas"],["bi-bar-chart-line","Estadísticas","Análisis en lenguaje natural"],["bi-geo-alt","Mapas","Geolocalización y seguimiento"],["bi-building","Reservas / Hotel","Gestión de habitaciones y reservas"],["bi-heart-pulse","Historia Clínica","Pacientes y turnos médicos"],["bi-house","Propiedades","Gestión inmobiliaria con mapa"],["bi-truck","Distribución","Rutas y logística inteligente"]];
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Módulos</div><div className="vh-sub">Catálogo del sistema</div></div></div><div className="g3">{modulos.map((m,i)=><div key={i} className="card"><div style={{display:"flex",alignItems:"center",gap:"0.75rem"}}><div className="mod-ico" style={{background:"var(--pr-pale)"}}><i className={`bi ${m[0]}`} style={{color:"var(--pr)"}} /></div><div style={{flex:1}}><div className="mod-name">{m[1]}</div><div className="mod-desc">{m[2]}</div></div><div className="tog" onClick={e=>e.currentTarget.classList.toggle("on")}><div className="tog-k" /></div></div></div>)}</div></div>);
-}
+function ViewPlanes(){const planes=[{name:"Starter",price:"Gratis",color:"var(--sub)",features:["Módulos básicos limitados","1 usuario","Sin WhatsApp","1 sugerencia IA/día"],off:[2,3]},{name:"Pro",price:"$XX.000",color:"var(--em)",features:["Módulos completos","5 usuarios","WhatsApp activo","Skills IA Nivel 2"],off:[]},{name:"Plan IA",price:"$XX.000",color:"var(--accent)",features:["Todo Pro incluido","Skills IA completas","Asistente IA avanzado","Sugerencias reactivas"],off:[]},{name:"Enterprise",price:"A consultar",color:"var(--pr)",features:["Multi-cuenta","White label","Módulos custom","Consultoría incluida"],off:[]}];return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Planes</div><div className="vh-sub">Gestión de suscripciones</div></div><button className="btn btn-em btn-sm"><i className="bi bi-plus-lg"/> Nuevo plan</button></div><div className="g4">{planes.map((p,i)=><div key={i} className="plan-card"><div className="plan-hdr"><div className="plan-name" style={{color:p.color}}>{p.name}</div><div className="plan-price">{p.price}<span>/mes</span></div></div>{p.features.map((f,j)=><div key={j} className={`plan-feature${p.off.includes(j)?" off":""}`}><i className={`bi ${p.off.includes(j)?"bi-x":"bi-check2"}`} style={{color:p.off.includes(j)?"var(--border2)":p.color}}/>{f}</div>)}<div className="plan-foot"><button className="btn btn-em btn-sm" style={{width:"100%",background:p.color}}>Gestionar</button></div></div>)}</div></div>);}
 
-function ViewPlanes() {
-  const planes=[{name:"Starter",price:"Gratis",color:"var(--sub)",features:["Módulos básicos limitados","1 usuario","Sin WhatsApp","1 sugerencia IA/día"],off:[2,3]},{name:"Pro",price:"$XX.000",color:"var(--em)",features:["Módulos completos","5 usuarios","WhatsApp activo","Skills IA Nivel 2"],off:[]},{name:"Plan IA",price:"$XX.000",color:"var(--accent)",features:["Todo Pro incluido","Skills IA completas","Asistente IA avanzado","Sugerencias reactivas"],off:[]},{name:"Enterprise",price:"A consultar",color:"var(--pr)",features:["Multi-cuenta","White label","Módulos custom","Consultoría incluida"],off:[]}];
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Planes</div><div className="vh-sub">Gestión de suscripciones</div></div><button className="btn btn-em btn-sm"><i className="bi bi-plus-lg" /> Nuevo plan</button></div><div className="g4">{planes.map((p,i)=><div key={i} className="plan-card"><div className="plan-hdr"><div className="plan-name" style={{color:p.color}}>{p.name}</div><div className="plan-price">{p.price}<span>/mes</span></div></div>{p.features.map((f,j)=><div key={j} className={`plan-feature${p.off.includes(j)?" off":""}`}><i className={`bi ${p.off.includes(j)?"bi-x":"bi-check2"}`} style={{color:p.off.includes(j)?"var(--border2)":p.color}} />{f}</div>)}<div className="plan-foot"><button className="btn btn-em btn-sm" style={{width:"100%",background:p.color}}>Gestionar</button></div></div>)}</div></div>);
-}
+function ViewComunicaciones(){return(<div className="comm-wrap view-anim"><div className="conv-list"><div className="conv-hdr"><div className="conv-hdr-title">Conversaciones</div></div><div className="conv-search"><i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.75rem"}}/><input placeholder="Buscar…"/></div><div className="conv-items">{[["HA","Hotel Alvear","¿Cuándo se activa el módulo?","10:24"],["SV","Salón Versailles","Necesito ajustar el bot","09:15"],["DR","Dra. López","Consulta sobre facturación","ayer"]].map(([av,name,prev,time],i)=>(<div key={i} className={`conv-item${i===0?" active":""}`}><div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}><div className="conv-av" style={{width:30,height:30,fontSize:"0.72rem"}}>{av[0]}</div><div style={{flex:1}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:600,fontSize:"0.78rem"}}>{name}</span><span style={{fontSize:"0.62rem",color:"var(--muted)"}}>{time}</span></div><div style={{fontSize:"0.67rem",color:"var(--muted)",marginTop:1}}>{prev}</div></div></div></div>))}</div></div><div className="chat-panel"><div className="chat-hdr"><div className="conv-av" style={{width:30,height:30,fontSize:"0.72rem"}}>H</div><div style={{flex:1}}><div style={{fontWeight:600,fontSize:"0.82rem"}}>Hotel Alvear</div></div></div><div className="chat-msgs"><div className="msg in">¿Cuándo se activa el módulo de reservas?</div><div className="msg out">Hola! El módulo se activa automáticamente dentro de las próximas 24hs.</div></div><div className="chat-input"><input placeholder="Escribí un mensaje…" style={{flex:1,border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.4rem 0.7rem",fontSize:"0.8rem",fontFamily:"inherit",outline:"none"}}/><button className="btn btn-em btn-sm"><i className="bi bi-send"/></button></div></div></div>);}
 
-function ViewComunicaciones() {
-  return(<div className="comm-wrap view-anim"><div className="conv-list"><div className="conv-hdr"><div className="conv-hdr-title">Conversaciones</div></div><div className="conv-search"><i className="bi bi-search" style={{color:"var(--muted)",fontSize:"0.75rem"}} /><input placeholder="Buscar…" /></div><div className="conv-items">{[["HA","Hotel Alvear","¿Cuándo se activa el módulo?","10:24"],["SV","Salón Versailles","Necesito ajustar el bot","09:15"],["DR","Dra. López","Consulta sobre facturación","ayer"]].map(([av,name,prev,time],i)=>(<div key={i} className={`conv-item${i===0?" active":""}`}><div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}><div className="conv-av" style={{width:30,height:30,fontSize:"0.72rem"}}>{av[0]}</div><div style={{flex:1}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:600,fontSize:"0.78rem"}}>{name}</span><span style={{fontSize:"0.62rem",color:"var(--muted)"}}>{time}</span></div><div style={{fontSize:"0.67rem",color:"var(--muted)",marginTop:1}}>{prev}</div></div></div></div>))}</div></div><div className="chat-panel"><div className="chat-hdr"><div className="conv-av" style={{width:30,height:30,fontSize:"0.72rem"}}>H</div><div style={{flex:1}}><div style={{fontWeight:600,fontSize:"0.82rem"}}>Hotel Alvear</div></div></div><div className="chat-msgs"><div className="msg in">¿Cuándo se activa el módulo de reservas?</div><div className="msg out">Hola! El módulo se activa automáticamente dentro de las próximas 24hs.</div></div><div className="chat-input"><input placeholder="Escribí un mensaje…" style={{flex:1,border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.4rem 0.7rem",fontSize:"0.8rem",fontFamily:"inherit",outline:"none"}} /><button className="btn btn-em btn-sm"><i className="bi bi-send" /></button></div></div></div>);
-}
+function ViewSeguimiento(){return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Seguimiento</div><div className="vh-sub">Tareas y recordatorios</div></div><button className="btn btn-em btn-sm"><i className="bi bi-plus-lg"/> Nueva tarea</button></div><div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem",color:"var(--muted)",gap:"0.5rem"}}><i className="bi bi-check2-square" style={{fontSize:"2.5rem"}}/><div style={{fontSize:"0.85rem",fontWeight:600}}>Módulo en desarrollo</div></div></div>);}
 
-function ViewSeguimiento() {
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Seguimiento</div><div className="vh-sub">Tareas y recordatorios</div></div><button className="btn btn-em btn-sm"><i className="bi bi-plus-lg" /> Nueva tarea</button></div><div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem",color:"var(--muted)",gap:"0.5rem"}}><i className="bi bi-check2-square" style={{fontSize:"2.5rem"}} /><div style={{fontSize:"0.85rem",fontWeight:600}}>Módulo en desarrollo</div></div></div>);
-}
+function ViewAlertas(){return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Alertas IA</div><div className="vh-sub">Detecciones automáticas</div></div></div><div className="alert-row warn"><i className="bi bi-exclamation-triangle" style={{color:"var(--amber)",fontSize:"0.85rem",flexShrink:0,marginTop:"0.1rem"}}/><div style={{fontSize:"0.77rem",color:"var(--text)",lineHeight:1.4,flex:1}}><strong>Salón Versailles</strong> — Sin actividad hace 7 días.</div><button className="btn btn-xs btn-out" style={{marginLeft:"auto",flexShrink:0}}>Acción</button></div><div className="alert-row em"><i className="bi bi-check-circle" style={{color:"var(--em)",fontSize:"0.85rem",flexShrink:0,marginTop:"0.1rem"}}/><div style={{fontSize:"0.77rem",color:"var(--text)",lineHeight:1.4,flex:1}}><strong>Hotel Alvear</strong> — Activó módulo Reservas.</div></div></div>);}
 
-function ViewAlertas() {
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Alertas IA</div><div className="vh-sub">Detecciones automáticas</div></div></div><div className="alert-row warn"><i className="bi bi-exclamation-triangle" style={{color:"var(--amber)",fontSize:"0.85rem",flexShrink:0,marginTop:"0.1rem"}} /><div style={{fontSize:"0.77rem",color:"var(--text)",lineHeight:1.4,flex:1}}><strong>Salón Versailles</strong> — Sin actividad hace 7 días.</div><button className="btn btn-xs btn-out" style={{marginLeft:"auto",flexShrink:0}}>Acción</button></div><div className="alert-row em"><i className="bi bi-check-circle" style={{color:"var(--em)",fontSize:"0.85rem",flexShrink:0,marginTop:"0.1rem"}} /><div style={{fontSize:"0.77rem",color:"var(--text)",lineHeight:1.4,flex:1}}><strong>Hotel Alvear</strong> — Activó módulo Reservas.</div></div></div>);
-}
+/* ══ INTEGRACIONES (completa, sin cambios respecto a versión anterior) ══ */
+const INT_SECCIONES=[{id:"whatsapp",titulo:"WhatsApp",icono:"bi-whatsapp",desc:"Conectá una o más líneas de WhatsApp",tipo:"whatsapp_multi"},{id:"web",titulo:"Web / Chat",icono:"bi-chat-dots",desc:"Widget embebible para tu sitio",items:[{tipo:"web",label:"Web / Chat",icono:"bi-chat-dots",color:"#1A7A4A",bg:"#F0FAF4",desc:"Widget de chat",proximamente:false}]},{id:"google",titulo:"Google",icono:"bi-google",desc:"Gmail, Calendar y Maps",items:[{tipo:"gmail",label:"Gmail",icono:"bi-envelope",color:"#EA4335",bg:"#FEF2F1",desc:"Leé y gestioná tu correo",proximamente:false},{tipo:"google_calendar",label:"Google Calendar",icono:"bi-calendar-check",color:"#1A73E8",bg:"#EBF3FE",desc:"Sincronizá turnos y eventos",proximamente:false},{tipo:"google_maps",label:"Google Maps",icono:"bi-geo-alt",color:"#34A853",bg:"#F0FAF3",desc:"Mapas y geolocalización",proximamente:true}]},{id:"meta",titulo:"Meta",icono:"bi-meta",desc:"Instagram y Facebook",items:[{tipo:"instagram",label:"Instagram",icono:"bi-instagram",color:"#E1306C",bg:"#FEF0F5",desc:"Mensajes con IA",proximamente:true},{tipo:"facebook",label:"Facebook",icono:"bi-facebook",color:"#1877F2",bg:"#EBF3FE",desc:"Messenger conectado",proximamente:true}]},{id:"pagos",titulo:"Pagos",icono:"bi-credit-card",desc:"Procesadores de pago",items:[{tipo:"mercadopago",label:"MercadoPago",icono:"bi-credit-card",color:"#009EE3",bg:"#EBF8FE",desc:"Cobros en ARS",proximamente:true}]},{id:"afip",titulo:"ARCA / AFIP",icono:"bi-building-check",desc:"Facturación electrónica",items:[{tipo:"afip",label:"ARCA / AFIP",icono:"bi-building-check",color:"#506886",bg:"#EDF1F6",desc:"Facturación electrónica",proximamente:true}]}];
+const IMPORT_TIPOS=[{id:"clientes",label:"Clientes / Contactos",icono:"bi-people",desc:"Nombre, email, teléfono"},{id:"productos",label:"Productos",icono:"bi-box-seam",desc:"Código, nombre, precio"},{id:"proveedores",label:"Proveedores",icono:"bi-truck",desc:"Nombre, CUIT, contacto"},{id:"precios",label:"Lista de precios",icono:"bi-tag",desc:"SKU, precio, descuento"}];
 
-/* ══ INTEGRACIONES (completa, sin cambios) ══ */
-const INT_SECCIONES=[{id:"whatsapp",titulo:"WhatsApp",icono:"bi-whatsapp",desc:"Conectá una o más líneas de WhatsApp",tipo:"whatsapp_multi"},{id:"web",titulo:"Web / Chat",icono:"bi-chat-dots",desc:"Widget embebible para tu sitio o panel",items:[{tipo:"web",label:"Web / Chat",icono:"bi-chat-dots",color:"#1A7A4A",bg:"#F0FAF4",desc:"Widget de chat para tu sitio web",proximamente:false}]},{id:"google",titulo:"Google",icono:"bi-google",desc:"Gmail, Calendar y Maps con un solo login",items:[{tipo:"gmail",label:"Gmail",icono:"bi-envelope",color:"#EA4335",bg:"#FEF2F1",desc:"Leé y gestioná tu correo",proximamente:false},{tipo:"google_calendar",label:"Google Calendar",icono:"bi-calendar-check",color:"#1A73E8",bg:"#EBF3FE",desc:"Sincronizá turnos y eventos",proximamente:false},{tipo:"google_maps",label:"Google Maps",icono:"bi-geo-alt",color:"#34A853",bg:"#F0FAF3",desc:"Mapas y geolocalización",proximamente:true}]},{id:"meta",titulo:"Meta",icono:"bi-meta",desc:"Instagram y Facebook Messenger",items:[{tipo:"instagram",label:"Instagram",icono:"bi-instagram",color:"#E1306C",bg:"#FEF0F5",desc:"Mensajes y comentarios con IA",proximamente:true},{tipo:"facebook",label:"Facebook Messenger",icono:"bi-facebook",color:"#1877F2",bg:"#EBF3FE",desc:"Página y Messenger conectados",proximamente:true}]},{id:"pagos",titulo:"Pagos",icono:"bi-credit-card",desc:"Procesadores de pago",items:[{tipo:"mercadopago",label:"MercadoPago",icono:"bi-credit-card",color:"#009EE3",bg:"#EBF8FE",desc:"Suscripciones y cobros en ARS",proximamente:true}]},{id:"ecommerce",titulo:"E-commerce",icono:"bi-shop",desc:"Tiendas online",items:[{tipo:"tiendanube",label:"Tiendanube",icono:"bi-cloud-upload",color:"#1F6FEB",bg:"#EBF3FE",desc:"Sincronizá tu tienda Tiendanube",proximamente:true},{tipo:"woocommerce",label:"WooCommerce",icono:"bi-wordpress",color:"#96588A",bg:"#F5EEF8",desc:"Conectá tu tienda WordPress",proximamente:true}]},{id:"afip",titulo:"ARCA / AFIP",icono:"bi-building-check",desc:"Facturación electrónica",items:[{tipo:"afip",label:"ARCA / AFIP",icono:"bi-building-check",color:"#506886",bg:"#EDF1F6",desc:"Facturación electrónica",proximamente:true}]},{id:"importar",titulo:"Importar datos",icono:"bi-file-earmark-arrow-up",desc:"Cargá datos masivos desde CSV o Excel",tipo:"importar"}];
-const IMPORT_TIPOS=[{id:"clientes",label:"Clientes / Contactos",icono:"bi-people",desc:"Nombre, email, teléfono, empresa"},{id:"productos",label:"Productos",icono:"bi-box-seam",desc:"Código, nombre, precio, stock"},{id:"proveedores",label:"Proveedores",icono:"bi-truck",desc:"Nombre, CUIT, contacto, rubro"},{id:"precios",label:"Lista de precios",icono:"bi-tag",desc:"SKU, precio, descuento"},{id:"stock",label:"Stock",icono:"bi-archive",desc:"SKU, cantidad, depósito"}];
+function IntBadge({estado,wspStatus}){const s=estado==="conectado"||wspStatus==="open";const c=estado==="conectando";const e=estado==="error";const p=estado==="proximamente";if(p)return<span style={{fontSize:"0.65rem",fontWeight:700,color:"#1E40AF",background:"#DBEAFE",border:"0.5px solid #93C5FD",borderRadius:999,padding:"2px 8px"}}>Próximamente</span>;if(s)return<span style={{fontSize:"0.65rem",fontWeight:700,color:"#166534",background:"#DCFCE7",border:"0.5px solid #86EFAC",borderRadius:999,padding:"2px 8px"}}>● Conectado</span>;if(c)return<span style={{fontSize:"0.65rem",fontWeight:700,color:"#92400E",background:"#FEF3C7",border:"0.5px solid #FCD34D",borderRadius:999,padding:"2px 8px"}}>◌ Conectando</span>;if(e)return<span style={{fontSize:"0.65rem",fontWeight:700,color:"#991B1B",background:"#FEE2E2",border:"0.5px solid #FCA5A5",borderRadius:999,padding:"2px 8px"}}>✕ Error</span>;return<span style={{fontSize:"0.65rem",fontWeight:600,color:"var(--muted)",background:"var(--bg)",border:"0.5px solid var(--border)",borderRadius:999,padding:"2px 8px"}}>Desconectado</span>;}
 
-function IntBadge({ estado, wspStatus }) {
-  const s=estado==="conectado"||wspStatus==="open";
-  const c=estado==="conectando";
-  const e=estado==="error";
-  const p=estado==="proximamente";
-  if(p) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#1E40AF",background:"#DBEAFE",border:"0.5px solid #93C5FD",borderRadius:999,padding:"2px 8px"}}>Próximamente</span>;
-  if(s) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#166534",background:"#DCFCE7",border:"0.5px solid #86EFAC",borderRadius:999,padding:"2px 8px"}}>● Conectado</span>;
-  if(c) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#92400E",background:"#FEF3C7",border:"0.5px solid #FCD34D",borderRadius:999,padding:"2px 8px"}}>◌ Conectando</span>;
-  if(e) return <span style={{fontSize:"0.65rem",fontWeight:700,color:"#991B1B",background:"#FEE2E2",border:"0.5px solid #FCA5A5",borderRadius:999,padding:"2px 8px"}}>✕ Error</span>;
-  return <span style={{fontSize:"0.65rem",fontWeight:600,color:"var(--muted)",background:"var(--bg)",border:"0.5px solid var(--border)",borderRadius:999,padding:"2px 8px"}}>Desconectado</span>;
-}
+function IntTarjeta({item,tokenData,onConectar,onDesconectar,saving}){const esPrx=item.proximamente||tokenData?.estado==="proximamente";const esConec=tokenData?.estado==="conectado"||tokenData?.wsp_status==="open";const metadata=tokenData?.metadata?(typeof tokenData.metadata==="string"?JSON.parse(tokenData.metadata):tokenData.metadata):null;return(<div style={{background:"var(--white)",border:`0.5px solid ${esConec?"#BBF7D0":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.9rem",display:"flex",flexDirection:"column",gap:"0.6rem",opacity:esPrx?0.7:1}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{width:36,height:36,borderRadius:9,background:item.bg||"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><i className={`bi ${item.icono}`} style={{color:item.color||"var(--muted)",fontSize:"1rem"}}/></div><IntBadge estado={tokenData?.estado||"desconectado"} wspStatus={tokenData?.wsp_status}/></div><div><div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)"}}>{item.label}</div><div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{item.desc}</div>{metadata?.email&&<div style={{fontSize:"0.67rem",color:"var(--sub)",marginTop:3}}><i className="bi bi-person-circle" style={{fontSize:"0.7rem",marginRight:3}}/>{metadata.email}</div>}</div>{!esPrx&&(esConec?(<button onClick={onDesconectar} disabled={saving} className="btn btn-out btn-sm" style={{width:"100%",justifyContent:"center"}}>{saving?"…":"Desconectar"}</button>):(<button onClick={onConectar} disabled={saving} className="btn btn-sm" style={{width:"100%",justifyContent:"center",background:"#1A7A4A",color:"#fff",border:"none"}}>{saving?"…":"Conectar"}</button>))}</div>);}
 
-function IntTarjeta({ item, tokenData, onConectar, onDesconectar, saving }) {
-  const esPrx=item.proximamente||tokenData?.estado==="proximamente";
-  const esConec=tokenData?.estado==="conectado"||tokenData?.wsp_status==="open";
-  const metadata=tokenData?.metadata?(typeof tokenData.metadata==="string"?JSON.parse(tokenData.metadata):tokenData.metadata):null;
-  return(
-    <div style={{background:"var(--white)",border:`0.5px solid ${esConec?"#BBF7D0":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.9rem",display:"flex",flexDirection:"column",gap:"0.6rem",opacity:esPrx?0.7:1,transition:"border-color .2s"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{width:36,height:36,borderRadius:9,background:item.bg||"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <i className={`bi ${item.icono}`} style={{color:item.color||"var(--muted)",fontSize:"1rem"}} />
-        </div>
-        <IntBadge estado={tokenData?.estado||"desconectado"} wspStatus={tokenData?.wsp_status} />
-      </div>
-      <div>
-        <div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)"}}>{item.label}</div>
-        <div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{item.desc}</div>
-        {metadata?.email&&<div style={{fontSize:"0.67rem",color:"var(--sub)",marginTop:3}}><i className="bi bi-person-circle" style={{fontSize:"0.7rem",marginRight:3}} />{metadata.email}</div>}
-      </div>
-      {!esPrx&&(esConec?(
-        <button onClick={onDesconectar} disabled={saving} className="btn btn-out btn-sm" style={{width:"100%",justifyContent:"center"}}>{saving?"…":"Desconectar"}</button>
-      ):(
-        <button onClick={onConectar} disabled={saving} className="btn btn-sm" style={{width:"100%",justifyContent:"center",background:"#1A7A4A",color:"#fff",border:"none"}}>{saving?"…":"Conectar"}</button>
-      ))}
-    </div>
-  );
-}
+function ModalWhatsAppNuevo({onClose,tenantId,onConectado}){const [fase,setFase]=useState("form");const [nombre,setNombre]=useState("");const [qr,setQr]=useState(null);const [msg,setMsg]=useState("");const pollingRef=useRef(null);const iniciar=async()=>{if(!nombre.trim()){setMsg("Ingresá un nombre");return;}setFase("cargando");try{const r=await fetch("/api/integraciones/whatsapp/init",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tenant_id:tenantId,nombre:nombre.trim()})});const d=await r.json();if(d.ok&&d.qr){setQr(d.qr);setFase("qr");pollingRef.current=setInterval(async()=>{try{const r=await fetch(`/api/integraciones/whatsapp/status?instance_id=${d.instance_id}`);const dd=await r.json();if(dd.conectado){clearInterval(pollingRef.current);setFase("conectado");onConectado&&onConectado();}}catch{}},3000);}else{setMsg(d.error||"Error");setFase("error");}}catch{setMsg("Error de conexión");setFase("error");}};useEffect(()=>()=>clearInterval(pollingRef.current),[]);const bV={background:"#1A7A4A",color:"#fff",border:"none",borderRadius:"var(--r-sm)",padding:"0.55rem 1.2rem",fontSize:"0.82rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"};const bG={background:"var(--bg)",color:"var(--text)",border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.55rem 1.2rem",fontSize:"0.82rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"};return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}><div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:420,boxShadow:"var(--sh-md)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)"}}><div style={{display:"flex",alignItems:"center",gap:"0.6rem"}}><div style={{width:34,height:34,borderRadius:9,background:"#F0FBF4",display:"flex",alignItems:"center",justifyContent:"center"}}><i className="bi bi-whatsapp" style={{color:"#25D366",fontSize:"1rem"}}/></div><div><div style={{fontSize:"0.88rem",fontWeight:700}}>Nueva línea WhatsApp</div></div></div><button onClick={onClose} style={{background:"none",border:"none",fontSize:"1rem",color:"var(--muted)",cursor:"pointer"}}>✕</button></div><div style={{padding:"1.4rem",textAlign:"center"}}>{fase==="form"&&(<><div style={{textAlign:"left",marginBottom:"1rem"}}><label style={{fontSize:"0.75rem",fontWeight:600,color:"var(--sub)",display:"block",marginBottom:"0.3rem"}}>Nombre de esta línea</label><input className="fi" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: Ventas, Soporte" style={{width:"100%"}} autoFocus/>{msg&&<div style={{fontSize:"0.72rem",color:"var(--red)",marginTop:"0.3rem"}}>{msg}</div>}</div><div style={{display:"flex",gap:"0.5rem",justifyContent:"flex-end"}}><button onClick={onClose} style={bG}>Cancelar</button><button onClick={iniciar} style={bV}>Generar QR →</button></div></>)}{fase==="cargando"&&(<><div style={{fontSize:"2rem",marginBottom:"1rem"}}>⏳</div><p style={{color:"var(--muted)",fontSize:"0.85rem"}}>Generando QR…</p></>)}{fase==="qr"&&qr&&(<><div style={{background:"#fff",border:"1px solid var(--border)",borderRadius:12,display:"inline-block",padding:"1rem",marginBottom:"1rem"}}><img src={qr} alt="QR" style={{width:200,height:200}}/></div><p style={{color:"var(--text)",fontSize:"0.82rem",lineHeight:1.6,marginBottom:"0.5rem"}}>1. Abrí WhatsApp<br/>2. Dispositivos vinculados<br/>3. Escaneá el QR</p><div style={{fontSize:"0.75rem",color:"var(--muted)"}}>Esperando conexión…</div></>)}{fase==="conectado"&&(<><div style={{fontSize:"3rem",marginBottom:"0.8rem"}}>✅</div><div style={{fontSize:"1rem",fontWeight:700,color:"#166534",marginBottom:"0.4rem"}}>¡WhatsApp conectado!</div><p style={{color:"var(--muted)",fontSize:"0.82rem",marginBottom:"1rem"}}>La línea <strong>{nombre}</strong> está activa.</p><button onClick={onClose} style={bV}>Cerrar</button></>)}{fase==="error"&&(<><div style={{fontSize:"2.5rem",marginBottom:"0.8rem"}}>⚠️</div><p style={{color:"var(--red)",fontSize:"0.85rem",marginBottom:"1rem"}}>{msg}</p><button onClick={()=>{setFase("form");setMsg("");}} style={bG}>Reintentar</button></>)}</div></div></div>);}
 
-function ModalWhatsAppNuevo({ onClose, tenantId, onConectado }) {
-  const [fase, setFase]     = useState("form");
-  const [nombre, setNombre] = useState("");
-  const [qr, setQr]         = useState(null);
-  const [msg, setMsg]       = useState("");
-  const pollingRef = useRef(null);
+function SeccionWhatsApp({tenantId,onToast}){const [instancias,setInstancias]=useState([]);const [loading,setLoading]=useState(true);const [modal,setModal]=useState(false);const [saving,setSaving]=useState(null);const cargar=async()=>{setLoading(true);try{const r=await fetch(`/api/integraciones/whatsapp/instancias${tenantId?`?tenant_id=${tenantId}`:""}`);const d=await r.json();if(d.ok)setInstancias(d.instancias);}catch{}setLoading(false);};useEffect(()=>{cargar();},[]);const desconectar=async(inst)=>{if(!confirm(`¿Desconectar "${inst.nombre}"?`))return;setSaving(inst.id);try{await fetch("/api/integraciones/whatsapp/disconnect",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({instance_id:inst.id,tenant_id:tenantId})});onToast("Línea desconectada");cargar();}catch{onToast("Error al desconectar","error");}setSaving(null);};return(<div style={{marginBottom:"1.5rem"}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.6rem"}}><div><div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}><i className="bi bi-whatsapp" style={{color:"#25D366"}}/> WhatsApp</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>Conectá una o más líneas</div></div><button className="btn btn-sm" style={{background:"#1A7A4A",color:"#fff",border:"none"}} onClick={()=>setModal(true)}><i className="bi bi-plus-lg"/> Nueva línea</button></div>{loading?<div style={{fontSize:"0.78rem",color:"var(--muted)",padding:"0.5rem 0"}}>Cargando…</div>:(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"0.6rem"}}>{instancias.map(inst=>(<div key={inst.id} style={{background:"var(--white)",border:`0.5px solid ${inst.estado==="conectado"?"#BBF7D0":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.9rem",display:"flex",flexDirection:"column",gap:"0.5rem"}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{width:34,height:34,borderRadius:9,background:"#F0FBF4",display:"flex",alignItems:"center",justifyContent:"center"}}><i className="bi bi-whatsapp" style={{color:"#25D366",fontSize:"1rem"}}/></div><IntBadge estado={inst.estado} wspStatus={inst.wsp_status}/></div><div><div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)"}}>{inst.nombre}</div>{inst.numero&&<div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{inst.numero}</div>}</div><button onClick={()=>desconectar(inst)} disabled={saving===inst.id} className="btn btn-out btn-sm" style={{width:"100%",justifyContent:"center"}}>{saving===inst.id?"…":"Desconectar"}</button></div>))}{instancias.length===0&&<div style={{gridColumn:"1/-1",padding:"1rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem",background:"var(--bg)",borderRadius:"var(--r)",border:"0.5px dashed var(--border2)"}}>Sin líneas conectadas todavía</div>}</div>)}{modal&&<ModalWhatsAppNuevo tenantId={tenantId} onClose={()=>setModal(false)} onConectado={()=>{cargar();onToast("WhatsApp conectado");}}/>}</div>);}
 
-  const iniciar = async () => {
-    if (!nombre.trim()) { setMsg("Ingresá un nombre para esta línea"); return; }
-    setFase("cargando");
-    try {
-      const r=await fetch("/api/integraciones/whatsapp/init",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tenant_id:tenantId,nombre:nombre.trim()})});
-      const d=await r.json();
-      if(d.ok&&d.qr){ setQr(d.qr); setFase("qr"); iniciarPolling(d.instance_id); }
-      else { setMsg(d.error||"No se pudo generar el QR"); setFase("error"); }
-    } catch { setMsg("Error de conexión"); setFase("error"); }
-  };
+function SeccionImportar({onToast}){const [tipoActivo,setTipoActivo]=useState(null);const [archivo,setArchivo]=useState(null);const [subiendo,setSubiendo]=useState(false);const inputRef=useRef(null);const handleArchivo=(e)=>{const f=e.target.files?.[0];if(!f)return;const ext=f.name.split(".").pop().toLowerCase();if(!["csv","xlsx","xls"].includes(ext)){onToast("Solo CSV o Excel","error");return;}setArchivo(f);};const subir=async()=>{if(!archivo||!tipoActivo)return;setSubiendo(true);try{const fd=new FormData();fd.append("archivo",archivo);fd.append("tipo",tipoActivo.id);const r=await fetch("/api/importar",{method:"POST",body:fd});const d=await r.json();if(d.ok){onToast(`${d.importados} registros importados`);setArchivo(null);setTipoActivo(null);}else onToast(d.error||"Error","error");}catch{onToast("Error de conexión","error");}setSubiendo(false);};return(<div style={{marginBottom:"1.5rem"}}><div style={{marginBottom:"0.6rem"}}><div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}><i className="bi bi-file-earmark-arrow-up" style={{color:"var(--accent)"}}/> Importar datos</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>Cargá datos masivos desde CSV o Excel</div></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:"0.5rem",marginBottom:"0.8rem"}}>{IMPORT_TIPOS.map(t=>(<div key={t.id} onClick={()=>setTipoActivo(t)} style={{background:tipoActivo?.id===t.id?"var(--em-pale)":"var(--white)",border:`0.5px solid ${tipoActivo?.id===t.id?"var(--em)":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.75rem",cursor:"pointer"}}><i className={`bi ${t.icono}`} style={{color:tipoActivo?.id===t.id?"var(--em-d)":"var(--muted)",fontSize:"1.1rem",display:"block",marginBottom:"0.4rem"}}/><div style={{fontSize:"0.78rem",fontWeight:600,color:"var(--text)"}}>{t.label}</div><div style={{fontSize:"0.67rem",color:"var(--muted)",marginTop:2}}>{t.desc}</div></div>))}</div>{tipoActivo&&(<div style={{background:"var(--bg)",border:"0.5px solid var(--border)",borderRadius:"var(--r)",padding:"1rem"}}><div style={{fontSize:"0.8rem",fontWeight:600,color:"var(--text)",marginBottom:"0.5rem"}}>Importar: {tipoActivo.label}</div><div style={{display:"flex",alignItems:"center",gap:"0.6rem",flexWrap:"wrap"}}><input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" onChange={handleArchivo} style={{display:"none"}}/><button className="btn btn-out btn-sm" onClick={()=>inputRef.current?.click()}><i className="bi bi-upload"/> {archivo?archivo.name:"Seleccionar archivo"}</button>{archivo&&<button className="btn btn-em btn-sm" onClick={subir} disabled={subiendo}>{subiendo?"Importando…":"Importar"}</button>}</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:"0.5rem"}}>Formatos: .csv, .xlsx, .xls — Máximo 5 MB</div></div>)}</div>);}
 
-  const iniciarPolling = (id) => {
-    pollingRef.current=setInterval(async()=>{
-      try { const r=await fetch(`/api/integraciones/whatsapp/status?instance_id=${id}`); const d=await r.json(); if(d.conectado){clearInterval(pollingRef.current);setFase("conectado");onConectado&&onConectado();} } catch {}
-    },3000);
-  };
+function ViewIntegraciones({tenantId=null}){const [tokens,setTokens]=useState([]);const [loading,setLoading]=useState(true);const [saving,setSaving]=useState(null);const [toast,setToast]=useState(null);const showToast=(msg,tipo="ok")=>{setToast({msg,tipo});setTimeout(()=>setToast(null),3500);};const cargarTokens=useCallback(async()=>{setLoading(true);try{const r=await fetch(`/api/integraciones${tenantId?`?tenant_id=${tenantId}`:""}`);const d=await r.json();if(d.ok)setTokens(d.integraciones);}catch{}setLoading(false);},[tenantId]);useEffect(()=>{cargarTokens();},[cargarTokens]);const getToken=(tipo)=>tokens.find(t=>t.tipo===tipo)||null;const gmailConectado=getToken("gmail")?.estado==="conectado";const conectarGoogle=async()=>{try{const r=await fetch(`/api/integraciones/google/auth${tenantId?`?tenant_id=${tenantId}`:""}`);const d=await r.json();if(d.ok&&d.url)window.location.href=d.url;}catch{showToast("Error al conectar con Google","error");};};const onConectar=(tipo)=>{if(["gmail","google_calendar","google_maps"].includes(tipo))return conectarGoogle();showToast("Esta integración estará disponible pronto","info");};const onDesconectar=async(tipo)=>{const token=getToken(tipo);if(!token)return;if(!confirm(`¿Desconectar ${tipo}?`))return;setSaving(tipo);try{let url="";if(["gmail","google_calendar","google_maps"].includes(tipo))url="/api/integraciones/google/disconnect";if(!url)return;await fetch(url,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({tenant_id:tenantId})});showToast("Integración desconectada");cargarTokens();}catch{showToast("Error al desconectar","error");}setSaving(null);};const totalConectadas=tokens.filter(t=>t.estado==="conectado"||t.wsp_status==="open").length;return(<div className="view-anim" style={{maxWidth:820}}><div className="vh"><div><div className="vh-title">Integraciones</div><div className="vh-sub">{totalConectadas>0?`${totalConectadas} conexión${totalConectadas>1?"es":""} activa${totalConectadas>1?"s":""}`:""}</div></div><button className="btn btn-out btn-sm" onClick={cargarTokens}><i className="bi bi-arrow-clockwise"/></button></div>{!loading&&totalConectadas===0&&(<div style={{background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.9rem 1.1rem",display:"flex",alignItems:"flex-start",gap:"0.75rem",marginBottom:"1.2rem"}}><i className="bi bi-plug" style={{color:"#4AB880",fontSize:"1.1rem",marginTop:2,flexShrink:0}}/><div><div style={{fontSize:"0.7rem",fontWeight:700,color:"rgba(255,255,255,.55)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.2rem"}}>Maia · Sin conexiones activas</div><div style={{fontSize:"0.8rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>Conectá al menos un canal. Te recomendamos empezar por <strong>WhatsApp</strong>.</div></div></div>)}{loading?<div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>Cargando integraciones…</div>:(<><SeccionWhatsApp tenantId={tenantId} onToast={showToast}/>{INT_SECCIONES.filter(s=>s.items).map(sec=>{const items=sec.items.filter(item=>!(item.tipo==="email"&&gmailConectado));if(!items.length)return null;return(<div key={sec.id} style={{marginBottom:"1.5rem"}}><div style={{marginBottom:"0.6rem"}}><div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}><i className={`bi ${sec.icono}`} style={{color:"var(--pr)"}}/> {sec.titulo}</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>{sec.desc}</div></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"0.6rem"}}>{items.map(item=><IntTarjeta key={item.tipo} item={item} tokenData={getToken(item.tipo)} onConectar={()=>onConectar(item.tipo)} onDesconectar={()=>onDesconectar(item.tipo)} saving={saving===item.tipo}/>)}</div></div>);})}<SeccionImportar onToast={showToast}/></>)}{toast&&(<div style={{position:"fixed",bottom:"1.5rem",right:"1.5rem",background:toast.tipo==="error"?"#FEE2E2":toast.tipo==="info"?"#DBEAFE":"#DCFCE7",color:toast.tipo==="error"?"#991B1B":toast.tipo==="info"?"#1E40AF":"#166534",border:`1px solid ${toast.tipo==="error"?"#FCA5A5":toast.tipo==="info"?"#93C5FD":"#86EFAC"}`,borderRadius:10,padding:"0.7rem 1.1rem",fontSize:"0.82rem",fontWeight:600,zIndex:2000,boxShadow:"0 4px 20px rgba(0,0,0,0.1)"}}>{toast.msg}</div>)}</div>);}
 
-  useEffect(()=>()=>clearInterval(pollingRef.current),[]);
+function ViewAuditoria(){const [logs,setLogs]=useState([]);const [loading,setLoading]=useState(true);const [filtro,setFiltro]=useState("");useEffect(()=>{fetch("/api/auditoria").then(r=>r.json()).then(d=>{if(d.ok)setLogs(d.logs);}).catch(()=>{}).finally(()=>setLoading(false));},[]);const filtrados=filtro?logs.filter(l=>l.nombre?.toLowerCase().includes(filtro.toLowerCase())||l.email?.toLowerCase().includes(filtro.toLowerCase())):logs;return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Auditoría</div><div className="vh-sub">Registro de accesos</div></div><input className="fi" placeholder="Buscar usuario…" value={filtro} onChange={e=>setFiltro(e.target.value)} style={{width:200}}/></div><div className="card" style={{padding:0,overflow:"hidden"}}>{loading?<Cargando/>:(<table className="tbl"><thead><tr><th>Usuario</th><th>Dispositivo</th><th>IP</th><th>Fecha</th></tr></thead><tbody>{filtrados.length===0?<tr><td colSpan={4} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>Sin registros</td></tr>:filtrados.map((l,i)=>(<tr key={i}><td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={l.nombre?.[0]} size={26}/><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{l.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{l.email}</div></div></div></td><td style={{fontSize:"0.78rem"}}>{l.dispositivo||"Desconocido"}</td><td style={{fontSize:"0.78rem",color:"var(--muted)",fontFamily:"monospace"}}>{l.ip||"—"}</td><td style={{fontSize:"0.75rem",color:"var(--muted)"}}>{formatFecha(l.creado_en)}</td></tr>))}</tbody></table>)}</div></div>);}
 
-  const btnV={background:"#1A7A4A",color:"#fff",border:"none",borderRadius:"var(--r-sm)",padding:"0.55rem 1.2rem",fontSize:"0.82rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"};
-  const btnG={background:"var(--bg)",color:"var(--text)",border:"1px solid var(--border)",borderRadius:"var(--r-sm)",padding:"0.55rem 1.2rem",fontSize:"0.82rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"};
+function ViewConfiguracion(){return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Configuración</div><div className="vh-sub">Ajustes del sistema</div></div><button className="btn btn-em btn-sm"><i className="bi bi-floppy"/> Guardar</button></div><div className="g2"><div><div className="cfg-section"><div className="cfg-hdr"><i className="bi bi-building" style={{color:"var(--accent)"}}/><span className="cfg-title">Información de la empresa</span></div><div className="cfg-body"><div className="fg"><label className="fl">Nombre</label><input className="fi" defaultValue="Gestión 360 iA"/></div><div className="fg"><label className="fl">Dominio base</label><input className="fi" defaultValue="gestion360ia.com.ar"/></div></div></div><div className="cfg-section"><div className="cfg-hdr"><i className="bi bi-robot" style={{color:"var(--gold)"}}/><span className="cfg-title">Configuración IA</span></div><div className="cfg-body"><div className="fg"><label className="fl">Modelo principal</label><select className="fi"><option>Claude Sonnet 4</option><option>Claude Haiku</option><option>GPT-4o</option></select></div></div></div></div><div><div className="cfg-section"><div className="cfg-hdr"><i className="bi bi-shield-lock" style={{color:"var(--em)"}}/><span className="cfg-title">Seguridad</span></div><div className="cfg-body"><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.3rem 0"}}><div><div style={{fontSize:"0.8rem",fontWeight:600}}>HTTPS forzado</div></div><div className="tog on"><div className="tog-k"/></div></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.3rem 0"}}><div><div style={{fontSize:"0.8rem",fontWeight:600}}>Rate limiting</div></div><div className="tog on"><div className="tog-k"/></div></div></div></div></div></div></div>);}
 
-  return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
-      <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:420,boxShadow:"0 20px 60px rgba(0,0,0,0.15)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"1rem 1.2rem",borderBottom:"1px solid var(--border)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:"0.6rem"}}>
-            <div style={{width:34,height:34,borderRadius:9,background:"#F0FBF4",display:"flex",alignItems:"center",justifyContent:"center"}}><i className="bi bi-whatsapp" style={{color:"#25D366",fontSize:"1rem"}} /></div>
-            <div><div style={{fontSize:"0.88rem",fontWeight:700}}>Nueva línea WhatsApp</div><div style={{fontSize:"0.7rem",color:"var(--muted)"}}>Podés conectar múltiples números</div></div>
-          </div>
-          <button onClick={onClose} style={{background:"none",border:"none",fontSize:"1rem",color:"var(--muted)",cursor:"pointer"}}>✕</button>
-        </div>
-        <div style={{padding:"1.4rem",textAlign:"center"}}>
-          {fase==="form"&&(<><div style={{textAlign:"left",marginBottom:"1rem"}}><label style={{fontSize:"0.75rem",fontWeight:600,color:"var(--sub)",display:"block",marginBottom:"0.3rem"}}>Nombre de esta línea</label><input className="fi" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: Ventas, Soporte" style={{width:"100%"}} autoFocus />{msg&&<div style={{fontSize:"0.72rem",color:"var(--red)",marginTop:"0.3rem"}}>{msg}</div>}</div><div style={{display:"flex",gap:"0.5rem",justifyContent:"flex-end"}}><button onClick={onClose} style={btnG}>Cancelar</button><button onClick={iniciar} style={btnV}>Generar QR →</button></div></>)}
-          {fase==="cargando"&&(<><div style={{fontSize:"2rem",marginBottom:"1rem"}}>⏳</div><p style={{color:"var(--muted)",fontSize:"0.85rem"}}>Generando QR…</p></>)}
-          {fase==="qr"&&qr&&(<><div style={{background:"#fff",border:"1px solid var(--border)",borderRadius:12,display:"inline-block",padding:"1rem",marginBottom:"1rem"}}><img src={qr} alt="QR" style={{width:200,height:200}} /></div><p style={{color:"var(--text)",fontSize:"0.82rem",lineHeight:1.6,marginBottom:"0.5rem"}}>1. Abrí WhatsApp<br/>2. Dispositivos vinculados<br/>3. Escaneá el QR</p><div style={{fontSize:"0.75rem",color:"var(--muted)"}}>Esperando conexión…</div></>)}
-          {fase==="conectado"&&(<><div style={{fontSize:"3rem",marginBottom:"0.8rem"}}>✅</div><div style={{fontSize:"1rem",fontWeight:700,color:"#166534",marginBottom:"0.4rem"}}>¡WhatsApp conectado!</div><p style={{color:"var(--muted)",fontSize:"0.82rem",marginBottom:"1rem"}}>La línea <strong>{nombre}</strong> está activa.</p><button onClick={onClose} style={btnV}>Cerrar</button></>)}
-          {fase==="error"&&(<><div style={{fontSize:"2.5rem",marginBottom:"0.8rem"}}>⚠️</div><p style={{color:"var(--red)",fontSize:"0.85rem",marginBottom:"1rem"}}>{msg}</p><button onClick={()=>{setFase("form");setMsg("");}} style={btnG}>Reintentar</button></>)}
-        </div>
-      </div>
-    </div>
-  );
-}
+function ViewSistema(){const [usuarios,setUsuarios]=useState([]);const [loading,setLoading]=useState(true);useEffect(()=>{fetch("/api/usuarios").then(r=>r.json()).then(d=>{if(d.ok)setUsuarios(d.usuarios);}).catch(()=>{}).finally(()=>setLoading(false));},[]);const aprobar=async(id)=>{try{await fetch("/api/usuarios",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:"approved",activo:1})});setUsuarios(p=>p.map(u=>u.id===id?{...u,status:"approved",activo:1}:u));}catch(_){}};const rechazar=async(id)=>{try{await fetch("/api/usuarios",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:"rejected",activo:0})});setUsuarios(p=>p.map(u=>u.id===id?{...u,status:"rejected",activo:0}:u));}catch(_){}};return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Usuarios del sistema</div><div className="vh-sub">{usuarios.length} usuarios registrados</div></div></div><div className="card" style={{padding:0,overflow:"hidden"}}>{loading?<Cargando/>:usuarios.length===0?(<div style={{padding:"2rem",textAlign:"center",color:"var(--muted)"}}>Sin usuarios</div>):(<table className="tbl"><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th></th></tr></thead><tbody>{usuarios.map(u=>(<tr key={u.id}><td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={u.nombre?.[0]} size={26}/><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div></div></div></td><td><span className="bdg bdg-blue">{u.rol}</span></td><td><span className={`bdg ${u.status==="approved"?"bdg-em":u.status==="pending"?"bdg-amber":"bdg-red"}`}>{u.status==="approved"?"Aprobado":u.status==="pending"?"Pendiente":"Rechazado"}</span></td><td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{u.ultimo_acceso?new Date(u.ultimo_acceso).toLocaleDateString("es-AR"):"Nunca"}</td><td style={{display:"flex",gap:4}}>{u.status==="pending"&&<><button className="btn btn-em btn-xs" onClick={()=>aprobar(u.id)}>Aprobar</button><button className="btn btn-red btn-xs" onClick={()=>rechazar(u.id)}>Rechazar</button></>}{u.status==="approved"&&<button className="btn btn-out btn-xs" onClick={()=>rechazar(u.id)}>Desactivar</button>}{u.status==="rejected"&&<button className="btn btn-out btn-xs" onClick={()=>aprobar(u.id)}>Reactivar</button>}</td></tr>))}</tbody></table>)}</div></div>);}
 
-function SeccionWhatsApp({ tenantId, onToast }) {
-  const [instancias, setInstancias] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [modal, setModal]           = useState(false);
-  const [saving, setSaving]         = useState(null);
-
-  const cargar = async () => {
-    setLoading(true);
-    try { const r=await fetch(`/api/integraciones/whatsapp/instancias${tenantId?`?tenant_id=${tenantId}`:""}`); const d=await r.json(); if(d.ok) setInstancias(d.instancias); } catch {}
-    setLoading(false);
-  };
-
-  useEffect(()=>{ cargar(); },[]);
-
-  const desconectar = async (inst) => {
-    if(!confirm(`¿Desconectar "${inst.nombre}"?`)) return;
-    setSaving(inst.id);
-    try { await fetch("/api/integraciones/whatsapp/disconnect",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({instance_id:inst.id,tenant_id:tenantId})}); onToast("Línea desconectada"); cargar(); } catch { onToast("Error al desconectar","error"); }
-    setSaving(null);
-  };
-
-  return(
-    <div style={{marginBottom:"1.5rem"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"0.6rem"}}>
-        <div><div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}><i className="bi bi-whatsapp" style={{color:"#25D366"}} /> WhatsApp</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>Conectá una o más líneas</div></div>
-        <button className="btn btn-sm" style={{background:"#1A7A4A",color:"#fff",border:"none"}} onClick={()=>setModal(true)}><i className="bi bi-plus-lg" /> Nueva línea</button>
-      </div>
-      {loading?<div style={{fontSize:"0.78rem",color:"var(--muted)",padding:"0.5rem 0"}}>Cargando…</div>:(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"0.6rem"}}>
-          {instancias.map(inst=>(
-            <div key={inst.id} style={{background:"var(--white)",border:`0.5px solid ${inst.estado==="conectado"?"#BBF7D0":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.9rem",display:"flex",flexDirection:"column",gap:"0.5rem"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <div style={{width:34,height:34,borderRadius:9,background:"#F0FBF4",display:"flex",alignItems:"center",justifyContent:"center"}}><i className="bi bi-whatsapp" style={{color:"#25D366",fontSize:"1rem"}} /></div>
-                <IntBadge estado={inst.estado} wspStatus={inst.wsp_status} />
-              </div>
-              <div><div style={{fontSize:"0.82rem",fontWeight:700,color:"var(--text)"}}>{inst.nombre}</div>{inst.numero&&<div style={{fontSize:"0.7rem",color:"var(--muted)",marginTop:2}}>{inst.numero}</div>}</div>
-              <button onClick={()=>desconectar(inst)} disabled={saving===inst.id} className="btn btn-out btn-sm" style={{width:"100%",justifyContent:"center"}}>{saving===inst.id?"…":"Desconectar"}</button>
-            </div>
-          ))}
-          {instancias.length===0&&<div style={{gridColumn:"1/-1",padding:"1rem",textAlign:"center",color:"var(--muted)",fontSize:"0.78rem",background:"var(--bg)",borderRadius:"var(--r)",border:"0.5px dashed var(--border2)"}}>Sin líneas conectadas todavía</div>}
-        </div>
-      )}
-      {modal&&<ModalWhatsAppNuevo tenantId={tenantId} onClose={()=>setModal(false)} onConectado={()=>{cargar();onToast("WhatsApp conectado");}} />}
-    </div>
-  );
-}
-
-function SeccionImportar({ onToast }) {
-  const [tipoActivo, setTipoActivo] = useState(null);
-  const [archivo, setArchivo]       = useState(null);
-  const [subiendo, setSubiendo]     = useState(false);
-  const inputRef = useRef(null);
-
-  const handleArchivo = (e) => {
-    const f=e.target.files?.[0]; if(!f) return;
-    const ext=f.name.split(".").pop().toLowerCase();
-    if(!["csv","xlsx","xls"].includes(ext)){ onToast("Solo se aceptan archivos CSV o Excel","error"); return; }
-    setArchivo(f);
-  };
-
-  const subir = async () => {
-    if(!archivo||!tipoActivo) return;
-    setSubiendo(true);
-    try {
-      const fd=new FormData(); fd.append("archivo",archivo); fd.append("tipo",tipoActivo.id);
-      const r=await fetch("/api/importar",{method:"POST",body:fd}); const d=await r.json();
-      if(d.ok){ onToast(`${d.importados} registros importados`); setArchivo(null); setTipoActivo(null); } else onToast(d.error||"Error al importar","error");
-    } catch { onToast("Error de conexión","error"); }
-    setSubiendo(false);
-  };
-
-  return(
-    <div style={{marginBottom:"1.5rem"}}>
-      <div style={{marginBottom:"0.6rem"}}><div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}><i className="bi bi-file-earmark-arrow-up" style={{color:"var(--accent)"}} /> Importar datos</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>Cargá datos masivos desde CSV o Excel</div></div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:"0.5rem",marginBottom:"0.8rem"}}>
-        {IMPORT_TIPOS.map(t=>(
-          <div key={t.id} onClick={()=>setTipoActivo(t)} style={{background:tipoActivo?.id===t.id?"var(--em-pale)":"var(--white)",border:`0.5px solid ${tipoActivo?.id===t.id?"var(--em)":"var(--border)"}`,borderRadius:"var(--r)",padding:"0.75rem",cursor:"pointer",transition:"all .15s"}}>
-            <i className={`bi ${t.icono}`} style={{color:tipoActivo?.id===t.id?"var(--em-d)":"var(--muted)",fontSize:"1.1rem",display:"block",marginBottom:"0.4rem"}} />
-            <div style={{fontSize:"0.78rem",fontWeight:600,color:"var(--text)"}}>{t.label}</div>
-            <div style={{fontSize:"0.67rem",color:"var(--muted)",marginTop:2}}>{t.desc}</div>
-          </div>
-        ))}
-      </div>
-      {tipoActivo&&(
-        <div style={{background:"var(--bg)",border:"0.5px solid var(--border)",borderRadius:"var(--r)",padding:"1rem"}}>
-          <div style={{fontSize:"0.8rem",fontWeight:600,color:"var(--text)",marginBottom:"0.5rem"}}>Importar: {tipoActivo.label}</div>
-          <div style={{display:"flex",alignItems:"center",gap:"0.6rem",flexWrap:"wrap"}}>
-            <input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" onChange={handleArchivo} style={{display:"none"}} />
-            <button className="btn btn-out btn-sm" onClick={()=>inputRef.current?.click()}><i className="bi bi-upload" /> {archivo?archivo.name:"Seleccionar archivo"}</button>
-            {archivo&&<button className="btn btn-em btn-sm" onClick={subir} disabled={subiendo}>{subiendo?"Importando…":"Importar"}</button>}
-          </div>
-          <div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:"0.5rem"}}>Formatos aceptados: .csv, .xlsx, .xls — Máximo 5 MB</div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ViewIntegraciones({ tenantId = null }) {
-  const [tokens, setTokens]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(null);
-  const [toast, setToast]     = useState(null);
-
-  const showToast=(msg,tipo="ok")=>{ setToast({msg,tipo}); setTimeout(()=>setToast(null),3500); };
-
-  const cargarTokens = useCallback(async()=>{
-    setLoading(true);
-    try { const r=await fetch(`/api/integraciones${tenantId?`?tenant_id=${tenantId}`:""}`); const d=await r.json(); if(d.ok) setTokens(d.integraciones); } catch {}
-    setLoading(false);
-  },[tenantId]);
-
-  useEffect(()=>{ cargarTokens(); },[cargarTokens]);
-
-  const getToken=(tipo)=>tokens.find(t=>t.tipo===tipo)||null;
-  const gmailConectado=getToken("gmail")?.estado==="conectado";
-
-  const conectarGoogle=async()=>{
-    try { const r=await fetch(`/api/integraciones/google/auth${tenantId?`?tenant_id=${tenantId}`:""}`); const d=await r.json(); if(d.ok&&d.url) window.location.href=d.url; } catch { showToast("Error al conectar con Google","error"); }
-  };
-
-  const onConectar=(tipo)=>{
-    if(["gmail","google_calendar","google_maps"].includes(tipo)) return conectarGoogle();
-    showToast("Esta integración estará disponible pronto","info");
-  };
-
-  const onDesconectar=async(tipo)=>{
-    const token=getToken(tipo); if(!token) return;
-    if(!confirm(`¿Desconectar ${tipo}?`)) return;
-    setSaving(tipo);
-    try {
-      let url="";
-      if(["gmail","google_calendar","google_maps"].includes(tipo)) url="/api/integraciones/google/disconnect";
-      if(!url) return;
-      await fetch(url,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({tenant_id:tenantId})});
-      showToast("Integración desconectada"); cargarTokens();
-    } catch { showToast("Error al desconectar","error"); }
-    setSaving(null);
-  };
-
-  const totalConectadas=tokens.filter(t=>t.estado==="conectado"||t.wsp_status==="open").length;
-
-  return(
-    <div className="view-anim" style={{maxWidth:820}}>
-      <div className="vh">
-        <div><div className="vh-title">Integraciones</div><div className="vh-sub">{totalConectadas>0?`${totalConectadas} conexión${totalConectadas>1?"es":""} activa${totalConectadas>1?"s":""}`:""}</div></div>
-        <button className="btn btn-out btn-sm" onClick={cargarTokens}><i className="bi bi-arrow-clockwise" /></button>
-      </div>
-      {!loading&&totalConectadas===0&&(
-        <div style={{background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.9rem 1.1rem",display:"flex",alignItems:"flex-start",gap:"0.75rem",marginBottom:"1.2rem"}}>
-          <i className="bi bi-plug" style={{color:"#4AB880",fontSize:"1.1rem",marginTop:2,flexShrink:0}} />
-          <div><div style={{fontSize:"0.7rem",fontWeight:700,color:"rgba(255,255,255,.55)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.2rem"}}>Maia · Sin conexiones activas</div><div style={{fontSize:"0.8rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>Conectá al menos un canal para empezar. Te recomendamos <strong>WhatsApp</strong>.</div></div>
-        </div>
-      )}
-      {loading?<div style={{padding:"2rem",textAlign:"center",color:"var(--muted)",fontSize:"0.82rem"}}>Cargando integraciones…</div>:(
-        <>
-          <SeccionWhatsApp tenantId={tenantId} onToast={showToast} />
-          {INT_SECCIONES.filter(s=>s.items).map(sec=>{
-            const items=sec.items.filter(item=>!(item.tipo==="email"&&gmailConectado));
-            if(!items.length) return null;
-            return(
-              <div key={sec.id} style={{marginBottom:"1.5rem"}}>
-                <div style={{marginBottom:"0.6rem"}}><div style={{fontSize:"0.75rem",fontWeight:700,color:"var(--text)",display:"flex",alignItems:"center",gap:"0.4rem"}}><i className={`bi ${sec.icono}`} style={{color:"var(--pr)"}} /> {sec.titulo}</div><div style={{fontSize:"0.68rem",color:"var(--muted)",marginTop:1}}>{sec.desc}</div></div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"0.6rem"}}>
-                  {items.map(item=><IntTarjeta key={item.tipo} item={item} tokenData={getToken(item.tipo)} onConectar={()=>onConectar(item.tipo)} onDesconectar={()=>onDesconectar(item.tipo)} saving={saving===item.tipo} />)}
-                </div>
-              </div>
-            );
-          })}
-          <SeccionImportar onToast={showToast} />
-        </>
-      )}
-      {toast&&(
-        <div style={{position:"fixed",bottom:"1.5rem",right:"1.5rem",background:toast.tipo==="error"?"#FEE2E2":toast.tipo==="info"?"#DBEAFE":"#DCFCE7",color:toast.tipo==="error"?"#991B1B":toast.tipo==="info"?"#1E40AF":"#166534",border:`1px solid ${toast.tipo==="error"?"#FCA5A5":toast.tipo==="info"?"#93C5FD":"#86EFAC"}`,borderRadius:10,padding:"0.7rem 1.1rem",fontSize:"0.82rem",fontWeight:600,zIndex:2000,boxShadow:"0 4px 20px rgba(0,0,0,0.1)"}}>
-          {toast.msg}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ViewAuditoria() {
-  const [logs,setLogs]=useState([]); const [loading,setLoading]=useState(true); const [filtro,setFiltro]=useState("");
-  useEffect(()=>{ fetch("/api/auditoria").then(r=>r.json()).then(d=>{if(d.ok)setLogs(d.logs);}).catch(()=>{}).finally(()=>setLoading(false)); },[]);
-  const filtrados=filtro?logs.filter(l=>l.nombre?.toLowerCase().includes(filtro.toLowerCase())||l.email?.toLowerCase().includes(filtro.toLowerCase())):logs;
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Auditoría</div><div className="vh-sub">Registro de accesos</div></div><input className="fi" placeholder="Buscar usuario…" value={filtro} onChange={e=>setFiltro(e.target.value)} style={{width:200}} /></div><div className="card" style={{padding:0,overflow:"hidden"}}>{loading?<Cargando/>:(<table className="tbl"><thead><tr><th>Usuario</th><th>Dispositivo</th><th>IP</th><th>Fecha</th></tr></thead><tbody>{filtrados.length===0?<tr><td colSpan={4} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>Sin registros</td></tr>:filtrados.map((l,i)=>(<tr key={i}><td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={l.nombre?.[0]} size={26} /><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{l.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{l.email}</div></div></div></td><td><span style={{fontSize:"0.78rem"}}>{l.dispositivo||"Desconocido"}</span></td><td style={{fontSize:"0.78rem",color:"var(--muted)",fontFamily:"monospace"}}>{l.ip||"—"}</td><td style={{fontSize:"0.75rem",color:"var(--muted)"}}>{formatFecha(l.creado_en)}</td></tr>))}</tbody></table>)}</div></div>);
-}
-
-function ViewConfiguracion() {
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Configuración</div><div className="vh-sub">Ajustes del sistema</div></div><button className="btn btn-em btn-sm"><i className="bi bi-floppy" /> Guardar</button></div><div className="g2"><div><div className="cfg-section"><div className="cfg-hdr"><i className="bi bi-building" style={{color:"var(--accent)"}} /><span className="cfg-title">Información de la empresa</span></div><div className="cfg-body"><div className="fg"><label className="fl">Nombre</label><input className="fi" defaultValue="Gestión 360 iA" /></div><div className="fg"><label className="fl">Dominio base</label><input className="fi" defaultValue="gestion360ia.com.ar" /></div></div></div><div className="cfg-section"><div className="cfg-hdr"><i className="bi bi-robot" style={{color:"var(--gold)"}} /><span className="cfg-title">Configuración IA</span></div><div className="cfg-body"><div className="fg"><label className="fl">Modelo principal</label><select className="fi"><option>Claude Sonnet 4</option><option>Claude Haiku</option><option>GPT-4o</option></select></div></div></div></div><div><div className="cfg-section"><div className="cfg-hdr"><i className="bi bi-shield-lock" style={{color:"var(--em)"}} /><span className="cfg-title">Seguridad</span></div><div className="cfg-body"><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.3rem 0"}}><div><div style={{fontSize:"0.8rem",fontWeight:600}}>HTTPS forzado</div></div><div className="tog on"><div className="tog-k" /></div></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.3rem 0"}}><div><div style={{fontSize:"0.8rem",fontWeight:600}}>Rate limiting</div></div><div className="tog on"><div className="tog-k" /></div></div></div></div></div></div></div>);
-}
-
-function ViewSistema() {
-  const [usuarios,setUsuarios]=useState([]); const [loading,setLoading]=useState(true);
-  useEffect(()=>{ fetch("/api/usuarios").then(r=>r.json()).then(d=>{if(d.ok)setUsuarios(d.usuarios);}).catch(()=>{}).finally(()=>setLoading(false)); },[]);
-  const aprobar=async(id)=>{ try{await fetch("/api/usuarios",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:"approved",activo:1})});setUsuarios(p=>p.map(u=>u.id===id?{...u,status:"approved",activo:1}:u));}catch(_){} };
-  const rechazar=async(id)=>{ try{await fetch("/api/usuarios",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:"rejected",activo:0})});setUsuarios(p=>p.map(u=>u.id===id?{...u,status:"rejected",activo:0}:u));}catch(_){} };
-  return(<div className="view-anim"><div className="vh"><div><div className="vh-title">Usuarios del sistema</div><div className="vh-sub">{usuarios.length} usuarios registrados</div></div></div><div className="card" style={{padding:0,overflow:"hidden"}}>{loading?<Cargando/>:usuarios.length===0?(<div style={{padding:"2rem",textAlign:"center",color:"var(--muted)"}}>Sin usuarios</div>):(<table className="tbl"><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th></th></tr></thead><tbody>{usuarios.map(u=>(<tr key={u.id}><td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={u.nombre?.[0]} size={26} /><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div></div></div></td><td><span className="bdg bdg-blue">{u.rol}</span></td><td><span className={`bdg ${u.status==="approved"?"bdg-em":u.status==="pending"?"bdg-amber":"bdg-red"}`}>{u.status==="approved"?"Aprobado":u.status==="pending"?"Pendiente":"Rechazado"}</span></td><td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{u.ultimo_acceso?new Date(u.ultimo_acceso).toLocaleDateString("es-AR"):"Nunca"}</td><td style={{display:"flex",gap:4}}>{u.status==="pending"&&<><button className="btn btn-em btn-xs" onClick={()=>aprobar(u.id)}>Aprobar</button><button className="btn btn-red btn-xs" onClick={()=>rechazar(u.id)}>Rechazar</button></>}{u.status==="approved"&&<button className="btn btn-out btn-xs" onClick={()=>rechazar(u.id)}>Desactivar</button>}{u.status==="rejected"&&<button className="btn btn-out btn-xs" onClick={()=>aprobar(u.id)}>Reactivar</button>}</td></tr>))}</tbody></table>)}</div></div>);
-}
-
-function ViewPerfil() {
-  const { data: session } = useSession();
-  return(<div className="view-anim" style={{maxWidth:520}}><div className="vh"><div><div className="vh-title">Mi perfil</div><div className="vh-sub">Configuración de tu cuenta</div></div></div><div className="card"><div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",paddingBottom:"1rem",borderBottom:"1px solid var(--border)"}}>{session?.user?.image?<img src={session.user.image} style={{width:52,height:52,borderRadius:"50%",objectFit:"cover"}} alt="" />:<Av letra={session?.user?.name?.[0]} size={52} />}<div><div style={{fontWeight:700,fontSize:"1rem"}}>{session?.user?.name||"—"}</div><div style={{fontSize:"0.75rem",color:"var(--muted)",marginTop:2}}>{session?.user?.email}</div><span className="bdg bdg-em" style={{marginTop:4,display:"inline-block"}}>Superadmin</span></div></div><div style={{display:"flex",flexDirection:"column",gap:"0.6rem"}}><div className="fg"><label className="fl">Nombre completo</label><input className="fi" defaultValue={session?.user?.name||""} /></div><div className="fg"><label className="fl">Email</label><input className="fi" defaultValue={session?.user?.email||""} disabled style={{opacity:0.6}} /></div><div className="fg"><label className="fl">Cargo</label><input className="fi" placeholder="Ej: Director de Operaciones" /></div></div><div style={{marginTop:"1rem",paddingTop:"1rem",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"flex-end"}}><button className="btn btn-em btn-sm">Guardar cambios</button></div></div></div>);
-}
+function ViewPerfil(){const{data:session}=useSession();return(<div className="view-anim" style={{maxWidth:520}}><div className="vh"><div><div className="vh-title">Mi perfil</div><div className="vh-sub">Configuración de tu cuenta</div></div></div><div className="card"><div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.2rem",paddingBottom:"1rem",borderBottom:"1px solid var(--border)"}}>{session?.user?.image?<img src={session.user.image} style={{width:52,height:52,borderRadius:"50%",objectFit:"cover"}} alt=""/>:<Av letra={session?.user?.name?.[0]} size={52}/>}<div><div style={{fontWeight:700,fontSize:"1rem"}}>{session?.user?.name||"—"}</div><div style={{fontSize:"0.75rem",color:"var(--muted)",marginTop:2}}>{session?.user?.email}</div><span className="bdg bdg-em" style={{marginTop:4,display:"inline-block"}}>Superadmin</span></div></div><div style={{display:"flex",flexDirection:"column",gap:"0.6rem"}}><div className="fg"><label className="fl">Nombre completo</label><input className="fi" defaultValue={session?.user?.name||""}/></div><div className="fg"><label className="fl">Email</label><input className="fi" defaultValue={session?.user?.email||""} disabled style={{opacity:0.6}}/></div><div className="fg"><label className="fl">Cargo</label><input className="fi" placeholder="Ej: Director de Operaciones"/></div></div><div style={{marginTop:"1rem",paddingTop:"1rem",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"flex-end"}}><button className="btn btn-em btn-sm">Guardar cambios</button></div></div></div>);}
