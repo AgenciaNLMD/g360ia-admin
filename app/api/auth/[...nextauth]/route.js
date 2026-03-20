@@ -1,3 +1,4 @@
+// app/api/auth/[...nextauth]/route.js
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import NextAuth from "next-auth";
@@ -24,6 +25,11 @@ function parseDispositivo(ua = "") {
 const handler = NextAuth({
   trustHost: true,
 
+  // ── JWT strategy para que los datos persistan en el token ──
+  session: {
+    strategy: "jwt",
+  },
+
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -45,8 +51,8 @@ const handler = NextAuth({
 
       if (rows.length === 0) {
         await db.query(
-          `INSERT INTO usuarios 
-          (tenant_id, nombre, email, password_hash, rol, status, activo, creado_en) 
+          `INSERT INTO usuarios
+          (tenant_id, nombre, email, password_hash, rol, status, activo, creado_en)
           VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
           [null, user.name, user.email, "", "viewer", "pending", false]
         );
@@ -77,7 +83,6 @@ const handler = NextAuth({
                       <table style="width:100%;font-size:13px;border-collapse:collapse;">
                         <tr><td style="color:#9CA3AF;font-weight:600;padding:4px 0;width:100px;">Nombre</td><td style="color:#1F2937;font-weight:600;padding:4px 0;">${user.name}</td></tr>
                         <tr><td style="color:#9CA3AF;font-weight:600;padding:4px 0;">Email</td><td style="color:#1F2937;padding:4px 0;">${user.email}</td></tr>
-                        <tr><td style="color:#9CA3AF;font-weight:600;padding:4px 0;">Estado</td><td style="padding:4px 0;"><span style="background:#FBF6EE;color:#92680A;border:1px solid #E8D5AF;border-radius:999px;font-size:11px;font-weight:600;padding:2px 10px;">Pendiente de aprobación</span></td></tr>
                       </table>
                     </div>
                     <div style="text-align:center;">
@@ -112,12 +117,7 @@ const handler = NextAuth({
         );
         await db.query(
           `INSERT INTO sesiones_log (usuario_id, ip, user_agent, dispositivo) VALUES (?, ?, ?, ?)`,
-          [
-            dbUser.id,
-            null, // IP no disponible en este callback, se puede enriquecer desde middleware
-            profile?.sub ?? "",
-            parseDispositivo(""),
-          ]
+          [dbUser.id, null, profile?.sub ?? "", parseDispositivo("")]
         );
       } catch (logError) {
         console.error("Error registrando sesión:", logError);
@@ -126,17 +126,33 @@ const handler = NextAuth({
       return true;
     },
 
-    async session({ session }) {
-      if (session?.user) {
-        const [rows] = await db.query(
-          "SELECT id, rol, status FROM usuarios WHERE email = ?",
-          [session.user.email]
-        );
-        if (rows.length > 0) {
-          session.user.id = rows[0].id;
-          session.user.rol = rows[0].rol;
-          session.user.status = rows[0].status;
+    // ── JWT: guardar id y rol en el token ───────────────────
+    async jwt({ token, user, account }) {
+      // Solo en el primer login (cuando user existe)
+      if (account && user) {
+        try {
+          const [rows] = await db.query(
+            "SELECT id, rol, status FROM usuarios WHERE email = ?",
+            [user.email]
+          );
+          if (rows.length > 0) {
+            token.id     = rows[0].id;
+            token.rol    = rows[0].rol;
+            token.status = rows[0].status;
+          }
+        } catch (err) {
+          console.error("JWT callback error:", err);
         }
+      }
+      return token;
+    },
+
+    // ── Session: leer desde el token ────────────────────────
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.id     = token.id     || null;
+        session.user.rol    = token.rol    || null;
+        session.user.status = token.status || null;
       }
       return session;
     },
