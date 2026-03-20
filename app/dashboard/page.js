@@ -710,7 +710,13 @@ function ViewConversaciones({ session, onNavegar }) {
   const enviar = async () => {
     if (!texto.trim() || !activa) return;
     setEnviando(true);
-    try { await fetch("/api/ventas/mensajes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({conversacion_id:activa.id,direccion:"saliente",contenido:texto})}); setTexto(""); await cargarMensajes(activa); } catch(_){}
+    const contenido = texto;
+    setTexto(""); // limpiar inmediatamente para no enviar doble
+    try {
+      await fetch("/api/ventas/mensajes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({conversacion_id:activa.id,direccion:"saliente",contenido})});
+      // Esperar un momento antes de recargar para que Evolution no dispare webhook duplicado
+      setTimeout(()=>cargarMensajes(activa), 800);
+    } catch(_){}
     setEnviando(false);
   };
 
@@ -735,18 +741,24 @@ function ViewConversaciones({ session, onNavegar }) {
   return (
     <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
 
-      {/* Banner Maia — solo si WSP no conectado */}
-      {!wspConectado && (
-        <div style={{margin:"0.75rem 0.75rem 0",background:"linear-gradient(135deg,#1C3D2E,#2A5A44)",borderRadius:"var(--r)",padding:"0.8rem 1rem",display:"flex",alignItems:"center",gap:"0.75rem"}}>
-          <i className="bi bi-plug" style={{color:"#4AB880",fontSize:"1rem",flexShrink:0}} />
-          <div style={{flex:1,fontSize:"0.79rem",color:"rgba(255,255,255,.9)",lineHeight:1.5}}>
-            <strong>Maia:</strong> Conectá WhatsApp para recibir conversaciones en el panel.
+      {/* Banner Maia — canales no conectados */}
+      {(() => {
+        const canalesConectados = wspConectado ? ["whatsapp"] : [];
+        const faltantes = Object.entries(CANAL_META).filter(([tipo]) => !canalesConectados.includes(tipo) && tipo !== "tiktok");
+        if (!faltantes.length) return null;
+        return (
+          <div style={{margin:"0.75rem 0.75rem 0",background:"linear-gradient(135deg,#2A3F55,#3D5A78)",borderRadius:"var(--r)",padding:"0.65rem 1rem",display:"flex",alignItems:"center",gap:"0.75rem",flexWrap:"wrap"}}>
+            <div style={{fontSize:"0.75rem",color:"rgba(255,255,255,.85)",flexShrink:0}}><strong>Maia:</strong> Podés conectar más canales:</div>
+            {faltantes.slice(0,4).map(([tipo,m])=>(
+              <div key={tipo} style={{display:"flex",alignItems:"center",gap:"0.35rem",background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:20,padding:"0.2rem 0.65rem"}}>
+                {m.dot()}
+                <span style={{fontSize:"0.7rem",color:"rgba(255,255,255,.9)"}}>{m.label}</span>
+                <button onClick={()=>onNavegar&&onNavegar("integraciones")} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",fontSize:"0.65rem",cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>Conectar</button>
+              </div>
+            ))}
           </div>
-          <button onClick={()=>onNavegar&&onNavegar("integraciones")} style={{flexShrink:0,padding:"0.3rem 0.8rem",borderRadius:"var(--r-sm)",border:"1px solid rgba(255,255,255,.3)",background:"rgba(255,255,255,.12)",color:"#fff",fontSize:"0.72rem",fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
-            Conectar →
-          </button>
-        </div>
-      )}
+        );
+      })()}
 
       <div className="comm-wrap view-anim" style={{flex:1,marginTop:"0.75rem"}}>
 
@@ -836,6 +848,18 @@ function ViewConversaciones({ session, onNavegar }) {
                     <span style={{marginLeft:2}}>{CANAL_META[activa.canal].label}</span>
                   </div>
                 )}
+                {/* Selector de etapa del embudo */}
+                <select
+                  value={activa.estado||"nueva"}
+                  onChange={e=>cambiarEstadoConv(activa.id, e.target.value)}
+                  style={{fontSize:"0.7rem",border:"0.5px solid var(--border2)",borderRadius:"var(--r-sm)",padding:"3px 6px",background:"var(--bg)",color:"var(--text)",cursor:"pointer",fontFamily:"inherit"}}>
+                  <option value="nueva">Nueva</option>
+                  <option value="contactado">Contactado</option>
+                  <option value="interesado">Interesado</option>
+                  <option value="seguimiento">Seguimiento</option>
+                  <option value="resuelta">Resuelta</option>
+                  <option value="cerrada">Cerrada</option>
+                </select>
                 {!activa.asignado_a ? (
                   <button className="btn btn-em btn-xs" onClick={()=>tomarConv(activa.id)}>Tomar</button>
                 ) : (
