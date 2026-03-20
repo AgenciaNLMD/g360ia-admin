@@ -1,50 +1,85 @@
+// app/api/integraciones/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-import db from "../../../lib/db";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import db from "@/lib/db";
 
+// ─────────────────────────────────────────────────────────────
+// GET /api/integraciones
+// Lista integraciones con su estado de token
+// ─────────────────────────────────────────────────────────────
 export async function GET(request) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!session) return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
-  const tenant_id = searchParams.get("tenant_id") || null;
+  const tenantId = searchParams.get("tenant_id") || null;
 
   try {
     const [rows] = await db.query(
-      `SELECT * FROM integraciones WHERE tenant_id ${tenant_id ? "= ?" : "IS NULL"} ORDER BY id ASC`,
-      tenant_id ? [tenant_id] : []
+      `SELECT
+         i.id, i.nombre, i.tipo, i.activo, i.sugerencia_dismisseada,
+         t.id         AS token_id,
+         t.estado,
+         t.wsp_status,
+         t.metadata,
+         t.error_msg,
+         t.conectado_en
+       FROM integraciones i
+       LEFT JOIN integraciones_tokens t
+         ON t.integracion_id = i.id
+         AND (
+           (? IS NULL AND t.tenant_id IS NULL)
+           OR t.tenant_id = ?
+         )
+       WHERE i.tenant_id IS NULL OR i.tenant_id = ?
+       ORDER BY i.id ASC`,
+      [tenantId, tenantId, tenantId]
     );
-    return NextResponse.json({ ok: true, integraciones: rows });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error al obtener integraciones" }, { status: 500 });
+
+    // Parsear metadata JSON si viene como string
+    const integraciones = rows.map(r => ({
+      ...r,
+      metadata: r.metadata
+        ? (typeof r.metadata === "string" ? JSON.parse(r.metadata) : r.metadata)
+        : null,
+    }));
+
+    return NextResponse.json({ ok: true, integraciones });
+  } catch (err) {
+    console.error("GET /api/integraciones:", err);
+    return NextResponse.json({ ok: false, error: "Error al obtener integraciones" }, { status: 500 });
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// PATCH /api/integraciones
+// Toggle activo / dismiss sugerencia
+// ─────────────────────────────────────────────────────────────
 export async function PATCH(request) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!session) return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
 
   try {
     const body = await request.json();
-    const { id, activo, sugerencia_dismisseada, config, nombre } = body;
+    const { id, activo, sugerencia_dismisseada } = body;
 
-    const sets = [];
-    const vals = [];
+    if (!id) return NextResponse.json({ ok: false, error: "Falta id" }, { status: 400 });
 
-    if (activo !== undefined)                 { sets.push("activo = ?");                  vals.push(activo); }
-    if (sugerencia_dismisseada !== undefined) { sets.push("sugerencia_dismisseada = ?");  vals.push(sugerencia_dismisseada); }
-    if (config !== undefined)                 { sets.push("config = ?");                  vals.push(JSON.stringify(config)); }
-    if (nombre !== undefined)                 { sets.push("nombre = ?");                  vals.push(nombre); }
+    const campos = [];
+    const vals   = [];
 
-    if (sets.length === 0) return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
+    if (activo !== undefined)                { campos.push("activo = ?");                vals.push(activo); }
+    if (sugerencia_dismisseada !== undefined) { campos.push("sugerencia_dismisseada = ?"); vals.push(sugerencia_dismisseada); }
+
+    if (!campos.length) return NextResponse.json({ ok: false, error: "Sin campos" }, { status: 400 });
 
     vals.push(id);
-    await db.query(`UPDATE integraciones SET ${sets.join(", ")} WHERE id = ?`, vals);
+    await db.query(`UPDATE integraciones SET ${campos.join(", ")} WHERE id = ?`, vals);
+
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error al actualizar integración" }, { status: 500 });
+  } catch (err) {
+    console.error("PATCH /api/integraciones:", err);
+    return NextResponse.json({ ok: false, error: "Error al actualizar" }, { status: 500 });
   }
 }
