@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
   try {
     // Datos del usuario
     const [[usuario]] = await db.query(
-      `SELECT id, nombre, email, rol, area, titulo, activo, ultimo_acceso,
+      `SELECT id, nombre, email, rol, area, activo, ultimo_acceso,
               tasa_cierre, mrr_generado, tickets_resueltos, satisfaccion_avg,
               rubros_especialidad, modulos_especialidad
        FROM usuarios WHERE id = ?`,
