@@ -27,7 +27,6 @@ export async function GET(request) {
       LEFT JOIN ventas_leads vl ON vl.asignado_a = u.id AND vl.estado NOT IN ('cerrado','perdido')
       LEFT JOIN soporte_tickets st ON st.asignado_a = u.id AND st.estado NOT IN ('resuelto','cerrado')
       WHERE u.rol NOT IN ('superadmin','viewer')
-      AND u.tenant_id IS NULL
     `;
     const params = [];
     if (area) { q += ` AND u.area = ?`; params.push(area); }
