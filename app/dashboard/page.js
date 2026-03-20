@@ -2011,9 +2011,15 @@ function ViewSistema() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
   const [tab, setTab] = useState("todos");
-  const cargar = async () => { setLoading(true); try { const r=await fetch("/api/usuarios"); const d=await r.json(); if(d.ok) setUsuarios(d.usuarios); } catch(_){} setLoading(false); };
+
+  const cargar = async () => {
+    setLoading(true);
+    try { const r=await fetch("/api/usuarios"); const d=await r.json(); if(d.ok) setUsuarios(d.usuarios); } catch(_){}
+    setLoading(false);
+  };
   useEffect(() => { cargar(); }, []);
-  const actualizar = async (id,cambios,email,nombre) => {
+
+  const actualizar = async (id, cambios, email, nombre) => {
     setSaving(id);
     try {
       if(cambios.status==="approved") await fetch("/api/usuarios/aprobar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,email,nombre})});
@@ -2023,34 +2029,138 @@ function ViewSistema() {
     } catch(_){}
     setSaving(null);
   };
-  const eliminar = async (id,nombre) => { if(!confirm(`¿Eliminar a ${nombre||"este usuario"}?`)) return; setSaving(id); try { await fetch("/api/usuarios",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})}); await cargar(); } catch(_){} setSaving(null); };
-  const STATUS_BADGE = { approved:{cls:"bdg-em",label:"Aprobado"}, pending:{cls:"bdg-amber",label:"Pendiente"}, rejected:{cls:"bdg-red",label:"Rechazado"} };
-  const pendientes = usuarios.filter(u=>u.status==="pending");
+
+  const eliminar = async (id, nombre) => {
+    if(!confirm(`¿Eliminar a ${nombre||"este usuario"}?`)) return;
+    setSaving(id);
+    try { await fetch("/api/usuarios",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})}); await cargar(); } catch(_){}
+    setSaving(null);
+  };
+
+  const STATUS_BADGE = {
+    approved: { cls:"bdg-em",    label:"Aprobado" },
+    pending:  { cls:"bdg-amber", label:"Pendiente" },
+    rejected: { cls:"bdg-red",   label:"Rechazado" },
+  };
+
+  const AREA_LABELS = {
+    comercial:      "Comercial",
+    contenido:      "Marketing",
+    atencion:       "Soporte",
+    administracion: "Administración",
+    operaciones:    "Operaciones",
+  };
+
+  const pendientes = usuarios.filter(u => u.status==="pending");
   const lista = tab==="pendientes" ? pendientes : usuarios;
+
   return (
     <div className="view-anim">
-      <div className="vh"><div><div className="vh-title">Usuarios y Permisos</div><div className="vh-sub">{usuarios.length} usuarios · {pendientes.length} pendientes</div></div><button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /></button></div>
-      <Tabs tabs={[["todos","Todos","bi-people"],["pendientes","Pendientes","bi-hourglass-split"]]} active={tab} onChange={setTab} extraBadge={tab==="todos"&&pendientes.length>0?{tab:"pendientes",count:pendientes.length}:null} />
+      <div className="vh">
+        <div><div className="vh-title">Usuarios y Permisos</div><div className="vh-sub">{usuarios.length} usuarios · {pendientes.length} pendientes</div></div>
+        <button className="btn btn-out btn-sm" onClick={cargar}><i className="bi bi-arrow-clockwise" /></button>
+      </div>
+
+      <Tabs tabs={[["todos","Todos","bi-people"],["pendientes","Pendientes","bi-hourglass-split"]]} active={tab} onChange={setTab}
+        extraBadge={tab==="todos"&&pendientes.length>0?{tab:"pendientes",count:pendientes.length}:null} />
+
       <div className="card">
         {loading ? <Cargando texto="Cargando usuarios..." /> : (
           <table className="tbl">
-            <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Activo</th><th>Último acceso</th><th>Registrado</th><th>Acciones</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Área</th>
+                <th>Estado</th>
+                <th>Activo</th>
+                <th>Último acceso</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
             <tbody>
-              {lista.length===0 ? <tr><td colSpan={7} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>{tab==="pendientes"?"No hay solicitudes pendientes":"No hay usuarios"}</td></tr>
-              : lista.map(u=>(
+              {lista.length===0
+                ? <tr><td colSpan={7} style={{textAlign:"center",padding:"2rem",color:"var(--muted)"}}>
+                    {tab==="pendientes"?"No hay solicitudes pendientes":"No hay usuarios"}
+                  </td></tr>
+                : lista.map(u => (
                 <tr key={u.id}>
-                  <td><div style={{display:"flex",alignItems:"center",gap:8}}><Av letra={u.nombre?.[0]} size={28} /><div><div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div><div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div></div></div></td>
-                  <td><select value={u.rol} disabled={saving===u.id} onChange={e=>actualizar(u.id,{rol:e.target.value},u.email,u.nombre)} style={{padding:"0.25rem 0.5rem",borderRadius:"var(--r-sm)",border:"1px solid var(--border2)",fontSize:"0.75rem",fontFamily:"inherit",background:"var(--white)",cursor:"pointer"}}><option value="superadmin">Superadmin</option><option value="admin">Admin</option><option value="vendedor">Vendedor</option><option value="viewer">Viewer</option></select></td>
+                  {/* Usuario */}
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <Av letra={u.nombre?.[0]} size={28} />
+                      <div>
+                        <div style={{fontWeight:600,fontSize:"0.8rem"}}>{u.nombre||"—"}</div>
+                        <div style={{fontSize:"0.67rem",color:"var(--muted)"}}>{u.email}</div>
+                        {u.titulo && <div style={{fontSize:"0.65rem",color:"var(--accent)",fontWeight:600}}>{u.titulo}</div>}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Rol */}
+                  <td>
+                    <select value={u.rol} disabled={saving===u.id}
+                      onChange={e => actualizar(u.id, {rol:e.target.value}, u.email, u.nombre)}
+                      style={{padding:"0.25rem 0.5rem",borderRadius:"var(--r-sm)",border:"1px solid var(--border2)",fontSize:"0.75rem",fontFamily:"inherit",background:"var(--white)",cursor:"pointer"}}>
+                      <option value="superadmin">Superadmin</option>
+                      <option value="admin">Admin</option>
+                      <option value="vendedor">Vendedor</option>
+                      <option value="cm">Community Manager</option>
+                      <option value="soporte">Soporte</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
+                  </td>
+
+                  {/* Área */}
+                  <td>
+                    <select value={u.area||""} disabled={saving===u.id}
+                      onChange={e => actualizar(u.id, {area:e.target.value||null}, u.email, u.nombre)}
+                      style={{padding:"0.25rem 0.5rem",borderRadius:"var(--r-sm)",border:"1px solid var(--border2)",fontSize:"0.75rem",fontFamily:"inherit",background:"var(--white)",cursor:"pointer",color:u.area?"var(--text)":"var(--muted)"}}>
+                      <option value="">Sin área</option>
+                      <option value="comercial">Comercial</option>
+                      <option value="contenido">Marketing</option>
+                      <option value="atencion">Soporte</option>
+                      <option value="administracion">Administración</option>
+                      <option value="operaciones">Operaciones</option>
+                    </select>
+                  </td>
+
+                  {/* Estado */}
                   <td><span className={`bdg ${STATUS_BADGE[u.status]?.cls??"bdg-moon"}`}>{STATUS_BADGE[u.status]?.label??u.status}</span></td>
-                  <td><div className={`tog${u.activo?" on":""}`} onClick={()=>saving!==u.id&&actualizar(u.id,{activo:u.activo?0:1},u.email,u.nombre)} style={{cursor:saving===u.id?"not-allowed":"pointer"}}><div className="tog-k" /></div></td>
-                  <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{u.ultimo_acceso?new Date(u.ultimo_acceso).toLocaleDateString("es-AR"):"Nunca"}</td>
-                  <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>{new Date(u.creado_en).toLocaleDateString("es-AR")}</td>
-                  <td><div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                    {u.status==="pending"&&<><button className="btn btn-em btn-xs" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"approved"},u.email,u.nombre)}><i className="bi bi-check-lg" /> Aprobar</button><button className="btn btn-xs btn-out" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"rejected",activo:0},u.email,u.nombre)}><i className="bi bi-x-lg" /> Rechazar</button></>}
-                    {u.status==="approved"&&<button className="btn btn-xs btn-out" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"rejected",activo:0},u.email,u.nombre)}><i className="bi bi-slash-circle" /> Revocar</button>}
-                    {u.status==="rejected"&&<button className="btn btn-xs btn-out" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"approved",activo:1},u.email,u.nombre)}><i className="bi bi-arrow-counterclockwise" /> Restaurar</button>}
-                    <button className="btn btn-xs" disabled={saving===u.id} onClick={()=>eliminar(u.id,u.nombre)} style={{background:"var(--red-bg)",color:"var(--red)",border:"1px solid #f5c6c6"}}><i className="bi bi-trash3" /></button>
-                  </div></td>
+
+                  {/* Activo */}
+                  <td>
+                    <div className={`tog${u.activo?" on":""}`}
+                      onClick={()=>saving!==u.id&&actualizar(u.id,{activo:u.activo?0:1},u.email,u.nombre)}
+                      style={{cursor:saving===u.id?"not-allowed":"pointer"}}>
+                      <div className="tog-k" />
+                    </div>
+                  </td>
+
+                  {/* Último acceso */}
+                  <td style={{fontSize:"0.72rem",color:"var(--muted)"}}>
+                    {u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleDateString("es-AR") : "Nunca"}
+                  </td>
+
+                  {/* Acciones */}
+                  <td>
+                    <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                      {u.status==="pending" && <>
+                        <button className="btn btn-em btn-xs" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"approved"},u.email,u.nombre)}>
+                          <i className="bi bi-check-lg" /> Aprobar
+                        </button>
+                        <button className="btn btn-xs btn-out" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"rejected",activo:0},u.email,u.nombre)}>
+                          <i className="bi bi-x-lg" /> Rechazar
+                        </button>
+                      </>}
+                      {u.status==="approved" && <button className="btn btn-xs btn-out" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"rejected",activo:0},u.email,u.nombre)}><i className="bi bi-slash-circle" /> Revocar</button>}
+                      {u.status==="rejected" && <button className="btn btn-xs btn-out" disabled={saving===u.id} onClick={()=>actualizar(u.id,{status:"approved",activo:1},u.email,u.nombre)}><i className="bi bi-arrow-counterclockwise" /> Restaurar</button>}
+                      <button className="btn btn-xs" disabled={saving===u.id} onClick={()=>eliminar(u.id,u.nombre)}
+                        style={{background:"var(--red-bg)",color:"var(--red)",border:"1px solid #f5c6c6"}}>
+                        <i className="bi bi-trash3" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
