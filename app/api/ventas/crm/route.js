@@ -17,7 +17,7 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const vista      = searchParams.get("vista") || "todo"; // todo | leads | funnel | conversaciones
   const rol        = session.user.rol;
-  const usuario_id = session.user.id;
+const usuario_id = session.user.id || session.user.sub || null;
   const esAdmin    = ["superadmin","admin"].includes(rol);
 
   try {
@@ -83,6 +83,7 @@ export async function GET(req) {
 console.log("FUNNEL QUERY:", q, params);
 const [funnel] = await db.query(q, params);
 console.log("FUNNEL RESULT:", JSON.stringify(funnel));
+      console.log("SESSION:", session.user.rol, session.user.id);
   const etapas = {
     contactado:  [],
     interesado:  [],
