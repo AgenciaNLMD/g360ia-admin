@@ -1131,7 +1131,7 @@ function ViewDashboard() {
 
 /* ══ VIEW CLIENTES ══ */
 const PLAN_META = { starter:{label:"Starter",cls:"bdg-moon"}, pro:{label:"Pro",cls:"bdg-pro"}, plan_ia:{label:"Plan IA",cls:"bdg-gold"}, enterprise:{label:"Enterprise",cls:"bdg-pine"} };
-const RUBROS    = ["Hotel / Cabañas","Consultorio / Clínica / Spa","Salón de Eventos","Inmobiliaria","Restaurante / Gastronomía","Salón de belleza / Estética","Contador / Estudio contable","Abogado / Estudio jurídico","Gestor de seguros","Logística / Distribución","GovTech","Otro"];
+const RUBROS    = ["Servicio Técnico"];
 const FORM_CLI  = { nombre:"", rubro:"", plan:"starter", subdominio:"", email:"", telefono:"", logo_url:"" };
 
 function ViewClientes() {
