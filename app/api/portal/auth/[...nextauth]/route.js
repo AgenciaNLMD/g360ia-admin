@@ -3,6 +3,9 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import db from "@/lib/db";
 
+// 🔥 FIX CLAVE
+process.env.NEXTAUTH_URL = "https://app.gestion360ia.com.ar";
+
 const PORTAL_URL = "https://app.gestion360ia.com.ar";
 
 const authPortalOptions = {
