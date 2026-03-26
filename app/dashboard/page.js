@@ -3,6 +3,33 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 
+// ── Temas de color del sidebar ────────────────────────────────────
+const THEMES = {
+  verde: {
+    label: "Verde",      sub: "Predeterminado",
+    sbBg: "#1A7A4A",     sbBrd: "rgba(255,255,255,.2)",  sbActive: "rgba(255,255,255,.2)",
+    dark: true,          preview: ["#1A7A4A", "#2A9A60", "#1A7A4A"],
+  },
+  slate: {
+    label: "Tiza",       sub: "Slate",
+    sbBg: "linear-gradient(170deg,#7E8FA6 0%,#5C6E85 55%,#3A4A5C 100%)",
+    sbBrd: "rgba(255,255,255,.15)", sbActive: "rgba(255,255,255,.18)",
+    dark: true,          preview: ["#7E8FA6", "#5C6E85", "#3A4A5C"],
+  },
+  champagne: {
+    label: "Champagne",  sub: "#03",
+    sbBg: "linear-gradient(170deg,#F7D87C 0%,#C8922E 60%,#A87020 100%)",
+    sbBrd: "rgba(0,0,0,.12)",       sbActive: "rgba(0,0,0,.12)",
+    dark: false,         preview: ["#F7D87C", "#C8922E", "#A87020"],
+  },
+  teal: {
+    label: "Teal",       sub: "→ Azul",
+    sbBg: "linear-gradient(170deg,#1FC8A0 0%,#17B0A7 50%,#1499C2 100%)",
+    sbBrd: "rgba(255,255,255,.18)", sbActive: "rgba(255,255,255,.18)",
+    dark: true,          preview: ["#1FC8A0", "#17B0A7", "#1499C2"],
+  },
+};
+
 const VIEWS = {
   dashboard:     ["Dashboard",      "Resumen general del sistema"],
   clientes:      ["Clientes",       "Tenants registrados"],
@@ -27,6 +54,8 @@ export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [menuUsuario, setMenuUsuario] = useState(false);
   const [menuPos, setMenuPos] = useState({ bottom: 0, left: 0, width: 0 });
+  const [theme, setTheme]             = useState("slate");
+  const [showPersonalizar, setShowPersonalizar] = useState(false);
   const [stats, setStats] = useState({
     clientes_activos: null, conv_sin_asignar: null,
     tickets_urgentes: null, usuarios_pendientes: null,
@@ -39,6 +68,12 @@ export default function DashboardPage() {
   const userInitial = userName[0]?.toUpperCase() || "A";
   const rol         = session?.user?.rol || "superadmin";
   const esVendedor  = rol === "vendedor";
+
+  // Cargar y aplicar tema desde localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("g360ia_admin_theme");
+    if (saved && THEMES[saved]) applyTheme(saved, setTheme);
+  }, []);
 
   useEffect(() => {
     fetch("/api/stats/sidebar").then(r=>r.json()).then(d=>{
@@ -59,13 +94,16 @@ export default function DashboardPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const isCrmView = view === "crm";
+  const isCrmView   = view === "crm";
+  const champagne   = theme === "champagne";
+  const sbTxt       = champagne ? "rgba(60,30,0,.95)" : "#fff";
+  const sbTxtDim    = champagne ? "rgba(60,30,0,.55)" : "rgba(255,255,255,.5)";
 
   return (
     <>
       <div className="g360-wrap">
         {/* SIDEBAR */}
-        <nav id="sb" className={collapsed ? "collapsed" : ""}>
+        <nav id="sb" className={collapsed ? "collapsed" : ""} data-theme={theme}>
           <div className="sb-logo">
             <div className="sb-logo-mark" onClick={()=>setCollapsed(!collapsed)} style={{cursor:"pointer"}}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="18" height="18">
@@ -152,8 +190,8 @@ export default function DashboardPage() {
                   }
                 </div>
                 <div className="sb-logo-texts" style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:"0.78rem",fontWeight:600,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{userName}</div>
-                  <div style={{fontSize:"0.62rem",color:"rgba(255,255,255,.5)",marginTop:1}}>{esVendedor ? "Vendedor" : "Superadmin"}</div>
+                  <div style={{fontSize:"0.78rem",fontWeight:600,color:sbTxt,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{userName}</div>
+                  <div style={{fontSize:"0.62rem",color:sbTxtDim,marginTop:1}}>{esVendedor ? "Vendedor" : "Superadmin"}</div>
                 </div>
               </div>
               {menuUsuario && (
@@ -168,6 +206,7 @@ export default function DashboardPage() {
                   <div style={{padding:"0.3rem 0"}}>
                     <DropdownItem icon="bi-person" label="Mi perfil" onClick={()=>{setMenuUsuario(false);nav("perfil");}} />
                     {!esVendedor && <DropdownItem icon="bi-eye" label="Ver como cliente" onClick={()=>setMenuUsuario(false)} muted />}
+                    <DropdownItem icon="bi-palette" label="Personalizar" onClick={()=>{setMenuUsuario(false);setShowPersonalizar(true);}} />
                   </div>
                   <div style={{borderTop:"1px solid var(--border)",padding:"0.3rem 0"}}>
                     <DropdownItem icon="bi-box-arrow-right" label="Cerrar sesión" onClick={()=>signOut({callbackUrl:"/"})} danger />
@@ -213,6 +252,18 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ── MODAL PERSONALIZAR ── */}
+      {showPersonalizar && (
+        <AdminModalPersonalizar
+          theme={theme}
+          onSelect={(key) => {
+            applyTheme(key, setTheme);
+            localStorage.setItem("g360ia_admin_theme", key);
+          }}
+          onClose={() => setShowPersonalizar(false)}
+        />
+      )}
 
       <style jsx global>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -408,12 +459,137 @@ export default function DashboardPage() {
         .ficha-row .fv.m { color:var(--muted); font-style:italic; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
         .view-anim { animation:fadeIn .18s ease; }
+
+        /* ── Champagne sidebar overrides ── */
+        #sb[data-theme="champagne"] .sb-brand        { color:rgba(60,30,0,.95) !important; }
+        #sb[data-theme="champagne"] .sb-brand-sub    { color:rgba(60,30,0,.55) !important; }
+        #sb[data-theme="champagne"] .sb-sec          { color:rgba(60,30,0,.45) !important; }
+        #sb[data-theme="champagne"] .sb-divider      { background:rgba(0,0,0,.12) !important; }
+        #sb[data-theme="champagne"] .ni-ic           { color:rgba(60,30,0,.65) !important; }
+        #sb[data-theme="champagne"] .ni-txt          { color:rgba(60,30,0,.8) !important; }
+        #sb[data-theme="champagne"] .ni:hover        { background:rgba(0,0,0,.08) !important; }
+        #sb[data-theme="champagne"] .ni.on           { background:rgba(0,0,0,.12) !important; }
+        #sb[data-theme="champagne"] .ni.on .ni-ic    { color:rgba(40,15,0,.9) !important; }
+        #sb[data-theme="champagne"] .ni.on .ni-txt   { color:rgba(40,15,0,1) !important; }
+        #sb[data-theme="champagne"] .sb-logo         { border-bottom-color:rgba(0,0,0,.12) !important; }
+        #sb[data-theme="champagne"] .sb-logo-mark    { background:rgba(0,0,0,.1) !important; }
+        #sb[data-theme="champagne"] .sb-foot         { border-top-color:rgba(0,0,0,.12) !important; }
+
+        /* ── Admin modal personalizar ── */
+        .adm-modal-over {
+          position:fixed; inset:0; background:rgba(0,0,0,.35);
+          z-index:600; display:flex; align-items:center; justify-content:center; padding:1rem;
+        }
+        .adm-modal-box {
+          background:#fff; border-radius:var(--r); width:100%; max-width:400px;
+          box-shadow:var(--sh-md);
+        }
+        .adm-modal-hdr {
+          display:flex; align-items:center; justify-content:space-between;
+          padding:1rem 1.2rem; border-bottom:1px solid var(--border);
+        }
+        .adm-modal-title { font-size:0.92rem; font-weight:700; color:var(--text); }
+        .adm-modal-close {
+          width:28px; height:28px; border-radius:6px;
+          display:flex; align-items:center; justify-content:center;
+          cursor:pointer; color:var(--muted); font-size:0.9rem; transition:background .12s;
+        }
+        .adm-modal-close:hover { background:var(--bg); color:var(--text); }
+        .adm-modal-body { padding:1.2rem; }
+        .adm-modal-sub  { font-size:0.75rem; color:var(--muted); margin-bottom:1rem; }
+        .adm-themes-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .adm-theme-card {
+          border:2px solid var(--border); border-radius:var(--r);
+          overflow:hidden; cursor:pointer; transition:border-color .15s, box-shadow .15s;
+        }
+        .adm-theme-card:hover    { border-color:#9CA3AF; }
+        .adm-theme-card.selected { border-color:var(--pr); box-shadow:0 0 0 3px rgba(80,104,134,.12); }
+        .adm-theme-swatch { height:64px; position:relative; }
+        .adm-theme-check {
+          position:absolute; top:7px; right:7px; width:20px; height:20px; border-radius:50%;
+          background:var(--pr); color:#fff; display:flex; align-items:center; justify-content:center;
+          font-size:0.65rem;
+        }
+        .adm-theme-info  { padding:7px 10px 8px; border-top:1px solid var(--border); background:#fff; }
+        .adm-theme-label { font-size:0.75rem; font-weight:700; color:var(--text); }
+        .adm-theme-sub   { font-size:0.62rem; color:var(--muted); margin-top:1px; }
+        .adm-modal-foot  { padding:0.75rem 1.2rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
+        .adm-modal-btn   { padding:7px 18px; border-radius:var(--r-sm); background:var(--pr); color:#fff; font-size:0.8rem; font-weight:600; border:none; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .15s; }
+        .adm-modal-btn:hover { opacity:.85; }
       `}</style>
     </>
   );
 }
 
 /* ══ COMPONENTES COMPARTIDOS ══ */
+
+// ── Helper: aplica un tema al CSS y actualiza el estado ───────────
+function applyTheme(key, setTheme) {
+  const t = THEMES[key];
+  if (!t) return;
+  const root = document.documentElement;
+  root.style.setProperty("--sb-bg",  t.sbBg);
+  root.style.setProperty("--sb-brd", t.sbBrd);
+  root.style.setProperty("--sb-active", t.sbActive);
+  setTheme(key);
+}
+
+// ── Modal Personalizar (admin) ────────────────────────────────────
+function AdminModalPersonalizar({ theme, onSelect, onClose }) {
+  const [selected, setSelected] = useState(theme);
+
+  const apply = () => {
+    onSelect(selected);
+    onClose();
+  };
+
+  return (
+    <div className="adm-modal-over" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="adm-modal-box view-anim">
+        <div className="adm-modal-hdr">
+          <span className="adm-modal-title">Personalizar panel</span>
+          <div className="adm-modal-close" onClick={onClose}>
+            <i className="bi bi-x-lg" />
+          </div>
+        </div>
+        <div className="adm-modal-body">
+          <div className="adm-modal-sub">Elegí un color para el sidebar de tu panel.</div>
+          <div className="adm-themes-grid">
+            {Object.entries(THEMES).map(([key, t]) => {
+              const gradient = t.preview.length === 1
+                ? t.preview[0]
+                : `linear-gradient(135deg, ${t.preview.join(", ")})`;
+              return (
+                <div
+                  key={key}
+                  className={`adm-theme-card${selected === key ? " selected" : ""}`}
+                  onClick={() => setSelected(key)}
+                >
+                  <div className="adm-theme-swatch" style={{ background: gradient }}>
+                    {selected === key && (
+                      <div className="adm-theme-check">
+                        <i className="bi bi-check" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="adm-theme-info">
+                    <div className="adm-theme-label">{t.label}</div>
+                    <div className="adm-theme-sub">{t.sub}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="adm-modal-foot">
+          <button className="adm-modal-btn" onClick={apply}>
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function NavItem({ id, icon, iconSvg, label, active, onClick, badge, badgeClass, incoming }) {
   return (
