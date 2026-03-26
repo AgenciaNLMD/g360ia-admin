@@ -1,4 +1,5 @@
 import Providers from "./providers";
+import "g360ia-styles/index.css";
 import "./globals.css";
 
 export const metadata = {
