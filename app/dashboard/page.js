@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const [theme, setTheme]             = useState("slate");
   const [showPersonalizar, setShowPersonalizar] = useState(false);
   const [showRubroService, setShowRubroService] = useState(false);
+  const [showSocialMedia, setShowSocialMedia]   = useState(false);
   const [stats, setStats] = useState({
     clientes_activos: null, conv_sin_asignar: null,
     tickets_urgentes: null, usuarios_pendientes: null,
@@ -212,6 +213,7 @@ export default function DashboardPage() {
                   <div style={{borderTop:"1px solid var(--border)",padding:"0.3rem 0 0.15rem"}}>
                     <div style={{fontSize:"0.6rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"var(--muted)",padding:"0.3rem 0.85rem 0.15rem"}}>Documentos</div>
                     <DropdownItem icon="bi-file-earmark-text" label="Rubro Service" onClick={()=>{setMenuUsuario(false);setShowRubroService(true);}} />
+                    <DropdownItem icon="bi-grid-1x2" label="Módulo Social Media" onClick={()=>{setMenuUsuario(false);setShowSocialMedia(true);}} />
                   </div>
                   <div style={{borderTop:"1px solid var(--border)",padding:"0.3rem 0"}}>
                     <DropdownItem icon="bi-box-arrow-right" label="Cerrar sesión" onClick={()=>signOut({callbackUrl:"/"})} danger />
@@ -260,6 +262,9 @@ export default function DashboardPage() {
 
       {/* ── MODAL RUBRO SERVICE ── */}
       {showRubroService && <ModalRubroService onClose={()=>setShowRubroService(false)} />}
+
+      {/* ── MODAL SOCIAL MEDIA ── */}
+      {showSocialMedia && <ModalSocialMedia onClose={()=>setShowSocialMedia(false)} />}
 
       {/* ── MODAL PERSONALIZAR ── */}
       {showPersonalizar && (
@@ -982,6 +987,874 @@ function ModalRubroService({ onClose }) {
           srcDoc={RUBRO_SERVICE_HTML}
           style={{flex:1,border:"none",width:"100%"}}
           title="Rubro Service — Tarifario Servicio Técnico"
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── Modal Módulo Social Media ────────────────────────────────────────────────
+const SOCIAL_MEDIA_HTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Studio — Gestión 360 iA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  :root {
+    --bg:#F2F4F6; --white:#FFFFFF;
+    --pr:#506886; --pr-d:#3E5270; --pr-l:#6B86A0; --pr-pale:#EDF1F6; --pr-mid:#C2CFD9;
+    --em:#3A9E70; --em-d:#2A7A54; --em-pale:#E8F7F1; --em-mid:#B8E0D0;
+    --accent:#B08A55; --accent-pale:#F7F0E6;
+    --text:#1F2937; --text2:#4B5563; --muted:#9CA3AF; --sub:#6B7280;
+    --border:#E5E7EB; --border2:#D1D5DB;
+    --red:#D9534F; --red-bg:#FDF2F2;
+    --amber:#B08A55; --amber-bg:#FBF6EE;
+    --r:11px; --r-sm:7px;
+    --sh:0 1px 3px rgba(30,50,80,.06),0 4px 14px rgba(30,50,80,.05);
+    --sh-md:0 4px 20px rgba(30,50,80,.10);
+    --plan-free:#6B7280; --plan-pro:#506886; --plan-biz:#3A9E70; --plan-ia:#B08A55;
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter','Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:13px; -webkit-font-smoothing:antialiased; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 16px; height:48px; background:var(--white);
+    border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .t-brand { display:flex; align-items:center; gap:8px; }
+  .t-mark { width:28px; height:28px; border-radius:7px; background:var(--pr); display:flex; align-items:center; justify-content:center; }
+  .t-mark i { color:#fff; font-size:13px; }
+  .t-name { font-family:'Fraunces',serif; font-size:0.9rem; font-weight:600; color:var(--pr); letter-spacing:-0.01em; }
+  .t-sep { font-size:0.7rem; color:var(--muted); }
+  .t-module { font-size:0.78rem; font-weight:600; color:var(--text2); }
+  .plan-switcher { display:flex; gap:4px; background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); padding:3px; }
+  .plan-btn {
+    padding:4px 12px; border-radius:5px; border:none; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:11px; font-weight:700;
+    letter-spacing:0.2px; transition:all .18s; background:transparent; color:var(--muted);
+  }
+  .plan-btn:hover:not(.active) { color:var(--text); background:var(--border); }
+  .plan-btn.free.active   { background:var(--plan-free);  color:#fff; }
+  .plan-btn.pro.active    { background:var(--plan-pro);   color:#fff; }
+  .plan-btn.biz.active    { background:var(--plan-biz);   color:#fff; }
+  .plan-btn.ia.active     { background:var(--plan-ia);    color:#fff; }
+  .t-right { display:flex; align-items:center; gap:8px; }
+  .t-avatar { width:28px; height:28px; border-radius:50%; background:var(--pr); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
+
+  /* ── LAYOUT ── */
+  .app-layout { display:grid; grid-template-columns:200px 1fr 280px; flex:1; overflow:hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { background:var(--white); border-right:1px solid var(--border); overflow-y:auto; padding:10px 8px; }
+  .sb-sec-label {
+    font-size:10px; font-weight:700; letter-spacing:.1em; color:var(--muted);
+    text-transform:uppercase; padding:6px 8px 4px; margin-top:6px;
+  }
+  .ni {
+    display:flex; align-items:center; gap:8px; padding:7px 9px; border-radius:var(--r-sm);
+    cursor:pointer; font-size:12px; font-weight:500; color:var(--text2);
+    transition:all .13s; border:1px solid transparent; margin-bottom:1px;
+  }
+  .ni:hover { background:var(--bg); color:var(--text); }
+  .ni.on { background:var(--pr-pale); color:var(--pr); border-color:var(--pr-mid); font-weight:600; }
+  .ni i { font-size:14px; width:18px; text-align:center; }
+  .ni-badge {
+    margin-left:auto; font-size:9px; font-weight:700; padding:2px 6px;
+    border-radius:20px; background:var(--pr-pale); color:var(--pr);
+  }
+  .ni-lock { margin-left:auto; font-size:9px; font-weight:700; padding:2px 6px; border-radius:20px; background:var(--amber-bg); color:var(--amber); }
+  .ni-ai { margin-left:auto; font-size:9px; font-weight:800; padding:2px 6px; border-radius:20px; background:var(--em-pale); color:var(--em-d); letter-spacing:.3px; }
+  .sb-divider { height:1px; background:var(--border); margin:8px 0; }
+  .plan-features { padding:0 4px; }
+  .fi { display:flex; align-items:center; gap:6px; padding:4px 0; font-size:11px; color:var(--text2); border-bottom:1px solid rgba(0,0,0,.04); }
+  .fi.ok { color:var(--text); }
+  .fi.no { opacity:.45; text-decoration:line-through; }
+  .fi-check { font-size:10px; }
+  .fi.ok .fi-check { color:var(--em); }
+  .fi.no .fi-check { color:var(--muted); }
+
+  /* ── MAIN ── */
+  .main { overflow-y:auto; background:var(--bg); }
+  .view { display:none; padding:20px; animation:fadeIn .25s ease; }
+  .view.on { display:block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+  .vh { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .vh-title { font-family:'Fraunces',serif; font-size:1.3rem; font-weight:600; color:var(--text); letter-spacing:-0.02em; }
+  .vh-title span { color:var(--pr); font-style:italic; }
+  .vh-sub { font-size:11.5px; color:var(--muted); margin-top:2px; }
+
+  /* ── BUTTONS ── */
+  .btn { display:inline-flex; align-items:center; gap:5px; padding:7px 14px; border-radius:var(--r-sm); font-family:'Inter',sans-serif; font-size:12px; font-weight:600; cursor:pointer; border:none; transition:all .14s; }
+  .btn-pr { background:var(--pr); color:#fff; box-shadow:0 2px 6px rgba(80,104,134,.22); }
+  .btn-pr:hover { background:var(--pr-d); }
+  .btn-out { background:none; border:1px solid var(--border2); color:var(--text2); }
+  .btn-out:hover { border-color:var(--pr); color:var(--pr); background:var(--pr-pale); }
+  .btn-em { background:var(--em); color:#fff; box-shadow:0 2px 6px rgba(58,158,112,.2); }
+  .btn-em:hover { background:var(--em-d); }
+  .btn-sm { padding:5px 11px; font-size:11.5px; }
+  .btn-row { display:flex; gap:6px; }
+
+  /* ── CARDS ── */
+  .card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--sh); overflow:hidden; }
+  .ch { padding:10px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+  .ch-title { font-size:12.5px; font-weight:700; color:var(--text); flex:1; }
+  .cb { padding:14px; }
+
+  /* ── GRIDS ── */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+
+  /* ── LOCKED OVERLAY ── */
+  .locked-wrap { position:relative; border-radius:var(--r); overflow:hidden; }
+  .locked-wrap::after { content:''; position:absolute; inset:0; background:rgba(242,244,246,.82); backdrop-filter:blur(2px); border-radius:var(--r); }
+  .lock-over { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; gap:8px; }
+  .lock-badge { font-size:11px; font-weight:700; color:var(--amber); background:var(--amber-bg); border:1px solid rgba(176,138,85,.3); padding:4px 14px; border-radius:20px; }
+
+  /* ── DESIGNER ── */
+  .designer { display:grid; grid-template-columns:1fr 260px; gap:14px; }
+  .canvas-toolbar { display:flex; align-items:center; gap:6px; padding:9px 12px; border-bottom:1px solid var(--border); background:var(--bg); flex-wrap:wrap; }
+  .tool-btn { padding:4px 10px; background:var(--white); border:1px solid var(--border2); border-radius:5px; color:var(--text2); font-size:11.5px; font-weight:600; cursor:pointer; transition:all .13s; font-family:'Inter',sans-serif; }
+  .tool-btn:hover, .tool-btn.on { background:var(--pr-pale); border-color:var(--pr-mid); color:var(--pr); }
+  .tool-sep { width:1px; height:18px; background:var(--border2); margin:0 2px; }
+  .canvas-area {
+    display:flex; align-items:center; justify-content:center; padding:24px; min-height:340px;
+    background: repeating-linear-gradient(0deg,transparent,transparent 23px,var(--border) 23px,var(--border) 24px),
+                repeating-linear-gradient(90deg,transparent,transparent 23px,var(--border) 23px,var(--border) 24px);
+  }
+  .post-canvas {
+    width:240px; height:240px; border-radius:14px; box-shadow:var(--sh-md);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; overflow:hidden; cursor:pointer; transition:all .25s;
+    background:var(--pr);
+  }
+  .post-canvas:hover { transform:scale(1.02); box-shadow:0 8px 32px rgba(80,104,134,.22); }
+  .canvas-bg { position:absolute; inset:0; background:var(--canvas-bg,linear-gradient(135deg,#506886,#3E5270)); transition:background .4s; }
+  .canvas-content { position:relative; z-index:2; text-align:center; padding:18px; }
+  .canvas-headline { font-family:'Fraunces',serif; font-size:17px; font-weight:600; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.3); line-height:1.25; margin-bottom:7px; outline:none; }
+  .canvas-sub { font-size:10.5px; color:rgba(255,255,255,.7); font-weight:500; }
+  .canvas-logo { position:absolute; bottom:12px; right:12px; font-family:'Fraunces',serif; font-size:9px; font-weight:600; color:rgba(255,255,255,.45); }
+  .panel-title { font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+  .tpl-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:14px; }
+  .tpl-thumb { aspect-ratio:1; border-radius:7px; cursor:pointer; border:2px solid transparent; transition:all .18s; overflow:hidden; position:relative; }
+  .tpl-thumb:hover, .tpl-thumb.on { border-color:var(--pr); }
+  .tpl-name { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,.5); font-size:8.5px; font-weight:700; color:#fff; padding:3px 5px; text-align:center; }
+  .color-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+  .swatch { width:20px; height:20px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:all .15s; flex-shrink:0; }
+  .swatch:hover, .swatch.on { border-color:var(--pr); transform:scale(1.18); }
+  .fg { margin-bottom:10px; }
+  .fl { display:block; font-size:10.5px; font-weight:600; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em; }
+  .fi-input { width:100%; padding:7px 9px; background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); color:var(--text); font-family:'Inter',sans-serif; font-size:12px; transition:border .14s; }
+  .fi-input:focus { outline:none; border-color:var(--pr); box-shadow:0 0 0 3px rgba(80,104,134,.1); }
+  select.fi-input { cursor:pointer; }
+
+  /* ── MEDIA ── */
+  .drop-zone { border:2px dashed var(--border2); border-radius:var(--r); padding:28px 18px; text-align:center; cursor:pointer; transition:all .18s; background:var(--white); }
+  .drop-zone:hover { border-color:var(--pr); background:var(--pr-pale); }
+  .drop-icon { font-size:28px; opacity:.45; margin-bottom:8px; color:var(--pr); }
+  .drop-title { font-size:13px; font-weight:700; color:var(--text2); margin-bottom:3px; }
+  .drop-sub { font-size:10.5px; color:var(--muted); }
+  .media-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+  .media-thumb { aspect-ratio:1; border-radius:7px; overflow:hidden; cursor:pointer; position:relative; border:2px solid transparent; transition:all .18s; }
+  .media-thumb:hover { border-color:var(--pr); transform:scale(1.04); }
+  .media-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:18px; border-radius:5px; }
+  .media-over { position:absolute; inset:0; background:rgba(80,104,134,.55); opacity:0; display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; transition:opacity .18s; }
+  .media-thumb:hover .media-over { opacity:1; }
+
+  /* ── COPY / TEXT ── */
+  .net-tabs { display:flex; gap:5px; margin-bottom:12px; flex-wrap:wrap; }
+  .net-tab { padding:4px 11px; border-radius:20px; border:1px solid var(--border2); background:transparent; color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; transition:all .14s; font-family:'Inter',sans-serif; }
+  .net-tab.on { background:var(--pr); border-color:var(--pr); color:#fff; }
+  .net-tab.ig.on { background:linear-gradient(135deg,#f09433,#dc2743,#bc1888); border-color:transparent; }
+  .net-tab.fb.on { background:#1877f2; border-color:#1877f2; }
+  .net-tab.tw.on { background:#1F2937; border-color:#1F2937; }
+  .net-tab.li.on { background:#0a66c2; border-color:#0a66c2; }
+  .copy-area { background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); padding:12px; min-height:110px; font-size:12.5px; line-height:1.65; color:var(--text); outline:none; cursor:text; font-family:'Inter',sans-serif; transition:border .14s; }
+  .copy-area:focus { border-color:var(--pr); }
+  .hashtag-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .hashtag { font-size:11px; font-weight:600; padding:2px 9px; border-radius:20px; background:var(--pr-pale); color:var(--pr); border:1px solid var(--pr-mid); cursor:pointer; transition:all .13s; }
+  .hashtag:hover { background:var(--pr-mid); }
+  .topic-row { display:flex; gap:6px; margin-bottom:12px; }
+  .topic-input { flex:1; padding:7px 10px; background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); color:var(--text); font-family:'Inter',sans-serif; font-size:12px; }
+  .topic-input:focus { outline:none; border-color:var(--pr); }
+  .ai-badge { font-size:9px; font-weight:800; letter-spacing:.06em; padding:2px 7px; border-radius:20px; background:var(--em-pale); color:var(--em-d); border:1px solid var(--em-mid); }
+  .besttime-row { display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); }
+  .besttime-row:last-child { border-bottom:none; }
+  .bt-label { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:5px; }
+  .bt-val { font-size:13px; font-weight:700; color:var(--text); }
+  .plan-notice { display:flex; align-items:center; gap:7px; padding:8px 11px; border-radius:var(--r-sm); font-size:11px; font-weight:600; margin-bottom:8px; }
+  .notice-lock { background:var(--amber-bg); border:1px solid rgba(176,138,85,.25); color:var(--amber); }
+  .notice-ok   { background:var(--em-pale);  border:1px solid var(--em-mid); color:var(--em-d); }
+  .post-preview { background:var(--bg); border:1px solid var(--border); border-radius:9px; overflow:hidden; margin-top:10px; }
+  .pp-hdr { display:flex; align-items:center; gap:8px; padding:9px 11px; }
+  .pp-av { width:28px; height:28px; border-radius:50%; background:var(--pr); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; }
+  .pp-name { font-size:11.5px; font-weight:700; color:var(--text); }
+  .pp-time { font-size:10px; color:var(--muted); }
+  .pp-img { width:100%; height:100px; background:linear-gradient(135deg,var(--pr),var(--pr-d)); display:flex; align-items:center; justify-content:center; font-size:32px; color:rgba(255,255,255,.25); }
+  .pp-text { padding:9px 11px; font-size:11px; color:var(--text2); line-height:1.55; }
+  .pp-acts { display:flex; gap:12px; padding:7px 11px; border-top:1px solid var(--border); }
+  .pp-act { font-size:11px; color:var(--muted); font-weight:600; cursor:pointer; transition:color .13s; }
+  .pp-act:hover { color:var(--pr); }
+
+  /* ── CALENDAR ── */
+  .cal-layout { display:grid; grid-template-columns:1fr 260px; gap:14px; }
+  .cal-hdr { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); }
+  .cal-month { font-family:'Fraunces',serif; font-size:1rem; font-weight:600; color:var(--text); }
+  .cal-nav { display:flex; gap:4px; }
+  .cal-nav-btn { width:28px; height:28px; border-radius:5px; border:1px solid var(--border2); background:var(--bg); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .13s; }
+  .cal-nav-btn:hover { background:var(--pr-pale); border-color:var(--pr-mid); color:var(--pr); }
+  .cal-grid-wrap { padding:10px; }
+  .cal-days { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px; }
+  .cal-dn { text-align:center; font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; padding:3px 0; }
+  .cal-cells { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .cal-cell { min-height:58px; border-radius:7px; padding:5px; background:var(--white); border:1px solid var(--border); cursor:pointer; transition:all .13s; overflow:hidden; }
+  .cal-cell:hover { border-color:var(--pr-mid); background:var(--pr-pale); }
+  .cal-cell.today { border-color:var(--pr); background:var(--pr-pale); }
+  .cal-cell.dim { opacity:.35; }
+  .cal-num { font-size:10.5px; font-weight:700; color:var(--muted); margin-bottom:3px; }
+  .cal-cell.today .cal-num { color:var(--pr); }
+  .cal-post { font-size:8.5px; font-weight:600; padding:2px 4px; border-radius:3px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cal-post.ig { background:#FEF0F5; color:#9B1C4E; }
+  .cal-post.fb { background:#EBF3FE; color:#1455B5; }
+  .cal-post.tw { background:#F3F4F6; color:#374151; }
+  .queue-item { background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); padding:10px; margin-bottom:6px; cursor:pointer; transition:all .13s; }
+  .queue-item:hover { border-color:var(--pr-mid); }
+  .q-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+  .q-net { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+  .q-net.ig { background:#FEF0F5; color:#9B1C4E; }
+  .q-net.fb { background:#EBF3FE; color:#1455B5; }
+  .q-net.tw { background:#F3F4F6; color:#374151; }
+  .q-time { font-size:10px; color:var(--muted); font-weight:600; }
+  .q-text { font-size:11px; color:var(--text2); line-height:1.5; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .q-status { font-size:10px; font-weight:700; display:flex; align-items:center; gap:4px; }
+  .q-status.sched { color:var(--amber); }
+  .q-status.pub { color:var(--em); }
+
+  /* ── METRICS ── */
+  .kpi { background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; box-shadow:var(--sh); }
+  .kpi-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; }
+  .kpi-val { font-family:'Fraunces',serif; font-size:1.9rem; font-weight:600; color:var(--text); line-height:1; margin-bottom:3px; }
+  .kpi-chg { font-size:11px; font-weight:600; }
+  .kpi-chg.up { color:var(--em); }
+  .kpi-chg.dn { color:var(--red); }
+  .bar-chart { display:flex; align-items:flex-end; gap:4px; height:70px; }
+  .bar { flex:1; background:linear-gradient(180deg,var(--pr),var(--pr-pale)); border-radius:3px 3px 0 0; min-width:8px; transition:all .25s; cursor:pointer; }
+  .bar:hover { background:linear-gradient(180deg,var(--em),var(--em-pale)); }
+  .bar-labels { display:flex; gap:4px; }
+  .bl { flex:1; text-align:center; font-size:8.5px; color:var(--muted); font-weight:600; margin-top:3px; }
+
+  /* ── AUTOMATIONS ── */
+  .auto-item { background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); padding:12px; margin-bottom:8px; }
+  .auto-row { display:flex; align-items:center; justify-content:space-between; }
+  .auto-name { font-size:12.5px; font-weight:700; color:var(--text); }
+  .auto-desc { font-size:11px; color:var(--muted); margin-top:3px; }
+  .tog { width:34px; height:18px; border-radius:20px; cursor:pointer; position:relative; transition:background .2s; background:var(--border2); flex-shrink:0; }
+  .tog.on { background:var(--pr); }
+  .tog-k { width:14px; height:14px; background:#fff; border-radius:50%; position:absolute; top:2px; left:2px; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .tog.on .tog-k { transform:translateX(16px); }
+  .ai-card { border-radius:var(--r-sm); padding:11px 13px; margin-bottom:8px; }
+  .ai-card.teal { background:var(--em-pale); border:1px solid var(--em-mid); }
+  .ai-card.blue { background:var(--pr-pale); border:1px solid var(--pr-mid); }
+  .ai-card.amber { background:var(--amber-bg); border:1px solid rgba(176,138,85,.25); }
+  .ai-card-title { font-size:11.5px; font-weight:700; margin-bottom:3px; }
+  .ai-card.teal .ai-card-title { color:var(--em-d); }
+  .ai-card.blue .ai-card-title { color:var(--pr); }
+  .ai-card.amber .ai-card-title { color:var(--amber); }
+  .ai-card p { font-size:11px; color:var(--text2); line-height:1.55; }
+
+  /* ── RIGHT PANEL ── */
+  .rp { background:var(--white); border-left:1px solid var(--border); overflow-y:auto; display:flex; flex-direction:column; }
+  .rp-sec { padding:14px; border-bottom:1px solid var(--border); }
+  .rp-title { font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+  .acc-chip { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); margin-bottom:5px; cursor:pointer; transition:all .13s; }
+  .acc-chip:hover { border-color:var(--pr-mid); }
+  .acc-chip.sel { border-color:var(--pr); background:var(--pr-pale); }
+  .acc-icon { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .acc-icon.ig { background:linear-gradient(135deg,#f09433,#dc2743,#bc1888); color:#fff; }
+  .acc-icon.fb { background:#1877f2; color:#fff; }
+  .acc-icon.tw { background:#1F2937; color:#fff; }
+  .acc-name { font-size:12px; font-weight:700; color:var(--text); }
+  .acc-handle { font-size:10px; color:var(--muted); }
+  .acc-check { width:14px; height:14px; border-radius:50%; border:1.5px solid var(--border2); background:transparent; margin-left:auto; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:8px; transition:all .14s; }
+  .acc-chip.sel .acc-check { background:var(--pr); border-color:var(--pr); color:#fff; }
+  .sched-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; }
+  .sched-row input { width:100%; padding:7px 8px; background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); color:var(--text); font-family:'Inter',sans-serif; font-size:11.5px; color-scheme:light; }
+  .sched-row input:focus { outline:none; border-color:var(--pr); }
+  .mini-stat { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); }
+  .mini-stat:last-child { border-bottom:none; }
+  .ms-label { font-size:12px; color:var(--text2); }
+  .ms-val { font-size:13px; font-weight:700; color:var(--text); }
+  .ms-val.em { color:var(--em); }
+  .ms-val.amber { color:var(--amber); }
+  .stor-bar-wrap { height:5px; background:var(--bg); border-radius:3px; overflow:hidden; margin:4px 0 4px; }
+  .stor-bar { height:100%; border-radius:3px; transition:.5s; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="t-brand">
+    <div class="t-mark"><i class="bi bi-grid-1x2-fill"></i></div>
+    <span class="t-name">Gestión 360 iA</span>
+    <span class="t-sep">/</span>
+    <span class="t-module">Social Studio</span>
+  </div>
+  <div class="plan-switcher">
+    <button class="plan-btn free" onclick="setPlan('free')">FREE</button>
+    <button class="plan-btn pro active" onclick="setPlan('pro')">PRO</button>
+    <button class="plan-btn biz" onclick="setPlan('biz')">BUSINESS</button>
+    <button class="plan-btn ia" onclick="setPlan('ia')">PLAN IA</button>
+  </div>
+  <div class="t-right">
+    <div class="t-avatar">PA</div>
+  </div>
+</div>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-sec-label">Contenido</div>
+    <div class="ni on" onclick="setView('composer')"><i class="bi bi-palette"></i> Diseñar pieza</div>
+    <div class="ni" onclick="setView('media')"><i class="bi bi-images"></i> Biblioteca <span class="ni-badge" id="badge-media">24</span></div>
+    <div class="ni" onclick="setView('copy')"><i class="bi bi-pencil-square"></i> Texto sugerido <span class="ni-ai" id="badge-ai">IA</span></div>
+    <div class="sb-divider"></div>
+    <div class="sb-sec-label">Publicación</div>
+    <div class="ni" onclick="setView('calendar')"><i class="bi bi-calendar3"></i> Calendario</div>
+    <div class="ni" onclick="setView('metrics')"><i class="bi bi-bar-chart-line"></i> Métricas <span id="lock-metrics" class="ni-lock" style="display:none">PRO+</span></div>
+    <div class="ni" onclick="setView('automations')"><i class="bi bi-lightning-charge"></i> Automatizaciones <span id="lock-auto" class="ni-lock" style="display:none">IA</span></div>
+    <div class="sb-divider"></div>
+    <div class="sb-sec-label">Plan actual</div>
+    <div class="plan-features" id="plan-features"></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- COMPOSER -->
+    <div class="view on" id="view-composer">
+      <div class="vh">
+        <div><div class="vh-title">Diseñar <span>Pieza Gráfica</span></div><div class="vh-sub">Creá tu contenido visual para redes sociales</div></div>
+        <div class="btn-row">
+          <button class="btn btn-out btn-sm" onclick="alert('👁️ Preview generado')"><i class="bi bi-eye"></i> Preview</button>
+          <button class="btn btn-pr btn-sm" onclick="alert('✅ Pieza guardada en biblioteca!')"><i class="bi bi-floppy"></i> Guardar pieza</button>
+        </div>
+      </div>
+      <div class="designer">
+        <div class="card">
+          <div class="canvas-toolbar">
+            <button class="tool-btn on" onclick="setFormat('square',this)">1:1 Post</button>
+            <button class="tool-btn" onclick="setFormat('story',this)">9:16 Story</button>
+            <button class="tool-btn" onclick="setFormat('banner',this)">16:9 Banner</button>
+            <span class="tool-sep"></span>
+            <button class="tool-btn" onclick="toggleGrid(this)"><i class="bi bi-grid-3x3"></i> Grid</button>
+            <button class="tool-btn" onclick="document.getElementById('canvas-headline').focus()"><i class="bi bi-type"></i> Texto</button>
+          </div>
+          <div class="canvas-area" id="canvas-area">
+            <div class="post-canvas" id="post-canvas">
+              <div class="canvas-bg" id="canvas-bg"></div>
+              <div class="canvas-content">
+                <div class="canvas-headline" id="canvas-headline" contenteditable="true" onclick="event.stopPropagation()">Automatizá tu negocio con IA</div>
+                <div class="canvas-sub" id="canvas-sub">Gestión 360 iA · gestion360ia.com.ar</div>
+              </div>
+              <div class="canvas-logo">G360 iA</div>
+            </div>
+          </div>
+        </div>
+        <div class="card cb" style="overflow-y:auto;max-height:440px">
+          <div class="panel-title"><i class="bi bi-palette2"></i> Plantillas</div>
+          <div class="tpl-grid" id="tpl-grid">
+            <div class="tpl-thumb on" onclick="applyTpl(0)" style="background:linear-gradient(135deg,#506886,#3E5270)"><span class="tpl-name">Pizarra</span></div>
+            <div class="tpl-thumb" onclick="applyTpl(1)" style="background:linear-gradient(135deg,#1A7A4A,#0f5233)"><span class="tpl-name">Verde G360</span></div>
+            <div class="tpl-thumb" onclick="applyTpl(2)" style="background:linear-gradient(135deg,#B08A55,#7A5800)"><span class="tpl-name">Dorado</span></div>
+            <div class="tpl-thumb" onclick="applyTpl(3)" style="background:linear-gradient(135deg,#1F2937,#374151)"><span class="tpl-name">Oscuro</span></div>
+            <div class="tpl-thumb locked-wrap" id="tpl-4" onclick="lockAlert('Pro')">
+              <div class="lock-over"><i class="bi bi-lock-fill" style="font-size:16px;color:var(--amber)"></i><span class="lock-badge">PRO</span></div>
+              <div style="height:100%;background:linear-gradient(135deg,#3A9E70,#2A7A54)"></div><span class="tpl-name">Esmeralda</span>
+            </div>
+            <div class="tpl-thumb locked-wrap" id="tpl-5" onclick="lockAlert('IA')">
+              <div class="lock-over"><i class="bi bi-lock-fill" style="font-size:16px;color:var(--amber)"></i><span class="lock-badge">IA</span></div>
+              <div style="height:100%;background:linear-gradient(135deg,#7C3AED,#5B21B6)"></div><span class="tpl-name">Violeta IA</span>
+            </div>
+          </div>
+          <div class="panel-title"><i class="bi bi-droplet-half"></i> Color de fondo</div>
+          <div class="color-row" id="color-row">
+            <div class="swatch on" style="background:linear-gradient(135deg,#506886,#3E5270)" onclick="applyColor('linear-gradient(135deg,#506886,#3E5270)',this)"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#1A7A4A,#0f5233)" onclick="applyColor('linear-gradient(135deg,#1A7A4A,#0f5233)',this)"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#B08A55,#7A5800)" onclick="applyColor('linear-gradient(135deg,#B08A55,#7A5800)',this)"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#1F2937,#374151)" onclick="applyColor('linear-gradient(135deg,#1F2937,#374151)',this)"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#3A9E70,#2A7A54)" onclick="applyColor('linear-gradient(135deg,#3A9E70,#2A7A54)',this)"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#7C3AED,#5B21B6)" onclick="applyColor('linear-gradient(135deg,#7C3AED,#5B21B6)',this)"></div>
+            <div class="swatch" style="background:#F2F4F6;border:1.5px solid #D1D5DB" onclick="applyColor('#F2F4F6',this)"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#E1306C,#833AB4)" onclick="applyColor('linear-gradient(135deg,#E1306C,#833AB4)',this)"></div>
+          </div>
+          <div class="fg"><label class="fl">Título principal</label>
+            <input class="fi-input" type="text" id="inp-headline" value="Automatizá tu negocio con IA" oninput="document.getElementById('canvas-headline').innerText=this.value">
+          </div>
+          <div class="fg"><label class="fl">Subtítulo / marca</label>
+            <input class="fi-input" type="text" id="inp-sub" value="Gestión 360 iA · gestion360ia.com.ar" oninput="document.getElementById('canvas-sub').innerText=this.value">
+          </div>
+          <div class="fg"><label class="fl">Tamaño de fuente</label>
+            <select class="fi-input" onchange="document.getElementById('canvas-headline').style.fontSize=this.value+'px'">
+              <option value="14">14px — Compacto</option>
+              <option value="17" selected>17px — Normal</option>
+              <option value="21">21px — Grande</option>
+              <option value="25">25px — Display</option>
+            </select>
+          </div>
+          <button class="btn btn-em" style="width:100%;justify-content:center;margin-top:4px" onclick="alert('✅ Pieza añadida a biblioteca!')"><i class="bi bi-plus-lg"></i> Agregar a biblioteca</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="view" id="view-media">
+      <div class="vh">
+        <div><div class="vh-title">Biblioteca de <span>Medios</span></div><div class="vh-sub">Fotos, videos y piezas gráficas disponibles</div></div>
+        <button class="btn btn-pr btn-sm" onclick="alert('📂 Seleccioná archivos para subir')"><i class="bi bi-upload"></i> Subir medios</button>
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="drop-zone" onclick="alert('📂 Seleccioná fotos o arrastrá acá')">
+          <div class="drop-icon"><i class="bi bi-image"></i></div>
+          <div class="drop-title">Subir fotos</div>
+          <div class="drop-sub">PNG, JPG, WEBP · Máx. 10MB</div>
+        </div>
+        <div class="drop-zone" id="video-zone" onclick="handleVideoUpload()">
+          <div class="drop-icon"><i class="bi bi-camera-video"></i></div>
+          <div class="drop-title" id="vzone-title">Subir videos</div>
+          <div class="drop-sub" id="vzone-sub">MP4, MOV · Máx. 200MB</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ch-title"><i class="bi bi-folder2-open"></i> Mis archivos (24)</span>
+          <button class="btn btn-out btn-sm" onclick="alert('🔍 Buscar en biblioteca')"><i class="bi bi-search"></i> Buscar</button>
+        </div>
+        <div class="cb"><div class="media-grid" id="media-grid"></div></div>
+      </div>
+    </div>
+
+    <!-- COPY -->
+    <div class="view" id="view-copy">
+      <div class="vh">
+        <div><div class="vh-title">Texto <span>Sugerido</span></div><div class="vh-sub">Generá copies optimizados por red social</div></div>
+        <div id="copy-notice"></div>
+      </div>
+      <div class="g2">
+        <div class="card cb">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <span style="font-size:13px;font-weight:700;color:var(--text)"><i class="bi bi-stars" style="color:var(--em)"></i> Generador de Copy</span>
+            <span class="ai-badge">IA</span>
+          </div>
+          <div class="net-tabs">
+            <button class="net-tab ig on" onclick="setNet(this,'ig')"><i class="bi bi-instagram"></i> Instagram</button>
+            <button class="net-tab fb" onclick="setNet(this,'fb')"><i class="bi bi-facebook"></i> Facebook</button>
+            <button class="net-tab tw" onclick="setNet(this,'tw')">𝕏 Twitter</button>
+            <button class="net-tab li" onclick="setNet(this,'li')"><i class="bi bi-linkedin"></i> LinkedIn</button>
+          </div>
+          <div class="topic-row">
+            <input class="topic-input" type="text" id="topic-input" placeholder="Tema del post…" value="Automatización con IA para pymes argentinas">
+            <button class="btn btn-pr btn-sm" onclick="generateCopy()"><i class="bi bi-lightning-charge-fill"></i> Generar</button>
+          </div>
+          <div class="copy-area" id="copy-area" contenteditable="true">🚀 ¿Seguís haciendo todo a mano en tu negocio?
+
+La inteligencia artificial ya no es ciencia ficción. Con Gestión 360 iA, automatizás WhatsApp, turnos, facturación y atención al cliente — todo desde un solo lugar.
+
+Las pymes que adoptan IA hoy tienen una ventaja real sobre las que esperan. ¿Tu negocio ya está listo?
+
+📲 Escribinos y te contamos cómo empezar.</div>
+          <div class="hashtag-row" id="hashtag-row">
+            <span class="hashtag">#InteligenciaArtificial</span>
+            <span class="hashtag">#PymesArgentinas</span>
+            <span class="hashtag">#Automatización</span>
+            <span class="hashtag">#NegociosDigitales</span>
+            <span class="hashtag">#IA</span>
+            <span class="hashtag">#Gestión360</span>
+          </div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn btn-out btn-sm" style="flex:1;justify-content:center" onclick="generateCopy()"><i class="bi bi-arrow-repeat"></i> Regenerar</button>
+            <button class="btn btn-pr btn-sm" style="flex:1;justify-content:center" onclick="alert('✅ Copy copiado al portapapeles!')"><i class="bi bi-clipboard"></i> Copiar</button>
+          </div>
+        </div>
+        <div>
+          <div class="card cb" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+              <span style="font-size:12.5px;font-weight:700"><i class="bi bi-clock" style="color:var(--pr)"></i> Mejor horario</span>
+              <span class="ai-badge" id="besttime-ai" style="display:none">IA</span>
+            </div>
+            <div id="besttime-wrap">
+              <div class="besttime-row"><span class="bt-label"><i class="bi bi-instagram"></i> Instagram</span><span class="bt-val">18:00 – 21:00</span></div>
+              <div class="besttime-row"><span class="bt-label"><i class="bi bi-facebook"></i> Facebook</span><span class="bt-val">12:00 – 14:00</span></div>
+              <div class="besttime-row"><span class="bt-label">𝕏 Twitter</span><span class="bt-val">09:00 – 11:00</span></div>
+              <div class="besttime-row"><span class="bt-label"><i class="bi bi-linkedin"></i> LinkedIn</span><span class="bt-val">08:00 – 10:00</span></div>
+            </div>
+            <div id="besttime-lock" style="display:none"><div class="plan-notice notice-lock"><i class="bi bi-lock-fill"></i> Horario IA disponible desde Plan Business</div></div>
+          </div>
+          <div class="card cb">
+            <div style="font-size:12.5px;font-weight:700;margin-bottom:10px"><i class="bi bi-eye" style="color:var(--pr)"></i> Preview del post</div>
+            <div class="post-preview">
+              <div class="pp-hdr"><div class="pp-av">G3</div><div><div class="pp-name">Gestión 360 iA</div><div class="pp-time">Ahora · <i class="bi bi-instagram"></i></div></div></div>
+              <div class="pp-img"><i class="bi bi-robot" style="font-size:32px;color:rgba(255,255,255,.3)"></i></div>
+              <div class="pp-text" id="preview-text">🚀 ¿Seguís haciendo todo a mano en tu negocio? La inteligencia artificial ya no es ciencia ficción…</div>
+              <div class="pp-acts"><span class="pp-act"><i class="bi bi-heart"></i> 0</span><span class="pp-act"><i class="bi bi-chat"></i> 0</span><span class="pp-act"><i class="bi bi-share"></i> Compartir</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="view" id="view-calendar">
+      <div class="vh">
+        <div><div class="vh-title">Calendario <span>Editorial</span></div><div class="vh-sub">Programá y organizá tus publicaciones</div></div>
+        <button class="btn btn-pr btn-sm" onclick="setView('composer')"><i class="bi bi-plus-lg"></i> Nueva pieza</button>
+      </div>
+      <div class="cal-layout">
+        <div class="card">
+          <div class="cal-hdr">
+            <button class="cal-nav-btn" onclick="prevMonth()"><i class="bi bi-chevron-left"></i></button>
+            <div class="cal-month" id="cal-month-lbl">Marzo 2026</div>
+            <button class="cal-nav-btn" onclick="nextMonth()"><i class="bi bi-chevron-right"></i></button>
+          </div>
+          <div class="cal-grid-wrap">
+            <div class="cal-days"><div class="cal-dn">Dom</div><div class="cal-dn">Lun</div><div class="cal-dn">Mar</div><div class="cal-dn">Mié</div><div class="cal-dn">Jue</div><div class="cal-dn">Vie</div><div class="cal-dn">Sáb</div></div>
+            <div class="cal-cells" id="cal-cells"></div>
+          </div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div class="ch"><span class="ch-title"><i class="bi bi-list-check"></i> Cola de publicación</span></div>
+          <div class="cb" style="padding:10px">
+            <div class="queue-item"><div class="q-hdr"><span class="q-net ig"><i class="bi bi-instagram"></i> Instagram</span><span class="q-time">Hoy 18:30</span></div><div class="q-text">🚀 ¿Seguís haciendo todo a mano en tu negocio? La IA ya llegó a las pymes argentinas...</div><div class="q-status sched"><i class="bi bi-clock"></i> Programado</div></div>
+            <div class="queue-item"><div class="q-hdr"><span class="q-net fb"><i class="bi bi-facebook"></i> Facebook</span><span class="q-time">Mañana 12:00</span></div><div class="q-text">💡 5 procesos que podés automatizar HOY en tu negocio con inteligencia artificial...</div><div class="q-status sched"><i class="bi bi-clock"></i> Programado</div></div>
+            <div class="queue-item"><div class="q-hdr"><span class="q-net tw">𝕏 Twitter</span><span class="q-time">28 Mar 09:00</span></div><div class="q-text">El 67% de las pymes que adoptaron IA vieron más productividad en 3 meses.</div><div class="q-status sched"><i class="bi bi-clock"></i> Programado</div></div>
+            <div class="queue-item" style="opacity:.6"><div class="q-hdr"><span class="q-net ig"><i class="bi bi-instagram"></i> Instagram</span><span class="q-time">25 Mar 19:00</span></div><div class="q-text">Caso real: cómo un consultorio redujo un 40% su tiempo de gestión con IA...</div><div class="q-status pub"><i class="bi bi-check-circle-fill"></i> Publicado</div></div>
+            <button class="btn btn-out btn-sm" style="width:100%;justify-content:center;margin-top:4px" onclick="setView('composer')"><i class="bi bi-plus-lg"></i> Agregar a cola</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="view" id="view-metrics">
+      <div class="vh">
+        <div><div class="vh-title">Métricas de <span>Rendimiento</span></div><div class="vh-sub">Analizá el impacto de tu contenido</div></div>
+        <div id="metrics-notice"></div>
+      </div>
+      <div class="g3" style="margin-bottom:14px">
+        <div class="kpi"><div class="kpi-label">Alcance total</div><div class="kpi-val">12.4K</div><div class="kpi-chg up"><i class="bi bi-arrow-up-short"></i> +18% vs mes anterior</div></div>
+        <div class="kpi"><div class="kpi-label">Interacciones</div><div class="kpi-val">847</div><div class="kpi-chg up"><i class="bi bi-arrow-up-short"></i> +24%</div></div>
+        <div class="kpi"><div class="kpi-label">Engagement rate</div><div class="kpi-val">6.8%</div><div class="kpi-chg up"><i class="bi bi-check-circle"></i> Muy bueno</div></div>
+      </div>
+      <div class="g2">
+        <div class="card cb">
+          <div class="ch-title" style="margin-bottom:12px"><i class="bi bi-bar-chart-fill" style="color:var(--pr)"></i> Alcance semanal</div>
+          <div class="bar-chart" id="bar-chart"></div>
+          <div class="bar-labels"><div class="bl">L</div><div class="bl">M</div><div class="bl">X</div><div class="bl">J</div><div class="bl">V</div><div class="bl">S</div><div class="bl">D</div></div>
+        </div>
+        <div class="card cb">
+          <div class="ch-title" style="margin-bottom:12px"><i class="bi bi-globe" style="color:var(--pr)"></i> Por red social</div>
+          <div class="mini-stat"><span class="ms-label"><i class="bi bi-instagram"></i> Instagram</span><span class="ms-val em">7.2K</span></div>
+          <div class="mini-stat"><span class="ms-label"><i class="bi bi-facebook"></i> Facebook</span><span class="ms-val">3.8K</span></div>
+          <div class="mini-stat"><span class="ms-label">𝕏 Twitter</span><span class="ms-val">1.4K</span></div>
+          <div class="mini-stat"><span class="ms-label"><i class="bi bi-linkedin"></i> LinkedIn</span><span class="ms-val amber">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTOMATIONS -->
+    <div class="view" id="view-automations">
+      <div class="vh">
+        <div><div class="vh-title">Automatizaciones <span>IA</span></div><div class="vh-sub">Publicación y optimización automática con inteligencia artificial</div></div>
+      </div>
+      <div class="g2">
+        <div class="card cb">
+          <div class="ch-title" style="margin-bottom:14px"><i class="bi bi-robot" style="color:var(--pr)"></i> Autopilot de contenido</div>
+          <div class="auto-item"><div class="auto-row"><div><div class="auto-name"><i class="bi bi-calendar-check"></i> Publicación automática</div><div class="auto-desc">Publica según el mejor horario detectado por IA</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div></div></div>
+          <div class="auto-item"><div class="auto-row"><div><div class="auto-name"><i class="bi bi-pencil-square"></i> Copy con IA</div><div class="auto-desc">Genera automáticamente el texto según la imagen subida</div></div><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div></div></div>
+          <div class="auto-item"><div class="auto-row"><div><div class="auto-name"><i class="bi bi-envelope"></i> Reporte semanal IA</div><div class="auto-desc">Recibí un análisis de rendimiento cada lunes por email</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div></div></div>
+        </div>
+        <div class="card cb">
+          <div class="ch-title" style="margin-bottom:14px"><i class="bi bi-lightbulb-fill" style="color:var(--accent)"></i> Sugerencias IA esta semana</div>
+          <div class="ai-card teal"><div class="ai-card-title"><i class="bi bi-calendar-event"></i> Mejor día para postear</div><p>Los jueves a las 18:30 tu audiencia tiene 2.3× más engagement. Programá tu próximo post ahí.</p></div>
+          <div class="ai-card blue"><div class="ai-card-title"><i class="bi bi-grid"></i> Formato recomendado</div><p>Los carruseles tienen 3× más guardados que las fotos simples. Probá ese formato esta semana.</p></div>
+          <div class="ai-card amber"><div class="ai-card-title"><i class="bi bi-lightning-charge-fill"></i> Acción sugerida</div><p>Llevas 5 días sin publicar en Instagram. Tu alcance orgánico puede bajar. Agendá un post hoy.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="rp">
+    <div class="rp-sec">
+      <div class="rp-title"><i class="bi bi-phone"></i> Cuentas conectadas</div>
+      <div class="acc-chip sel" onclick="this.classList.toggle('sel')"><div class="acc-icon ig"><i class="bi bi-instagram"></i></div><div><div class="acc-name">Instagram</div><div class="acc-handle">@gestion360ia</div></div><div class="acc-check">✓</div></div>
+      <div class="acc-chip sel" onclick="this.classList.toggle('sel')"><div class="acc-icon fb"><i class="bi bi-facebook"></i></div><div><div class="acc-name">Facebook</div><div class="acc-handle">Gestión 360 iA</div></div><div class="acc-check">✓</div></div>
+      <div class="acc-chip" id="acc-tw" onclick="handleTw(this)"><div class="acc-icon tw"><i class="bi bi-twitter-x"></i></div><div><div class="acc-name">Twitter / X</div><div class="acc-handle" id="tw-handle">No conectado</div></div><div class="acc-check" id="tw-check">+</div></div>
+    </div>
+    <div class="rp-sec">
+      <div class="rp-title"><i class="bi bi-calendar-plus"></i> Programar publicación</div>
+      <div class="sched-row">
+        <input type="date" id="sched-date" value="2026-03-26">
+        <input type="time" id="sched-time" value="18:30">
+      </div>
+      <button class="btn btn-pr" style="width:100%;justify-content:center" onclick="schedulePost()"><i class="bi bi-clock"></i> Programar ahora</button>
+    </div>
+    <div class="rp-sec">
+      <div class="rp-title"><i class="bi bi-hdd"></i> Almacenamiento</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--text2)">Usado</span>
+        <span id="stor-val" style="font-size:12px;font-weight:700;color:var(--text)">120MB / 200MB</span>
+      </div>
+      <div class="stor-bar-wrap"><div class="stor-bar" id="stor-bar" style="width:60%;background:linear-gradient(90deg,var(--pr),var(--pr-l))"></div></div>
+      <div id="stor-cap" style="font-size:10px;color:var(--muted);margin-top:3px">Plan PRO · 200MB incluido</div>
+    </div>
+    <div class="rp-sec">
+      <div class="rp-title"><i class="bi bi-graph-up-arrow"></i> Resumen rápido</div>
+      <div class="mini-stat"><span class="ms-label">Posts este mes</span><span class="ms-val">14</span></div>
+      <div class="mini-stat"><span class="ms-label">Programados</span><span class="ms-val amber" id="rp-sched">3</span></div>
+      <div class="mini-stat"><span class="ms-label">Alcance prom.</span><span class="ms-val em" id="rp-reach">886</span></div>
+      <div class="mini-stat" id="rp-ia-row" style="display:none"><span class="ms-label">Sugerencias IA</span><span class="ms-val" style="color:var(--accent)">3 nuevas</span></div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  let currentPlan = 'pro', currentNet = 'ig';
+  let currentMonth = 2, currentYear = 2026;
+
+  const plans = {
+    free:{ storage:'50MB / 50MB', storW:'100%', storC:'Plan FREE · 50MB', storBg:'linear-gradient(90deg,#D9534F,#ef4444)',
+           features:[{t:'4 posts semanales',ok:1},{t:'Plantillas predefinidas',ok:1},{t:'Instagram + Facebook',ok:1},{t:'Sin Stories',ok:0},{t:'Sin IA de copy',ok:0},{t:'Sin calendario',ok:0},{t:'Sin métricas',ok:0}],
+           metricsLock:1, autoLock:1, video:0 },
+    pro: { storage:'120MB / 200MB', storW:'60%', storC:'Plan PRO · 200MB', storBg:'linear-gradient(90deg,#506886,#6B86A0)',
+           features:[{t:'Posts ilimitados',ok:1},{t:'Calendario editorial',ok:1},{t:'Instagram Stories',ok:1},{t:'Métricas de alcance',ok:1},{t:'Programación API Meta',ok:1},{t:'Sin métricas de interacción',ok:0},{t:'Sin sugerencias IA',ok:0}],
+           metricsLock:0, autoLock:1, video:1 },
+    biz: { storage:'320MB / 2GB', storW:'16%', storC:'Plan Business · 2GB', storBg:'linear-gradient(90deg,#3A9E70,#2A7A54)',
+           features:[{t:'Todo lo de PRO',ok:1},{t:'Multi-sede',ok:1},{t:'Métricas completas',ok:1},{t:'Horario óptimo',ok:1},{t:'Sin sugerencias IA',ok:0},{t:'Sin automatizaciones',ok:0}],
+           metricsLock:0, autoLock:1, video:1 },
+    ia:  { storage:'800MB / 5GB', storW:'16%', storC:'Plan IA · 5GB', storBg:'linear-gradient(90deg,#B08A55,#C8A472)',
+           features:[{t:'Todo lo de Business',ok:1},{t:'Sugerencias IA en tiempo real',ok:1},{t:'Publicación automática IA',ok:1},{t:'Calendario sugerido por IA',ok:1},{t:'Storage 5GB',ok:1},{t:'Automatizaciones completas',ok:1}],
+           metricsLock:0, autoLock:0, video:1 },
+  };
+
+  function setPlan(p) {
+    currentPlan = p;
+    document.querySelectorAll('.plan-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.plan-btn.'+p).classList.add('active');
+    const d = plans[p];
+    document.getElementById('stor-val').textContent = d.storage;
+    document.getElementById('stor-bar').style.width = d.storW;
+    document.getElementById('stor-bar').style.background = d.storBg;
+    document.getElementById('stor-cap').textContent = d.storC;
+    document.getElementById('plan-features').innerHTML = d.features.map(f=>\`<div class="fi \${f.ok?'ok':'no'}"><span class="fi-check">\${f.ok?'✓':'✗'}</span>\${f.t}</div>\`).join('');
+    document.getElementById('lock-metrics').style.display = d.metricsLock ? 'inline-block' : 'none';
+    document.getElementById('lock-auto').style.display = d.autoLock ? 'inline-block' : 'none';
+    document.getElementById('rp-ia-row').style.display = (!d.autoLock) ? 'flex' : 'none';
+    document.getElementById('rp-reach').textContent = p==='ia' ? '2.1K' : '886';
+    ['4','5'].forEach((i,idx) => {
+      const t = document.getElementById('tpl-'+i);
+      const unlock = (i==='4' && ['pro','biz','ia'].includes(p)) || (i==='5' && p==='ia');
+      if (unlock) {
+        t.classList.remove('locked-wrap');
+        t.querySelector('.lock-over').style.display='none';
+        t.onclick = () => applyTpl(parseInt(i)-4);
+      } else {
+        t.classList.add('locked-wrap');
+        t.querySelector('.lock-over').style.display='flex';
+        t.onclick = () => lockAlert(i==='4'?'Pro':'IA');
+      }
+    });
+    if (d.video) { document.getElementById('vzone-title').textContent='Subir videos'; document.getElementById('vzone-sub').textContent='MP4, MOV · Máx. 200MB'; document.getElementById('video-zone').style.opacity='1'; }
+    else { document.getElementById('vzone-title').textContent='Videos (no disponible)'; document.getElementById('vzone-sub').textContent='🔒 Disponible desde PRO'; document.getElementById('video-zone').style.opacity='.5'; }
+    const mn = document.getElementById('metrics-notice');
+    mn.innerHTML = d.metricsLock ? '<div class="plan-notice notice-lock"><i class="bi bi-lock-fill"></i> Disponible desde Plan PRO</div>' : '<div class="plan-notice notice-ok"><i class="bi bi-check-circle-fill"></i> Métricas activas en tu plan</div>';
+  }
+
+  function setView(v) {
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+    document.getElementById('view-'+v).classList.add('on');
+    document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+    const map = {composer:0,media:1,copy:2,calendar:3,metrics:4,automations:5};
+    const nis = document.querySelectorAll('.ni');
+    if (nis[map[v]]) nis[map[v]].classList.add('on');
+    const p = plans[currentPlan];
+    if (v==='metrics' && p.metricsLock) { setTimeout(()=>alert('📊 Las métricas están disponibles desde el Plan PRO.'),100); }
+    if (v==='automations' && p.autoLock) { setTimeout(()=>alert('⚡ Las automatizaciones están disponibles en el Plan IA.'),100); }
+  }
+
+  const templates = [
+    'linear-gradient(135deg,#506886,#3E5270)',
+    'linear-gradient(135deg,#1A7A4A,#0f5233)',
+    'linear-gradient(135deg,#B08A55,#7A5800)',
+    'linear-gradient(135deg,#1F2937,#374151)',
+    'linear-gradient(135deg,#3A9E70,#2A7A54)',
+    'linear-gradient(135deg,#7C3AED,#5B21B6)',
+  ];
+
+  function applyTpl(i) {
+    document.getElementById('canvas-bg').style.background = templates[i];
+    document.querySelectorAll('.tpl-thumb').forEach((t,j)=>t.classList.toggle('on',j===i));
+  }
+  function applyColor(g, el) {
+    document.getElementById('canvas-bg').style.background = g;
+    document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('on'));
+    el.classList.add('on');
+  }
+  function setFormat(f, btn) {
+    document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const c = document.getElementById('post-canvas');
+    const fm = {square:{w:'240px',h:'240px'},story:{w:'140px',h:'248px'},banner:{w:'320px',h:'180px'}};
+    c.style.width = fm[f].w; c.style.height = fm[f].h;
+  }
+  function toggleGrid(btn) {
+    btn.classList.toggle('on');
+    const ca = document.getElementById('canvas-area');
+    const on = btn.classList.contains('on');
+    ca.style.backgroundImage = on
+      ? 'repeating-linear-gradient(0deg,transparent,transparent 23px,rgba(80,104,134,.2) 23px,rgba(80,104,134,.2) 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,rgba(80,104,134,.2) 23px,rgba(80,104,134,.2) 24px)'
+      : 'repeating-linear-gradient(0deg,transparent,transparent 23px,#E5E7EB 23px,#E5E7EB 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,#E5E7EB 23px,#E5E7EB 24px)';
+  }
+  function lockAlert(plan) { alert('🔒 Esta función está disponible en el Plan '+plan+'. Cambiá tu plan desde la barra superior.'); }
+
+  // MEDIA
+  const mediaItems = [
+    {e:'🧠',bg:'linear-gradient(135deg,#506886,#3E5270)'},{e:'📊',bg:'linear-gradient(135deg,#1A7A4A,#0f5233)'},
+    {e:'🚀',bg:'linear-gradient(135deg,#B08A55,#7A5800)'},{e:'💼',bg:'linear-gradient(135deg,#1F2937,#374151)'},
+    {e:'🤖',bg:'linear-gradient(135deg,#3A9E70,#2A7A54)'},{e:'📱',bg:'linear-gradient(135deg,#7C3AED,#5B21B6)'},
+    {e:'✨',bg:'linear-gradient(135deg,#E1306C,#833AB4)'},{e:'🏆',bg:'linear-gradient(135deg,#506886,#3E5270)'},
+    {e:'💡',bg:'linear-gradient(135deg,#1F2937,#374151)'},{e:'🔮',bg:'linear-gradient(135deg,#B08A55,#7A5800)'},
+  ];
+  function buildMedia() {
+    document.getElementById('media-grid').innerHTML = mediaItems.map((m,i)=>\`
+      <div class="media-thumb" onclick="alert('✅ Imagen seleccionada para tu próximo post.')" title="Imagen \${i+1}">
+        <div class="media-ph" style="background:\${m.bg}">\${m.e}</div>
+        <div class="media-over">✅</div>
+      </div>\`).join('') +
+      \`<div class="media-thumb" style="border:2px dashed #D1D5DB;background:transparent" onclick="alert('📂 Subí nuevas fotos')">
+        <div class="media-ph" style="background:transparent;color:#9CA3AF;font-size:22px">+</div></div>\`;
+  }
+
+  // COPY
+  const copies = {
+    ig:['🚀 ¿Seguís haciendo todo a mano en tu negocio?\\n\\nLa inteligencia artificial ya no es ciencia ficción. Con Gestión 360 iA, automatizás WhatsApp, turnos, facturación y atención al cliente — todo desde un solo lugar.\\n\\n📲 Escribinos y te contamos cómo empezar.','💡 Dato: el 73% de las pymes que automatizan sus procesos ahorran más de 10 horas semanales.\\n\\nEso es tiempo real para enfocarte en lo que más importa: crecer.\\n\\n¿Querés saber qué podés automatizar? Comentá 👇'],
+    fb:['💼 CASO REAL: Cómo un consultorio en Buenos Aires redujo un 40% su carga administrativa con IA.\\n\\nSin cambiar todo su sistema. Sin costos enormes. Solo con las herramientas correctas.','👋 Si tenés un negocio y todavía gestionás todo en papel o Excel, tenemos algo importante para contarte.'],
+    tw:['El 67% de las pymes que adoptaron IA vieron resultados en menos de 90 días.\\n\\nNo es el futuro. Es ahora. 🤔','Automatizar no es caro. Es caro NO automatizar.\\n\\nCada hora en tareas repetitivas es una hora que no pasás con tus clientes.'],
+    li:['La transformación digital de las pymes argentinas no requiere grandes presupuestos.\\n\\nRequiere las herramientas correctas y un enfoque claro.\\n\\n¿Líderes de pymes: cuál es el proceso que más tiempo les consume hoy?'],
+  };
+  const tags = {
+    ig:['#InteligenciaArtificial','#PymesArgentinas','#Automatización','#NegociosDigitales','#IA','#Gestión360','#MarketingDigital'],
+    fb:['#IA','#Automatización','#PymesArgentinas','#Gestión360iA'],
+    tw:['#IA','#Pymes','#Automatización','#Argentina'],
+    li:['#InteligenciaArtificial','#Pymes','#TransformaciónDigital','#AI','#Argentina'],
+  };
+  function generateCopy() {
+    const arr = copies[currentNet];
+    const c = arr[Math.floor(Math.random()*arr.length)];
+    document.getElementById('copy-area').innerText = c;
+    document.getElementById('preview-text').textContent = c.substring(0,110)+'…';
+    document.getElementById('hashtag-row').innerHTML = tags[currentNet].map(t=>\`<span class="hashtag">\${t}</span>\`).join('');
+  }
+  function setNet(btn, net) {
+    currentNet = net;
+    document.querySelectorAll('.net-tab').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    generateCopy();
+  }
+
+  // CALENDAR
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const posts = {'2026-3-26':[{n:'ig',t:'Post IA'},{n:'fb',t:'Facebook'}],'2026-3-27':[{n:'fb',t:'Facebook'}],'2026-3-28':[{n:'tw',t:'Tweet'}],'2026-3-31':[{n:'ig',t:'Story'}],'2026-3-10':[{n:'ig',t:'Publicado'}],'2026-3-15':[{n:'fb',t:'Publicado'}]};
+  function buildCal() {
+    document.getElementById('cal-month-lbl').textContent = monthNames[currentMonth]+' '+currentYear;
+    const cells = document.getElementById('cal-cells'); cells.innerHTML = '';
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+    const today = new Date(); const isCur = today.getMonth()===currentMonth && today.getFullYear()===currentYear;
+    const prev = new Date(currentYear,currentMonth,0).getDate();
+    for (let i=firstDay-1;i>=0;i--) { const c=document.createElement('div'); c.className='cal-cell dim'; c.innerHTML=\`<div class="cal-num">\${prev-i}</div>\`; cells.appendChild(c); }
+    for (let d=1;d<=daysInMonth;d++) {
+      const c=document.createElement('div'); const isT=isCur&&d===today.getDate();
+      c.className='cal-cell'+(isT?' today':''); c.innerHTML=\`<div class="cal-num">\${d}</div>\`;
+      const key=\`\${currentYear}-\${currentMonth+1}-\${d}\`;
+      if (posts[key]) posts[key].forEach(p=>{const t=document.createElement('div');t.className=\`cal-post \${p.n}\`;t.textContent=p.t;c.appendChild(t);});
+      c.onclick=()=>{ const ps=posts[key]; ps?alert(\`📅 \${d}/\${currentMonth+1}/\${currentYear}\\n\${ps.map(p=>'• '+p.n.toUpperCase()+': '+p.t).join('\\n')}\`):confirm(\`📅 \${d}/\${currentMonth+1}/\${currentYear}\\nSin posts.\\n¿Agregar uno?\`)&&setView('composer'); };
+      cells.appendChild(c);
+    }
+    const total=firstDay+daysInMonth; const rem=total%7===0?0:7-(total%7);
+    for (let d=1;d<=rem;d++) { const c=document.createElement('div'); c.className='cal-cell dim'; c.innerHTML=\`<div class="cal-num">\${d}</div>\`; cells.appendChild(c); }
+  }
+  function prevMonth() { currentMonth--; if(currentMonth<0){currentMonth=11;currentYear--;} buildCal(); }
+  function nextMonth() { currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} buildCal(); }
+
+  // BAR CHART
+  function buildChart() {
+    const vals=[42,78,55,91,67,84,73];
+    document.getElementById('bar-chart').innerHTML = vals.map(v=>\`<div class="bar" style="flex:1;height:\${v}%" title="\${v*100} personas"></div>\`).join('');
+  }
+
+  // HELPERS
+  function handleVideoUpload() { if(currentPlan==='free'){alert('🔒 La carga de videos está disponible desde el Plan PRO.');}else{alert('📂 Seleccioná un video (MP4, MOV). Máx. 200MB.');} }
+  function handleTw(chip) {
+    if(currentPlan==='free'){alert('🔒 Conectar Twitter/X está disponible desde el Plan PRO.');return;}
+    chip.classList.toggle('sel');
+    const sel=chip.classList.contains('sel');
+    document.getElementById('tw-handle').textContent=sel?'@g360ia_ar':'No conectado';
+    document.getElementById('tw-check').textContent=sel?'✓':'+';
+  }
+  function schedulePost() {
+    const dt=document.getElementById('sched-date').value, tm=document.getElementById('sched-time').value;
+    const accs=[...document.querySelectorAll('.acc-chip.sel')].map(c=>c.querySelector('.acc-name').textContent);
+    if(!accs.length){alert('⚠️ Seleccioná al menos una cuenta para publicar.');return;}
+    alert(\`✅ Post programado para el \${dt} a las \${tm}\\nRedes: \${accs.join(', ')}\`);
+    document.getElementById('rp-sched').textContent=parseInt(document.getElementById('rp-sched').textContent)+1;
+  }
+
+  // INIT
+  buildMedia(); buildCal(); buildChart(); setPlan('pro');
+</script>
+</body>
+</html>`;
+
+function ModalSocialMedia({ onClose }) {
+  return (
+    <div
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}
+    >
+      <div style={{background:"#fff",borderRadius:14,width:"100%",maxWidth:1200,height:"92vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 24px 64px rgba(0,0,0,0.22)"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.75rem 1.1rem",borderBottom:"1px solid #E5E7EB",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
+            <i className="bi bi-grid-1x2" style={{fontSize:"0.9rem",color:"#506886"}} />
+            <span style={{fontSize:"0.85rem",fontWeight:700,color:"#1F2937"}}>Documentos</span>
+            <i className="bi bi-chevron-right" style={{fontSize:"0.65rem",color:"#9CA3AF"}} />
+            <span style={{fontSize:"0.85rem",fontWeight:600,color:"#506886"}}>Módulo Social Media</span>
+          </div>
+          <div
+            onClick={onClose}
+            style={{width:28,height:28,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#9CA3AF",fontSize:"0.9rem",transition:"background .12s"}}
+            onMouseEnter={e=>e.currentTarget.style.background="#F2F4F6"}
+            onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+          >
+            <i className="bi bi-x-lg" />
+          </div>
+        </div>
+        <iframe
+          srcDoc={SOCIAL_MEDIA_HTML}
+          style={{flex:1,border:"none",width:"100%"}}
+          title="Módulo Social Media — Gestión 360 iA"
         />
       </div>
     </div>
