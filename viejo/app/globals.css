@@ -18,7 +18,7 @@
   --gold:#B08A55; --gold-bg:rgba(176,138,85,.09); --gold-l:#C8A472;
   --sh:0 1px 3px rgba(30,50,80,.06),0 4px 14px rgba(30,50,80,.05);
   --sh-md:0 4px 20px rgba(30,50,80,.10);
-  --r:11px; --r-sm:7px; --sb-w:230px; --sb-w-collapsed:60px;
+  --r:11px; --r-sm:7px; --sb-w:230px;
 }
 
 body { font-family:'Inter','Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
