@@ -8,10 +8,10 @@ import TabConversaciones from "./TabConversaciones";
 import TabClientes from "./TabClientes";
 
 const TABS = [
-  { id: "leads",          label: "Leads",          icon: "bi-person-plus"  },
-  { id: "funnel",         label: "Funnel",          icon: "bi-funnel"       },
-  { id: "conversaciones", label: "Conversaciones",  icon: "bi-chat-dots"    },
-  { id: "clientes",       label: "Clientes",        icon: "bi-people"       },
+  { id: "leads",          label: "Leads",         icon: "bi-person-plus" },
+  { id: "funnel",         label: "Funnel",         icon: "bi-funnel"      },
+  { id: "conversaciones", label: "Conversaciones", icon: "bi-chat-dots"   },
+  { id: "clientes",       label: "Clientes",       icon: "bi-people"      },
 ];
 
 export default function CRMModule() {
@@ -26,7 +26,7 @@ export default function CRMModule() {
 
   if (!ctx.tenant_id) {
     return (
-      <div className="mod-wrap">
+      <div className="mod-tabs-layout">
         <div className="ui-empty">
           <div className="ui-empty__icon"><i className="bi bi-building-slash" /></div>
           <div className="ui-empty__text">Sin tenant asignado</div>
@@ -37,14 +37,17 @@ export default function CRMModule() {
   }
 
   return (
-    <div className="mod-wrap">
-      <div className="mod-header">
+    <div className="mod-tabs-layout">
+
+      {/* Header */}
+      <div className="mod-page-header">
         <div>
           <div className="mod-title">CRM</div>
           <div className="mod-sub">Leads · Funnel · Conversaciones · Clientes</div>
         </div>
       </div>
 
+      {/* Tabs — full width, sin padding lateral */}
       <div className="ui-tabs">
         {TABS.map(t => (
           <div
@@ -52,16 +55,24 @@ export default function CRMModule() {
             className={`ui-tab${tab === t.id ? " ui-tab--active" : ""}`}
             onClick={() => setTab(t.id)}
           >
-            <i className={`bi ${t.icon}`} style={{ marginRight: 5 }} />
-            {t.label}
+            <i className={`bi ${t.icon}`} /> {t.label}
           </div>
         ))}
       </div>
 
-      {tab === "leads"          && <TabLeads         {...ctx} />}
-      {tab === "funnel"         && <TabFunnel        {...ctx} />}
-      {tab === "conversaciones" && <TabConversaciones {...ctx} />}
-      {tab === "clientes"       && <TabClientes       {...ctx} />}
+      {/* Contenido del tab activo */}
+      {tab === "conversaciones" ? (
+        <div className="mod-tab-body mod-tab-body--flush">
+          <TabConversaciones {...ctx} />
+        </div>
+      ) : (
+        <div className="mod-tab-body">
+          {tab === "leads"   && <TabLeads   {...ctx} />}
+          {tab === "funnel"  && <TabFunnel  {...ctx} />}
+          {tab === "clientes" && <TabClientes {...ctx} />}
+        </div>
+      )}
+
     </div>
   );
 }

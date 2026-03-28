@@ -115,7 +115,7 @@ export default function TabConversaciones({ tenant_id, usuario_id, rol }) {
   }
 
   return (
-    <div style={{ display: "flex", height: 560, overflow: "hidden", marginTop: 8 }}>
+    <div style={{ display: "flex", flex: 1, minHeight: 520, overflow: "hidden", borderTop: "1px solid var(--border)" }}>
       {/* Lista izquierda */}
       <div style={{ width: 280, flexShrink: 0, borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", background: "var(--surface)" }}>
         <div className="conv-list-head">
