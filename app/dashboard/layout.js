@@ -31,8 +31,7 @@ function MaiaTopbar() {
 // ── Sidebar nav items ──────────────────────────────────────────────────────────
 // Dashboard removido del menú según requerimiento.
 const NAV_ITEMS = [
-  // Agregá ítems aquí cuando sea necesario.
-  // { icon: "bi-people", label: "Clientes", href: "/dashboard/clientes" },
+  { icon: "bi-diagram-3", label: "CRM", href: "/dashboard/crm" },
 ];
 
 // ── Modal registry — each profile option maps to a title + component ───────────
