@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
-import "../../../styles/panel.css";
+import "../../styles/panel.css";
 
 // ── Sidebar items ─────────────────────────────────────────────────────────────
 // Agregá aquí los ítems de navegación del sidebar.
