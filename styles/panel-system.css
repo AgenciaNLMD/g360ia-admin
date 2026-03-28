@@ -63,9 +63,9 @@
    01. DESIGN TOKENS
    ============================================================ */
 :root {
-  --sb-w:             220px;
-  --sb-w-collapsed:   56px;
-  --sb-bg:            linear-gradient(170deg, #7E8FA6 0%, #5C6E85 55%, #3A4A5C 100%);
+  --sb-w:             230px;
+  --sb-w-collapsed:   60px;
+  --sb-bg:            linear-gradient(170deg, #6B86A0 0%, #506886 55%, #3E5270 100%);
   --sb-brd:           rgba(255,255,255,.15);
   --sb-active:        rgba(255,255,255,.18);
   --topbar-bg:        linear-gradient(170deg, #A8B5C2 0%, #8A9BAA 55%, #6E8090 100%);
@@ -113,9 +113,9 @@
   --shadow-sm:        0 1px 3px rgba(30,42,54,.07);
   --shadow-md:        0 3px 10px rgba(30,42,54,.11);
   --shadow-lg:        0 8px 24px rgba(30,42,54,.14);
-  --r:                0px;
-  --r-sm:             0px;
-  --font:             'Segoe UI', system-ui, -apple-system, sans-serif;
+  --r:                11px;
+  --r-sm:             7px;
+  --font:             'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-mono:        'Consolas', 'SF Mono', monospace;
   --alert:            #C0392B;
   --alert-bg:         rgba(192,57,43,.10);
