@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
-import "../../styles/panel.css";
+import "../../styles/panel-system.css";
 
 // Theme loader — data lives in lib/panel-themes, not here
 import { applyTheme, THEME_STORAGE_KEY } from "../../lib/panel-themes";
@@ -14,6 +14,19 @@ import DocumentosContent   from "../../components/profile/DocumentosContent";
 import MasInfoContent      from "../../components/profile/MasInfoContent";
 import IdiomaContent       from "../../components/profile/IdiomaContent";
 import AyudaContent        from "../../components/profile/AyudaContent";
+
+// ── MAIA Topbar ────────────────────────────────────────────────────────────────
+function MaiaTopbar() {
+  return (
+    <div className="mod-topbar">
+      <div className="ia-pill">
+        <i className="bi bi-stars ia-pill__icon" />
+        <span className="ia-pill__label">MAIA</span>
+        <span className="ia-pill__text">Sin mensajes por ahora.</span>
+      </div>
+    </div>
+  );
+}
 
 // ── Sidebar nav items ──────────────────────────────────────────────────────────
 // Dashboard removido del menú según requerimiento.
@@ -255,6 +268,7 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       <main className="panel-content">
+        <MaiaTopbar />
         {children}
       </main>
 
