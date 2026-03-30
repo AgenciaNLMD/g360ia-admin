@@ -32,7 +32,6 @@ function MaiaTopbar() {
 // Dashboard removido del menú según requerimiento.
 const NAV_ITEMS = [
   { icon: "bi-diagram-3", label: "CRM", href: "/dashboard/crm" },
-  { icon: "bi-plug-fill",  label: "MCP", href: "/dashboard/mcp" },
 ];
 
 // ── Modal registry — each profile option maps to a title + component ───────────
