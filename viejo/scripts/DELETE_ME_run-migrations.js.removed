@@ -1,1 +1,0 @@
-El archivo scripts/run-migrations.js quedó obsoleto y debe eliminarse. Usar scripts/run-migrations-safe.js hasta unificar ambos.

@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS negocios;
-DROP TABLE IF EXISTS migrations;
