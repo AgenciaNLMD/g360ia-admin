@@ -31,12 +31,6 @@ function MaiaTopbar() {
   );
 }
 
-// ── Sidebar nav items ──────────────────────────────────────────────────────────
-// Dashboard removido del menú según requerimiento.
-const NAV_ITEMS = [
-  { icon: "bi-diagram-3", label: "CRM",  slug: "crm" },
-  { icon: "bi-plug",      label: "MCP",  slug: "mcp" },
-];
 
 // ── Modal registry — each profile option maps to a title + component ───────────
 const PROFILE_MODALS = {
@@ -76,20 +70,16 @@ function SidebarLogo({ collapsed, onToggle }) {
 }
 
 // ── Nav item ───────────────────────────────────────────────────────────────────
-function NavItem({ item, collapsed }) {
+function NavItem({ item }) {
   const { moduloActivo, setModuloActivo } = useContext(ModuloContext);
   const active = moduloActivo === item.slug;
-
-  const handleClick = () => {
-    setModuloActivo(item.slug);
-  };
 
   return (
     <button
       type="button"
       title={item.label}
       className={`sb-nav__item${active ? " sb-nav__item--active" : ""}`}
-      onClick={handleClick}
+      onClick={() => setModuloActivo(item.slug)}
     >
       <i className={`bi ${item.icon} sb-nav__icon`} />
       <span className="sb-nav__label">{item.label}</span>
@@ -304,11 +294,20 @@ export default function DashboardLayout({ children }) {
   const [collapsed,    setCollapsed]    = useState(false);
   const [activeModal,  setActiveModal]  = useState(null);
   const [moduloActivo, setModuloActivo] = useState(null);
+  const [navItems,     setNavItems]     = useState([]);
 
   // Cargar tema guardado al montar
   useEffect(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved) applyTheme(saved);
+  }, []);
+
+  // Cargar módulos permitidos desde la API
+  useEffect(() => {
+    fetch("/api/modulos/permitidos")
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setNavItems(Array.isArray(data) ? data : []))
+      .catch(() => setNavItems([]));
   }, []);
 
   return (
@@ -318,11 +317,10 @@ export default function DashboardLayout({ children }) {
           <SidebarLogo collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
 
           <nav className="sb-nav">
-            {NAV_ITEMS.map(item => (
+            {navItems.map(item => (
               <NavItem
                 key={item.slug}
                 item={item}
-                collapsed={collapsed}
               />
             ))}
           </nav>
