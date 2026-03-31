@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, createContext, useContext } from "react";
 import { useSession, signOut } from "next-auth/react";
 import "../../styles/panel-system.css";
 
@@ -14,6 +14,9 @@ import MasInfoContent      from "../../components/profile/MasInfoContent";
 import IdiomaContent       from "../../components/profile/IdiomaContent";
 import AyudaContent        from "../../components/profile/AyudaContent";
 import { DOCUMENTOS }      from "../../lib/documentos";
+
+// ── Módulo context ─────────────────────────────────────────────────────────────
+export const ModuloContext = createContext({ moduloActivo: null, setModuloActivo: () => {} });
 
 // ── MAIA Topbar ────────────────────────────────────────────────────────────────
 function MaiaTopbar() {
@@ -31,7 +34,8 @@ function MaiaTopbar() {
 // ── Sidebar nav items ──────────────────────────────────────────────────────────
 // Dashboard removido del menú según requerimiento.
 const NAV_ITEMS = [
-  { icon: "bi-diagram-3", label: "CRM", href: "/dashboard/crm" },
+  { icon: "bi-diagram-3", label: "CRM",  slug: "crm" },
+  { icon: "bi-plug",      label: "MCP",  slug: "mcp" },
 ];
 
 // ── Modal registry — each profile option maps to a title + component ───────────
@@ -72,17 +76,24 @@ function SidebarLogo({ collapsed, onToggle }) {
 }
 
 // ── Nav item ───────────────────────────────────────────────────────────────────
-function NavItem({ item, active, onNavigate }) {
+function NavItem({ item, collapsed }) {
+  const { moduloActivo, setModuloActivo } = useContext(ModuloContext);
+  const active = moduloActivo === item.slug;
+
+  const handleClick = () => {
+    setModuloActivo(item.slug);
+  };
+
   return (
-    <a
-      href={item.href}
+    <button
+      type="button"
       title={item.label}
       className={`sb-nav__item${active ? " sb-nav__item--active" : ""}`}
-      onClick={onNavigate}
+      onClick={handleClick}
     >
       <i className={`bi ${item.icon} sb-nav__icon`} />
       <span className="sb-nav__label">{item.label}</span>
-    </a>
+    </button>
   );
 }
 
@@ -290,8 +301,9 @@ function ProfileButton({ session, collapsed, onOpenModal }) {
 // ── Main layout ────────────────────────────────────────────────────────────────
 export default function DashboardLayout({ children }) {
   const { data: session } = useSession();
-  const [collapsed,  setCollapsed]  = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // key of open profile modal
+  const [collapsed,    setCollapsed]    = useState(false);
+  const [activeModal,  setActiveModal]  = useState(null);
+  const [moduloActivo, setModuloActivo] = useState(null);
 
   // Cargar tema guardado al montar
   useEffect(() => {
@@ -299,42 +311,41 @@ export default function DashboardLayout({ children }) {
     if (saved) applyTheme(saved);
   }, []);
 
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "/dashboard";
-
   return (
-    <div className="panel-wrap">
-      <aside className={`sb${collapsed ? " sb--collapsed" : ""}`}>
-        <SidebarLogo collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
+    <ModuloContext.Provider value={{ moduloActivo, setModuloActivo }}>
+      <div className="panel-wrap">
+        <aside className={`sb${collapsed ? " sb--collapsed" : ""}`}>
+          <SidebarLogo collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
 
-        <nav className="sb-nav">
-          {NAV_ITEMS.map(item => (
-            <NavItem
-              key={item.href}
-              item={item}
-              active={pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))}
-              onNavigate={collapsed ? () => setCollapsed(false) : undefined}
-            />
-          ))}
-        </nav>
+          <nav className="sb-nav">
+            {NAV_ITEMS.map(item => (
+              <NavItem
+                key={item.slug}
+                item={item}
+                collapsed={collapsed}
+              />
+            ))}
+          </nav>
 
-        <ProfileButton
-          session={session}
-          collapsed={collapsed}
-          onOpenModal={setActiveModal}
-        />
-      </aside>
+          <ProfileButton
+            session={session}
+            collapsed={collapsed}
+            onOpenModal={setActiveModal}
+          />
+        </aside>
 
-      <main className="panel-content">
-        <MaiaTopbar />
-        {children}
-      </main>
+        <main className="panel-content">
+          <MaiaTopbar />
+          {children}
+        </main>
 
-      {activeModal && (
-        <ProfileModal
-          modalKey={activeModal}
-          onClose={() => setActiveModal(null)}
-        />
-      )}
-    </div>
+        {activeModal && (
+          <ProfileModal
+            modalKey={activeModal}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+      </div>
+    </ModuloContext.Provider>
   );
 }
