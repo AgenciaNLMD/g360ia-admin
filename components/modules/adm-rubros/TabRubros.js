@@ -16,10 +16,15 @@ export default function TabRubros() {
 
   async function cargar() {
     setLoading(true);
-    const r = await fetch("/api/adm-rubros/rubros");
-    const d = await r.json();
-    if (d.ok) setRubros(d.rubros);
-    setLoading(false);
+    try {
+      const r = await fetch("/api/adm-rubros/rubros");
+      const d = await r.json();
+      if (d.ok) setRubros(d.rubros);
+    } catch (e) {
+      console.error("[TabRubros]", e);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function abrirModal() {

@@ -24,18 +24,23 @@ export default function TabRubrosMolde() {
 
   async function cargar() {
     setLoading(true);
-    const [rRes, mRes, aRes] = await Promise.all([
-      fetch("/api/adm-rubros/rubros").then(r => r.json()),
-      fetch("/api/adm-rubros/modulos").then(r => r.json()),
-      fetch("/api/adm-rubros/rubros-modulos").then(r => r.json()),
-    ]);
-    if (rRes.ok) {
-      setRubros(rRes.rubros);
-      setRubroSel(sel => sel || (rRes.rubros[0] ? String(rRes.rubros[0].id) : ""));
+    try {
+      const [rRes, mRes, aRes] = await Promise.all([
+        fetch("/api/adm-rubros/rubros").then(r => r.json()),
+        fetch("/api/adm-rubros/modulos").then(r => r.json()),
+        fetch("/api/adm-rubros/rubros-modulos").then(r => r.json()),
+      ]);
+      if (rRes.ok) {
+        setRubros(rRes.rubros);
+        setRubroSel(sel => sel || (rRes.rubros[0] ? String(rRes.rubros[0].id) : ""));
+      }
+      if (mRes.ok) setModulos(mRes.modulos);
+      if (aRes.ok) setAsignaciones(aRes.asignaciones);
+    } catch (e) {
+      console.error("[TabRubrosMolde]", e);
+    } finally {
+      setLoading(false);
     }
-    if (mRes.ok) setModulos(mRes.modulos);
-    if (aRes.ok) setAsignaciones(aRes.asignaciones);
-    setLoading(false);
   }
 
   const asignadasAlRubro    = asignaciones.filter(a => String(a.rubro_id) === rubroSel);
