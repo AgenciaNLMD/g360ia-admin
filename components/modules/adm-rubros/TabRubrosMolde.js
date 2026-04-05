@@ -69,7 +69,7 @@ export default function TabRubrosMolde() {
         await fetch("/api/adm-rubros/rubros-modulos", {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ rubro_id: rubroSel, modulo_id: modulo.id, plan_minimo: 1 }),
+          body:    JSON.stringify({ rubro_id: rubroSel, modulo_id: modulo.id, plan_minimo: "free" }),
         });
       }
       await cargar();
