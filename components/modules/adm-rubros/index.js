@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import TabRubros      from "./TabRubros";
-import TabModulos     from "./TabModulos";
 import TabRubrosMolde from "./TabRubrosMolde";
 
 const TABS = [
-  { id: "rubros",       label: "Rubros",       icon: "bi-building"   },
-  { id: "modulos",      label: "Módulos",      icon: "bi-box-seam"   },
-  { id: "asignaciones", label: "Asignaciones", icon: "bi-diagram-3"  },
+  { id: "rubros",       label: "Rubros",       icon: "bi-building"  },
+  { id: "asignaciones", label: "Asignaciones", icon: "bi-grid-3x3"  },
 ];
 
 export default function AdmRubrosModule() {
@@ -20,7 +18,7 @@ export default function AdmRubrosModule() {
       <div className="mod-page-header">
         <div>
           <div className="mod-title">Administración de Rubros</div>
-          <div className="mod-sub">Rubros · Módulos · Asignaciones</div>
+          <div className="mod-sub">Rubros · Asignaciones</div>
         </div>
       </div>
 
@@ -38,7 +36,6 @@ export default function AdmRubrosModule() {
 
       <div className="mod-tab-body">
         {tab === "rubros"       && <TabRubros />}
-        {tab === "modulos"      && <TabModulos />}
         {tab === "asignaciones" && <TabRubrosMolde />}
       </div>
 
