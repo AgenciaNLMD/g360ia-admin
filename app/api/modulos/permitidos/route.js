@@ -6,14 +6,13 @@ import rubrosDb from "@/lib/rubros-db";
 
 // Metadata visual de cada módulo (icon + label para el sidebar)
 const META = {
-  crm:          { label: "CRM",          icon: "bi-people"   },
-  mcp:          { label: "Conexiones",   icon: "bi-grid-1x2" },
-  "adm-rubros": { label: "Adm. Rubros",  icon: "bi-building" },
-  matriz:       { label: "Matriz",       icon: "bi-grid-3x3" },
+  crm:    { label: "CRM",        icon: "bi-people"   },
+  mcp:    { label: "Conexiones", icon: "bi-grid-1x2" },
+  matriz: { label: "Matriz",     icon: "bi-grid-3x3" },
 };
 
 // Módulos exclusivos del superadmin
-const MODULOS_SUPERADMIN = ["crm", "mcp", "adm-rubros", "matriz"];
+const MODULOS_SUPERADMIN = ["crm", "mcp", "matriz"];
 
 export async function GET() {
   const session = await getServerSession(authOptions);

@@ -6,10 +6,9 @@ import { ModuloContext } from "./layout";
 
 // Mapa de módulos conocidos — agregar entradas acá al crear nuevos módulos
 const MODULOS = {
-  crm:          dynamic(() => import("@/components/modules/crm"),          { ssr: false }),
-  mcp:          dynamic(() => import("@/components/modules/mcp"),          { ssr: false }),
-  "adm-rubros": dynamic(() => import("@/components/modules/adm-rubros"),   { ssr: false }),
-  matriz:       dynamic(() => import("@/components/modules/adm-rubros"),   { ssr: false }),
+  crm:    dynamic(() => import("@/components/modules/crm"),       { ssr: false }),
+  mcp:    dynamic(() => import("@/components/modules/mcp"),       { ssr: false }),
+  matriz: dynamic(() => import("@/components/modules/adm-rubros"), { ssr: false }),
 };
 
 export default function DashboardPage() {
