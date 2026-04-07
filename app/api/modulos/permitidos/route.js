@@ -23,14 +23,14 @@ export async function GET() {
     if (session.user.rol === "superadmin") {
       let grupoMap = {};
       try {
-        const [mods] = await rubrosDb.query("SELECT slug, grupo FROM modulos ORDER BY id");
+        const [mods] = await rubrosDb.query("SELECT nombre, grupo FROM modulos WHERE activo = 1 ORDER BY id");
         // Si la query devuelve filas, armamos el mapa de grupos
         if (mods.length > 0) {
           return NextResponse.json(
             mods.map(m => ({
-              slug:  m.slug,
-              label: META[m.slug]?.label ?? m.slug,
-              icon:  META[m.slug]?.icon  ?? "bi-box",
+              slug:  m.nombre,
+              label: META[m.nombre]?.label ?? m.nombre,
+              icon:  META[m.nombre]?.icon  ?? "bi-box",
               grupo: m.grupo ?? null,
             }))
           );
@@ -51,34 +51,34 @@ export async function GET() {
     if (!session.user.tenant_id) return NextResponse.json([]);
 
     const [rows] = await modDb.query(`
-      SELECT m.slug
+      SELECT m.nombre
       FROM mtz_rubros_modulos rm
       JOIN mtz_rubros  r ON r.id = rm.rubro_id
       JOIN mtz_modulos m ON m.id = rm.modulo_id
       WHERE rm.rubro_id = ? AND m.activo = 1
-      ORDER BY m.slug
+      ORDER BY m.nombre
     `, [session.user.tenant_id]);
 
     // Obtener grupo de cada módulo desde rubros_molde (best-effort)
-    const slugs = rows.map(r => r.slug);
+    const nombres = rows.map(r => r.nombre);
     const grupoMap = {};
-    if (slugs.length > 0) {
+    if (nombres.length > 0) {
       try {
-        const placeholders = slugs.map(() => "?").join(",");
+        const placeholders = nombres.map(() => "?").join(",");
         const [grupoRows] = await rubrosDb.query(
-          `SELECT slug, grupo FROM modulos WHERE slug IN (${placeholders})`,
-          slugs
+          `SELECT nombre, grupo FROM modulos WHERE nombre IN (${placeholders})`,
+          nombres
         );
-        for (const r of grupoRows) grupoMap[r.slug] = r.grupo;
-      } catch { /* grupo queda null si la columna no existe aún */ }
+        for (const r of grupoRows) grupoMap[r.nombre] = r.grupo;
+      } catch { /* grupo queda null si hay error */ }
     }
 
     return NextResponse.json(
       rows.map(row => ({
-        slug:  row.slug,
-        label: META[row.slug]?.label ?? row.slug,
-        icon:  META[row.slug]?.icon  ?? "bi-box",
-        grupo: grupoMap[row.slug] ?? null,
+        slug:  row.nombre,
+        label: META[row.nombre]?.label ?? row.nombre,
+        icon:  META[row.nombre]?.icon  ?? "bi-box",
+        grupo: grupoMap[row.nombre] ?? null,
       }))
     );
 
