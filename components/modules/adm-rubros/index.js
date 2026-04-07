@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import TabRubros  from "./TabRubros";
 import TabModulos from "./TabModulos";
 import TabPlanes  from "./TabPlanes";
@@ -13,6 +13,13 @@ const TABS = [
 
 export default function MatrizModule() {
   const [tab, setTab] = useState("rubros");
+  const tabRefs = useRef({});
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    const el = tabRefs.current[tab];
+    if (el) setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+  }, [tab]);
 
   return (
     <div className="mod-tabs-layout">
@@ -24,16 +31,21 @@ export default function MatrizModule() {
         </div>
       </div>
 
-      <div className="ui-tabs">
+      <div className="ui-tabs ui-tabs--sliding">
         {TABS.map(t => (
           <div
             key={t.id}
+            ref={el => tabRefs.current[t.id] = el}
             className={`ui-tab${tab === t.id ? " ui-tab--active" : ""}`}
             onClick={() => setTab(t.id)}
           >
             <i className={`bi ${t.icon}`} /> {t.label}
           </div>
         ))}
+        <span
+          className="ui-tab-indicator"
+          style={{ left: indicator.left, width: indicator.width }}
+        />
       </div>
 
       <div className="mod-tab-body">

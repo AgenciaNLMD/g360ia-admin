@@ -258,9 +258,8 @@ export default function TabModulos() {
                           <td
                             key={m.id}
                             style={{ padding: "10px 16px", textAlign: "center", borderBottom: isLast ? "none" : "1px solid var(--border)", borderLeft: "1px solid var(--border)", cursor: isBusy ? "wait" : "pointer", transition: "background 0.12s" }}
-                            onClick={() => !isBusy && !asignado && toggleCelda(r, m)}
-                            onDoubleClick={() => !isBusy && asignado && toggleCelda(r, m)}
-                            title={asignado ? `Doble click para quitar ${m.nombre} de ${r.nombre}` : `Asignar ${m.nombre} a ${r.nombre}`}
+                            onClick={() => !isBusy && toggleCelda(r, m)}
+                            title={asignado ? `Quitar ${m.nombre} de ${r.nombre}` : `Asignar ${m.nombre} a ${r.nombre}`}
                           >
                             {isBusy ? (
                               <i className="bi bi-arrow-repeat" style={{ fontSize: 14, color: "var(--sub)" }} />
