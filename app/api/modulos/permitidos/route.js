@@ -19,15 +19,30 @@ export async function GET() {
   if (!session?.user) return NextResponse.json([]);
 
   try {
-    // Superadmin ve todos los módulos directamente desde la DB
+    // Superadmin ve todos los módulos — intenta obtener grupo desde DB, fallback a lista fija
     if (session.user.rol === "superadmin") {
-      const [mods] = await rubrosDb.query("SELECT slug, grupo FROM modulos ORDER BY id");
+      let grupoMap = {};
+      try {
+        const [mods] = await rubrosDb.query("SELECT slug, grupo FROM modulos ORDER BY id");
+        // Si la query devuelve filas, armamos el mapa de grupos
+        if (mods.length > 0) {
+          return NextResponse.json(
+            mods.map(m => ({
+              slug:  m.slug,
+              label: META[m.slug]?.label ?? m.slug,
+              icon:  META[m.slug]?.icon  ?? "bi-box",
+              grupo: m.grupo ?? null,
+            }))
+          );
+        }
+      } catch { /* columna grupo no existe aún o error de conexión — usar fallback */ }
+
       return NextResponse.json(
-        mods.map(m => ({
-          slug:  m.slug,
-          label: META[m.slug]?.label ?? m.slug,
-          icon:  META[m.slug]?.icon  ?? "bi-box",
-          grupo: m.grupo ?? null,
+        MODULOS_SUPERADMIN.map(slug => ({
+          slug,
+          label: META[slug]?.label ?? slug,
+          icon:  META[slug]?.icon  ?? "bi-box",
+          grupo: grupoMap[slug] ?? null,
         }))
       );
     }
@@ -44,16 +59,18 @@ export async function GET() {
       ORDER BY m.slug
     `, [session.user.tenant_id]);
 
-    // Obtener grupo de cada módulo desde rubros_molde
+    // Obtener grupo de cada módulo desde rubros_molde (best-effort)
     const slugs = rows.map(r => r.slug);
     const grupoMap = {};
     if (slugs.length > 0) {
-      const placeholders = slugs.map(() => "?").join(",");
-      const [grupoRows] = await rubrosDb.query(
-        `SELECT slug, grupo FROM modulos WHERE slug IN (${placeholders})`,
-        slugs
-      );
-      for (const r of grupoRows) grupoMap[r.slug] = r.grupo;
+      try {
+        const placeholders = slugs.map(() => "?").join(",");
+        const [grupoRows] = await rubrosDb.query(
+          `SELECT slug, grupo FROM modulos WHERE slug IN (${placeholders})`,
+          slugs
+        );
+        for (const r of grupoRows) grupoMap[r.slug] = r.grupo;
+      } catch { /* grupo queda null si la columna no existe aún */ }
     }
 
     return NextResponse.json(
