@@ -1,10 +1,8 @@
 // app/api/ot/ordenes/[id]/estado/route.js
 export const dynamic = "force-dynamic";
 
-import { NextResponse }    from "next/server";
-
-import { getServerSession, authOptions } from "@/lib/auth";
-import modulosDb           from "@/lib/modulos-db";
+import { NextResponse } from "next/server";
+import modulosDb       from "@/lib/modulos-db";
 
 const ESTADOS_VALIDOS = [
   "recibido", "en_diagnostico", "presupuestado",
@@ -13,10 +11,6 @@ const ESTADOS_VALIDOS = [
 
 // ── PATCH — cambia estado, registra log, crea garantía si corresponde ────────
 export async function PATCH(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
-  const { tenant_id, id: usuario_id } = session.user;
-
   try {
     const { estado, nota, dias_garantia } = await req.json();
 
@@ -26,8 +20,8 @@ export async function PATCH(req, { params }) {
 
     // Obtener estado actual
     const [rows] = await modulosDb.query(
-      "SELECT id, estado FROM ot_ordenes WHERE id = ? AND tenant_id = ?",
-      [params.id, tenant_id]
+      "SELECT id, estado FROM ot_ordenes WHERE id = ?",
+      [params.id]
     );
     if (!rows.length) {
       return NextResponse.json({ ok: false, error: "Orden no encontrada" }, { status: 404 });
@@ -37,22 +31,22 @@ export async function PATCH(req, { params }) {
 
     // Actualizar estado
     await modulosDb.query(
-      "UPDATE ot_ordenes SET estado = ?, actualizado_en = NOW() WHERE id = ? AND tenant_id = ?",
-      [estado, params.id, tenant_id]
+      "UPDATE ot_ordenes SET estado = ?, actualizado_en = NOW() WHERE id = ?",
+      [estado, params.id]
     );
 
     // Registrar en log
     await modulosDb.query(
-      `INSERT INTO ot_log (tenant_id, orden_id, estado_anterior, estado_actual, usuario_id, nota)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [tenant_id, params.id, estado_anterior, estado, usuario_id, nota || null]
+      `INSERT INTO ot_log (orden_id, estado_anterior, estado_actual, nota)
+       VALUES (?, ?, ?, ?)`,
+      [params.id, estado_anterior, estado, nota || null]
     );
 
     // Si se marca como entregado → registrar fecha y gestionar garantía
     if (estado === "entregado") {
       await modulosDb.query(
-        "UPDATE ot_ordenes SET entrega_fecha = NOW() WHERE id = ? AND tenant_id = ?",
-        [params.id, tenant_id]
+        "UPDATE ot_ordenes SET entrega_fecha = NOW() WHERE id = ?",
+        [params.id]
       );
 
       const diasNum = parseInt(dias_garantia) || 0;
@@ -76,9 +70,9 @@ export async function PATCH(req, { params }) {
         } else {
           await modulosDb.query(
             `INSERT INTO ot_garantia
-               (tenant_id, orden_id, dias_garantia, fecha_emision, fecha_vence, estado)
-             VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'vigente')`,
-            [tenant_id, params.id, diasNum, diasNum]
+               (orden_id, dias_garantia, fecha_emision, fecha_vence, estado)
+             VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'vigente')`,
+            [params.id, diasNum, diasNum]
           );
         }
       }

@@ -1,32 +1,20 @@
 // app/api/ot/config/route.js
 export const dynamic = "force-dynamic";
 
-import { NextResponse }    from "next/server";
+import { NextResponse } from "next/server";
+import modulosDb       from "@/lib/modulos-db";
 
-import { getServerSession, authOptions } from "@/lib/auth";
-import modulosDb           from "@/lib/modulos-db";
-
-function unauth() {
-  return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
-}
-
-// ── GET — devuelve config del tenant (crea default si no existe) ─────────────
+// ── GET — devuelve config (crea default si no existe) ────────────────────────
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return unauth();
-  const { tenant_id } = session.user;
-
   try {
     const [rows] = await modulosDb.query(
-      "SELECT * FROM ot_config WHERE tenant_id = ? LIMIT 1",
-      [tenant_id]
+      "SELECT * FROM ot_config LIMIT 1"
     );
 
     if (!rows.length) {
       await modulosDb.query(
-        `INSERT INTO ot_config (tenant_id, modo_numeracion, prefijo, ultimo_numero)
-         VALUES (?, 'correlativo', 'OT-', 0)`,
-        [tenant_id]
+        `INSERT INTO ot_config (modo_numeracion, prefijo, ultimo_numero)
+         VALUES ('correlativo', 'OT-', 0)`
       );
       return NextResponse.json({
         ok: true,
@@ -43,18 +31,13 @@ export async function GET() {
 
 // ── PATCH — actualiza modo y prefijo ─────────────────────────────────────────
 export async function PATCH(req) {
-  const session = await getServerSession(authOptions);
-  if (!session) return unauth();
-  const { tenant_id } = session.user;
-
   try {
     const { modo_numeracion, prefijo } = await req.json();
 
     await modulosDb.query(
       `UPDATE ot_config
-         SET modo_numeracion = ?, prefijo = ?, actualizado_en = NOW()
-       WHERE tenant_id = ?`,
-      [modo_numeracion, prefijo, tenant_id]
+         SET modo_numeracion = ?, prefijo = ?, actualizado_en = NOW()`,
+      [modo_numeracion, prefijo]
     );
 
     return NextResponse.json({ ok: true });

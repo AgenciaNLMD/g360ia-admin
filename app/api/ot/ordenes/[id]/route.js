@@ -1,25 +1,15 @@
 // app/api/ot/ordenes/[id]/route.js
 export const dynamic = "force-dynamic";
 
-import { NextResponse }    from "next/server";
-
-import { getServerSession, authOptions } from "@/lib/auth";
-import modulosDb           from "@/lib/modulos-db";
-
-function unauth() {
-  return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
-}
+import { NextResponse } from "next/server";
+import modulosDb       from "@/lib/modulos-db";
 
 // ── GET — detalle completo: OT + log + items + garantía ──────────────────────
 export async function GET(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return unauth();
-  const { tenant_id } = session.user;
-
   try {
     const [ordenes] = await modulosDb.query(
-      "SELECT * FROM ot_ordenes WHERE id = ? AND tenant_id = ?",
-      [params.id, tenant_id]
+      "SELECT * FROM ot_ordenes WHERE id = ?",
+      [params.id]
     );
     if (!ordenes.length) {
       return NextResponse.json({ ok: false, error: "Orden no encontrada" }, { status: 404 });
@@ -53,12 +43,7 @@ export async function GET(req, { params }) {
 
     return NextResponse.json({
       ok: true,
-      orden: {
-        ...orden,
-        log,
-        items,
-        garantia: garantia[0] || null,
-      },
+      orden: { ...orden, log, items, garantia: garantia[0] || null },
     });
   } catch (err) {
     console.error("ot/ordenes/[id] GET:", err);
@@ -68,10 +53,6 @@ export async function GET(req, { params }) {
 
 // ── PATCH — actualizar campos editables de la OT ─────────────────────────────
 export async function PATCH(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return unauth();
-  const { tenant_id } = session.user;
-
   try {
     const body = await req.json();
 
@@ -94,11 +75,9 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ ok: false, error: "Nada que actualizar" }, { status: 400 });
     }
 
-    valores.push(params.id, tenant_id);
+    valores.push(params.id);
     await modulosDb.query(
-      `UPDATE ot_ordenes
-         SET ${campos.join(", ")}, actualizado_en = NOW()
-       WHERE id = ? AND tenant_id = ?`,
+      `UPDATE ot_ordenes SET ${campos.join(", ")}, actualizado_en = NOW() WHERE id = ?`,
       valores
     );
 

@@ -1,30 +1,20 @@
 // app/api/ot/ordenes/route.js
 export const dynamic = "force-dynamic";
 
-import { NextResponse }    from "next/server";
-
-import { getServerSession, authOptions } from "@/lib/auth";
-import modulosDb           from "@/lib/modulos-db";
-import { randomUUID }      from "crypto";
-
-function unauth() {
-  return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
-}
+import { NextResponse } from "next/server";
+import modulosDb       from "@/lib/modulos-db";
+import { randomUUID }  from "crypto";
 
 // ── GET — lista de OTs con filtros opcionales ─────────────────────────────────
 export async function GET(req) {
-  const session = await getServerSession(authOptions);
-  if (!session) return unauth();
-  const { tenant_id } = session.user;
-
   const { searchParams } = new URL(req.url);
   const estado = searchParams.get("estado");
   const buscar = searchParams.get("q");
   const serie  = searchParams.get("serie");
 
   try {
-    let query  = "SELECT * FROM ot_ordenes WHERE tenant_id = ?";
-    const params = [tenant_id];
+    let query    = "SELECT * FROM ot_ordenes WHERE 1=1";
+    const params = [];
 
     if (estado) {
       query += " AND estado = ?";
@@ -53,10 +43,6 @@ export async function GET(req) {
 
 // ── POST — crear nueva OT ─────────────────────────────────────────────────────
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
-  if (!session) return unauth();
-  const { tenant_id, id: creado_por } = session.user;
-
   try {
     const {
       numero_ot,
@@ -69,7 +55,6 @@ export async function POST(req) {
       foto_url,
     } = await req.json();
 
-    // Validaciones
     if (!numero_ot?.trim())
       return NextResponse.json({ ok: false, error: "El número de OT es obligatorio" }, { status: 400 });
     if (!equipo_tipo?.trim())
@@ -77,10 +62,10 @@ export async function POST(req) {
     if (!problema_reportado?.trim())
       return NextResponse.json({ ok: false, error: "El problema reportado es obligatorio" }, { status: 400 });
 
-    // Verificar unicidad del número de OT por tenant
+    // Verificar unicidad del número de OT
     const [existe] = await modulosDb.query(
-      "SELECT id FROM ot_ordenes WHERE tenant_id = ? AND numero_ot = ?",
-      [tenant_id, numero_ot.trim()]
+      "SELECT id FROM ot_ordenes WHERE numero_ot = ?",
+      [numero_ot.trim()]
     );
     if (existe.length) {
       return NextResponse.json({ ok: false, error: "Ya existe una OT con ese número" }, { status: 400 });
@@ -90,36 +75,33 @@ export async function POST(req) {
 
     const [result] = await modulosDb.query(
       `INSERT INTO ot_ordenes
-         (tenant_id, numero_ot, token_publico, cliente_id,
+         (numero_ot, token_publico, cliente_id,
           equipo_tipo, equipo_marca, equipo_modelo, equipo_serie,
-          problema_reportado, foto_url, estado, creado_por)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'recibido', ?)`,
+          problema_reportado, foto_url, estado)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'recibido')`,
       [
-        tenant_id,
         numero_ot.trim(),
         token_publico,
-        cliente_id     || null,
+        cliente_id          || null,
         equipo_tipo.trim(),
-        equipo_marca   || null,
-        equipo_modelo  || null,
-        equipo_serie   || null,
+        equipo_marca        || null,
+        equipo_modelo       || null,
+        equipo_serie        || null,
         problema_reportado.trim(),
-        foto_url       || null,
-        creado_por,
+        foto_url            || null,
       ]
     );
 
     // Log de creación
     await modulosDb.query(
-      `INSERT INTO ot_log (tenant_id, orden_id, estado_anterior, estado_actual, usuario_id)
-       VALUES (?, ?, NULL, 'recibido', ?)`,
-      [tenant_id, result.insertId, creado_por]
+      `INSERT INTO ot_log (orden_id, estado_anterior, estado_actual)
+       VALUES (?, NULL, 'recibido')`,
+      [result.insertId]
     );
 
     // Incrementar contador correlativo
     await modulosDb.query(
-      "UPDATE ot_config SET ultimo_numero = ultimo_numero + 1 WHERE tenant_id = ?",
-      [tenant_id]
+      "UPDATE ot_config SET ultimo_numero = ultimo_numero + 1"
     );
 
     const [nueva] = await modulosDb.query(
