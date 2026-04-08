@@ -378,7 +378,7 @@ export default function OTPopup({ orden, rol, onClose, onActualizada }) {
               </button>
             )}
             <button
-              className="ui-btn ui-btn--secondary"
+              className="ui-btn ui-btn--notify"
               style={{ flex: siguienteEst ? "0 0 auto" : 1 }}
               onClick={notificar}
             >
