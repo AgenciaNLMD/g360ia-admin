@@ -129,42 +129,18 @@ export default function TabUbicacion({ ctx, saveTrigger, discardTrigger, onSaveR
           <span className="ui-card__title"><i className="bi bi-pin-map" /> Geolocalización</span>
         </div>
         <div className="ui-card__body">
-          <div className="form-grid form-grid--3">
-
-            <div className="ui-field span2">
-              <label className="ui-label">URL Google Maps</label>
-              <div className="ui-input-wrap">
-                <i className="bi bi-google ui-input-wrap__icon" />
-                <input
-                  className="ui-input"
-                  type="url"
-                  value={data.maps_url || ''}
-                  placeholder="https://maps.google.com/... o pegá el link compartido"
-                  onChange={e => set('maps_url', e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="ui-field">
-              <label className="ui-label">Latitud</label>
+          <div className="ui-field">
+            <label className="ui-label">URL Google Maps</label>
+            <div className="ui-input-wrap">
+              <i className="bi bi-google ui-input-wrap__icon" />
               <input
-                className="ui-input t-mono"
-                value={data.latitud || ''}
-                placeholder="-34.603722"
-                onChange={e => set('latitud', e.target.value)}
+                className="ui-input"
+                type="url"
+                value={data.maps_url || ''}
+                placeholder="https://maps.google.com/... o pegá el link compartido"
+                onChange={e => set('maps_url', e.target.value)}
               />
             </div>
-
-            <div className="ui-field">
-              <label className="ui-label">Longitud</label>
-              <input
-                className="ui-input t-mono"
-                value={data.longitud || ''}
-                placeholder="-58.381592"
-                onChange={e => set('longitud', e.target.value)}
-              />
-            </div>
-
           </div>
         </div>
       </div>

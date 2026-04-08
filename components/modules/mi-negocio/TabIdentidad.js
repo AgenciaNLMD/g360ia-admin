@@ -3,20 +3,13 @@ import { useState, useEffect } from 'react';
 
 const REQUIRED = [
   'nombre_comercial','telefono_principal','email_contacto',
-  'calle','localidad','provincia','logo_url','color_primario',
+  'calle','localidad','provincia','logo_url',
 ];
 
 function calcPct(d) {
   const filled = REQUIRED.filter(f => d[f] && String(d[f]).trim() !== '').length;
   return Math.round((filled / REQUIRED.length) * 100);
 }
-
-const COLORS = [
-  { field: 'color_primario',   label: 'Color primario',   def: '#5C6E85' },
-  { field: 'color_secundario', label: 'Color secundario', def: '#B08A55' },
-  { field: 'color_fondo',      label: 'Color de fondo',   def: '#F8FAFB' },
-  { field: 'color_acento',     label: 'Color de acento',  def: '#2ECC71' },
-];
 
 export default function TabIdentidad({ ctx, saveTrigger, discardTrigger, onSaveResult, onDiscardResult, onCompletitudChange }) {
   const [data, setData]         = useState({});
@@ -133,9 +126,9 @@ export default function TabIdentidad({ ctx, saveTrigger, discardTrigger, onSaveR
             </div>
 
             {/* Upload logo */}
-            <div className="ui-field" style={{flex:1}}>
+            <div className="ui-field">
               <label className="ui-label">Logo del negocio</label>
-              <label className="neg-upload-zone">
+              <label className="neg-upload-zone neg-upload-zone--sq">
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/svg+xml"
@@ -143,8 +136,8 @@ export default function TabIdentidad({ ctx, saveTrigger, discardTrigger, onSaveR
                   onChange={e => handleFilePreview(e.target.files[0], 'logo')}
                 />
                 <i className="bi bi-cloud-arrow-up neg-upload-zone__icon" />
-                <span className="neg-upload-zone__text">Arrastrá o hacé click para subir</span>
-                <span className="neg-upload-zone__sub">PNG, JPG, SVG — máx. 2MB · 400×400px recomendado</span>
+                <span className="neg-upload-zone__text">Logo</span>
+                <span className="neg-upload-zone__sub">PNG, JPG, SVG — 400×400px</span>
               </label>
             </div>
 
@@ -242,37 +235,6 @@ export default function TabIdentidad({ ctx, saveTrigger, discardTrigger, onSaveR
         </div>
       </div>
 
-      {/* Identidad visual */}
-      <div className="ui-card">
-        <div className="ui-card__header">
-          <span className="ui-card__title"><i className="bi bi-palette" /> Identidad Visual</span>
-        </div>
-        <div className="ui-card__body">
-          <div className="form-grid form-grid--4">
-            {COLORS.map(({ field, label, def }) => {
-              const color = data[field] || def;
-              return (
-                <div key={field} className="ui-field">
-                  <label className="ui-label">{label}</label>
-                  <div className="neg-color-field">
-                    <div className="neg-color-dot" style={{"--neg-swatch": color}} />
-                    <span className="neg-color-hex">{color}</span>
-                    <label className="neg-color-change">
-                      Cambiar
-                      <input
-                        type="color"
-                        value={color}
-                        className="neg-color-input"
-                        onChange={e => set(field, e.target.value)}
-                      />
-                    </label>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
     </>
   );
 }
