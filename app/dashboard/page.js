@@ -1,7 +1,19 @@
+"use client";
+import dynamic from 'next/dynamic';
+
+const MiNegocioModule = dynamic(
+  () => import('@/components/modules/mi-negocio/index'),
+  { ssr: false }
+);
+
+const __testCtx = {
+  tenant_id:  1,
+  usuario_id: 1,
+  rol:        'admin',
+  rubro:      'g360ia',
+  plan:       'enterprise',
+};
+
 export default function DashboardPage() {
-  return (
-    <div className="mod-wrap">
-      {/* El módulo se desarrolla aquí */}
-    </div>
-  );
+  return <MiNegocioModule ctx={__testCtx} />;
 }
