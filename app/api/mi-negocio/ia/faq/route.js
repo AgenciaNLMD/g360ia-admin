@@ -5,7 +5,7 @@ import pool from '@/lib/modulos-db';
 export async function POST(req) {
   try {
     const { pregunta, respuesta, orden } = await req.json();
-    if (!pregunta) return NextResponse.json({ error: 'pregunta requerida' }, { status: 400 });
+    // pregunta puede estar vacía al crear — el usuario la completa luego
     const [res] = await pool.query(
       'INSERT INTO neg_faq (pregunta, respuesta, orden) VALUES (?,?,?)',
       [pregunta, respuesta || '', orden || 0]
