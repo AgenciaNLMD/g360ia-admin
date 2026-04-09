@@ -40,7 +40,7 @@ export default function TabHorarios({ ctx, saveTrigger, discardTrigger, onSaveRe
   async function doSave() {
     try {
       const res = await fetch('/api/mi-negocio/horarios', {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ horarios, cierre, mensaje_fuera_horario: mfh }),
       });

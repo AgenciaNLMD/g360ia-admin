@@ -50,7 +50,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(req) {
+export async function PATCH(req) {
   try {
     const { horarios, cierre, mensaje_fuera_horario } = await req.json();
 

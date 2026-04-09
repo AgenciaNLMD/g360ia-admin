@@ -42,7 +42,7 @@ export default function TabRedes({ ctx, saveTrigger, discardTrigger, onSaveResul
   async function doSave() {
     try {
       const res = await fetch('/api/mi-negocio/redes', {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });

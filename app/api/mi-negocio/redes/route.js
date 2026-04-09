@@ -12,7 +12,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(req) {
+export async function PATCH(req) {
   try {
     const body = await req.json();
     for (const [plataforma, url] of Object.entries(body)) {
