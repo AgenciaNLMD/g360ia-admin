@@ -59,6 +59,10 @@ export default function MiNegocioModule({ ctx }) {
   const handleTabClick = useCallback((tab) => {
     setActiveTab(tab.id);
     setActiveIdx(tab.idx);
+    // Reset para que el tab recién activado no dispare save/discard
+    // por heredar el trigger acumulado de tabs anteriores
+    setSaveTrigger(0);
+    setDiscardTrigger(0);
   }, []);
 
   const showToast = useCallback((msg, type = 'ok') => {
