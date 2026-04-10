@@ -31,6 +31,13 @@ export default function DashboardLayout({ children }) {
         <nav className="sb-nav" />
       </aside>
       <main className="panel-content">
+        <div className="mod-topbar">
+          <div className="ia-pill">
+            <i className="bi bi-stars ia-pill__icon" />
+            <span className="ia-pill__label">MAIA</span>
+            <span className="ia-pill__text">Sin mensajes por ahora.</span>
+          </div>
+        </div>
         {children}
       </main>
     </div>
