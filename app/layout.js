@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "G360 Admin — Módulo en desarrollo",
+  title: "G360ia — DEV Version",
   description: "Entorno de desarrollo de módulo",
   icons: { icon: "/gestion360ia.ico" },
 };
