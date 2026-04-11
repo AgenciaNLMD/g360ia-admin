@@ -16,13 +16,15 @@ export async function GET(request) {
   const modulo = searchParams.get("modulo");
   if (!modulo) return NextResponse.json({ ok: false, error: "Falta modulo" }, { status: 400 });
 
+  const NOMBRE_TO_SLUG = {
+    "Órdenes de Trabajo": "ot",
+    "Mi Negocio":         "mi-negocio",
+  };
+  const slug = NOMBRE_TO_SLUG[modulo] ?? modulo;
+
   const [rows] = await pool.query(
-    `SELECT id, plan, precio, activo
-     FROM modulos_planes
-     WHERE modulo = ?
-        OR LOWER(REPLACE(REPLACE(modulo, '-', ' '), '_', ' ')) = LOWER(?)
-     ORDER BY id`,
-    [modulo, modulo]
+    "SELECT id, plan, precio, activo FROM modulos_planes WHERE modulo = ? ORDER BY id",
+    [slug]
   );
   return NextResponse.json({ ok: true, planes: rows });
 }

@@ -3,11 +3,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
 
-// Metadata visual de cada módulo (icon + label para el sidebar)
+// Metadata visual de cada módulo (icon + label + slug para el sidebar).
+// La key puede ser el nombre del DB (display name o slug corto).
+// slug: fuerza el slug usado en page.js MODULOS — si no se define, usa la key.
 const META = {
-  crm:    { label: "CRM",        icon: "bi-people"   },
-  mcp:    { label: "Conexiones", icon: "bi-grid-1x2" },
-  matriz: { label: "Matriz",     icon: "bi-grid-3x3" },
+  crm:                  { label: "CRM",                icon: "bi-people"   },
+  mcp:                  { label: "Conexiones",          icon: "bi-grid-1x2" },
+  matriz:               { label: "Matriz",              icon: "bi-grid-3x3" },
+  "Órdenes de Trabajo": { label: "Órdenes de Trabajo", icon: "bi-tools",   slug: "ot"         },
+  "Mi Negocio":         { label: "Mi Negocio",          icon: "bi-shop",    slug: "mi-negocio" },
 };
 
 // Módulos exclusivos del superadmin
@@ -25,7 +29,7 @@ export async function GET() {
         if (mods.length > 0) {
           return NextResponse.json(
             mods.map(m => ({
-              slug:  m.nombre,
+              slug:  META[m.nombre]?.slug ?? m.nombre,
               label: META[m.nombre]?.label ?? m.nombre,
               icon:  META[m.nombre]?.icon  ?? "bi-box",
               grupo: m.grupo ?? null,

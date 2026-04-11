@@ -16,13 +16,16 @@ export async function GET(request) {
   const modulo = searchParams.get("modulo");
   if (!modulo) return NextResponse.json({ ok: false, error: "Falta modulo" }, { status: 400 });
 
+  // Mapeo display-name → slug corto usado en modulos_herramientas.modulo
+  const NOMBRE_TO_SLUG = {
+    "Órdenes de Trabajo": "ot",
+    "Mi Negocio":         "mi-negocio",
+  };
+  const slug = NOMBRE_TO_SLUG[modulo] ?? modulo;
+
   const [rows] = await pool.query(
-    `SELECT id, slug, nombre, descripcion, plan_minimo, activo
-     FROM modulos_herramientas
-     WHERE modulo = ?
-        OR LOWER(REPLACE(REPLACE(modulo, '-', ' '), '_', ' ')) = LOWER(?)
-     ORDER BY id`,
-    [modulo, modulo]
+    "SELECT id, slug, nombre, descripcion, plan_minimo, activo FROM modulos_herramientas WHERE modulo = ? ORDER BY id",
+    [slug]
   );
   return NextResponse.json({ ok: true, herramientas: rows });
 }
