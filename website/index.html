@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/x-icon" href="/assets/gestion360ia.ico"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <title>Gestión 360 iA | Consultoría en Inteligencia Artificial · Argentina</title>
+  <meta name="description" content="Consultoría en Inteligencia Artificial para empresas. Automatización con n8n, chatbots, WhatsApp IA, diseño web, SEO y desarrollo de software a medida en Argentina."/>
+  <meta name="keywords" content="consultoría inteligencia artificial argentina, automatización n8n, chatbots empresas, whatsapp ia, desarrollo software argentina, SEO, diseño web profesional"/>
+  <link rel="canonical" href="https://g360ia.com.ar/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://g360ia.com.ar/"/>
+  <meta property="og:title" content="Gestión 360 iA | Consultoría en Inteligencia Artificial · Argentina"/>
+  <meta property="og:description" content="Consultoría en Inteligencia Artificial para empresas. Automatización con n8n, chatbots, WhatsApp IA, diseño web, SEO y desarrollo de software a medida en Argentina."/>
+  <meta property="og:image" content="https://g360ia.com.ar/og-image.jpg"/>
+  <meta property="og:locale" content="es_AR"/>
+  <meta property="og:site_name" content="Gestión 360 iA"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Gestión 360 iA | Consultoría en Inteligencia Artificial · Argentina"/>
+  <meta name="twitter:description" content="Consultoría en Inteligencia Artificial para empresas. Automatización con n8n, chatbots, WhatsApp IA, diseño web, SEO y desarrollo de software a medida en Argentina."/>
+  <meta name="twitter:image" content="https://g360ia.com.ar/og-image.jpg"/>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://g360ia.com.ar/#business","name":"Gestión 360 iA","url":"https://g360ia.com.ar","logo":"https://g360ia.com.ar/assets/gestion360ia.png","image":"https://g360ia.com.ar/og-image.jpg","description":"Consultoría en Inteligencia Artificial para empresas argentinas.","telephone":"+54-9-11-0000-0000","email":"contacto@g360ia.com.ar","address":{"@type":"PostalAddress","addressLocality":"Buenos Aires","addressRegion":"CABA","addressCountry":"AR"},"areaServed":{"@type":"Country","name":"Argentina"}}]}
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:     #0A1628;
+      --navy2:    #0F1E38;
+      --navy3:    #132440;
+      --blue:     #1A3A60;
+      --accent:   #B08A55;
+      --accent2:  #C9A060;
+      --accent3:  #E2BC80;
+      --white:    #FFFFFF;
+      --off:      #E4E0D8;
+      --muted:    rgba(228,224,216,0.55);
+      --border:   rgba(176,138,85,0.18);
+      --borderhi: rgba(176,138,85,0.4);
+      --pr:       #5A7AA0;
+      --em:       #3A9E70;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--navy); color: var(--off); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+
+    #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 1; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 900; height: 70px; padding: 0 6vw; display: flex; align-items: center; justify-content: space-between; background: rgba(6,16,28,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); transition: background 0.3s; }
+    nav.scrolled { background: rgba(6,16,28,0.97); }
+    .nav-logo { display: flex; align-items: center; text-decoration: none; }
+    .nav-logo img { height: 44px; width: auto; display: block; }
+    .nav-right { display: flex; align-items: center; gap: 1.8rem; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--off); }
+    .btn-login { padding: 0.48rem 1.2rem; border: 1px solid var(--borderhi); border-radius: 6px; background: transparent; color: var(--accent2); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.2s; white-space: nowrap; }
+    .btn-login:hover { background: rgba(176,138,85,0.1); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--off); border-radius: 2px; transition: transform 0.3s, opacity 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu { display: none; position: fixed; top: 70px; left: 0; right: 0; background: rgba(6,16,28,0.98); border-bottom: 1px solid var(--border); padding: 1.4rem 6vw 2rem; z-index: 850; flex-direction: column; gap: 0; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: var(--muted); text-decoration: none; font-size: 1rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); transition: color 0.2s; }
+    .mobile-menu a:hover { color: var(--off); }
+    .mobile-menu a:last-child { border-bottom: none; color: var(--accent2); }
+
+    /* HERO */
+    .hero { min-height: 100vh; position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 9rem 6vw 5rem; gap: 5rem; }
+    .hero-content { position: relative; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.38rem 1rem; background: rgba(176,138,85,0.08); border: 1px solid var(--borderhi); border-radius: 100px; font-size: 0.74rem; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+    .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--em); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.75)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.6rem,4.4vw,4.2rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; color: var(--white); margin-bottom: 1.6rem; opacity: 0; animation: fadeUp 0.9s 0.4s forwards; }
+    h1 .accent-text { color: var(--accent2); }
+    .hero-sub { font-size: 1.05rem; color: var(--muted); max-width: 460px; margin-bottom: 2.8rem; font-weight: 300; line-height: 1.8; opacity: 0; animation: fadeUp 0.9s 0.6s forwards; }
+    .hero-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s 0.8s forwards; }
+    .btn-primary { padding: 0.88rem 2.2rem; background: linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%); color: var(--navy); font-family: 'Syne',sans-serif; font-weight: 700; font-size: 0.88rem; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(176,138,85,0.35); }
+    .btn-outline { padding: 0.88rem 2rem; background: transparent; color: var(--off); font-family: 'DM Sans',sans-serif; font-weight: 400; font-size: 0.88rem; border: 1px solid rgba(221,216,206,0.2); border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: border-color 0.2s, color 0.2s; }
+    .btn-outline:hover { border-color: rgba(221,216,206,0.5); color: var(--white); }
+    .btn-outline svg { transition: transform 0.2s; }
+    .btn-outline:hover svg { transform: translateX(3px); }
+
+    /* Hero card stack */
+    .hero-visual { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; opacity: 0; animation: fadeIn 1.2s 0.6s forwards; }
+    .card-stack { position: relative; width: 360px; height: 400px; }
+    .fc { position: absolute; background: rgba(12,26,46,0.88); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 48px rgba(6,16,28,0.7); backdrop-filter: blur(14px); }
+    .fc.main { width: 290px; padding: 1.5rem; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 3; }
+    .fc-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.35rem; }
+    .fc-title { font-family: 'Syne',sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 1.1rem; }
+    .bars { display: flex; flex-direction: column; gap: 0.65rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.8rem; font-size: 0.76rem; color: var(--muted); }
+    .bar-lbl { min-width: 90px; }
+    .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 10px; width: 0; transition: width 1.4s cubic-bezier(.25,.8,.25,1); }
+    .bar-fill.blue  { background: linear-gradient(90deg,var(--pr),#6B8FAF); }
+    .bar-fill.green { background: linear-gradient(90deg,var(--em),#5AC890); }
+    .bar-fill.gold  { background: linear-gradient(90deg,var(--accent),var(--accent3)); }
+    .bar-val { font-weight: 500; color: var(--off); min-width: 32px; text-align: right; }
+    .fc.tr { width: 148px; padding: 1rem 1.1rem; top: 14px; right: 10px; z-index: 4; animation: float 4s ease-in-out infinite; }
+    .fc.bl { width: 148px; padding: 1rem 1.1rem; bottom: 18px; left: 10px; z-index: 4; animation: float 4s ease-in-out 2s infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+    .mini { display: flex; align-items: center; gap: 0.6rem; }
+    .mini-ico { width: 32px; height: 32px; border-radius: 8px; background: rgba(176,138,85,0.12); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mini-ico svg { width: 16px; height: 16px; color: var(--accent2); }
+    .mini-ico.blue { background: rgba(80,104,134,0.18); }
+    .mini-ico.blue svg { color: #7AAFD4; }
+    .mini-lbl { font-size: 0.68rem; color: var(--muted); }
+    .mini-val { font-family: 'Syne',sans-serif; font-size: 1rem; font-weight: 800; color: var(--white); line-height: 1.1; }
+
+    /* STATS */
+    .stats-bar { position: relative; z-index: 1; padding: 2.4rem 6vw; background: var(--navy2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; }
+    .stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; border-right: 1px solid var(--border); padding: 0 1.5rem; }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-family: 'Syne',sans-serif; font-size: 1.9rem; font-weight: 800; }
+    .stat-num.c1 { color: #7AAFD4; }
+    .stat-num.c2 { color: var(--accent2); }
+    .stat-num.c3 { color: #5AC890; }
+    .stat-num.c4 { color: var(--off); }
+    .stat-label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 1; padding: 7rem 6vw; }
+    .section-label { font-size: 0.72rem; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.7rem; font-weight: 500; }
+    .section-label::before { content: ''; width: 20px; height: 1px; background: var(--accent2); }
+    h2 { font-family: 'Syne',sans-serif; font-size: clamp(1.9rem,3vw,2.7rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: var(--white); margin-bottom: 1rem; }
+    .section-intro { color: var(--muted); font-size: 1rem; max-width: 490px; margin-bottom: 3.8rem; }
+
+    /* SERVICES */
+    .services { background: var(--navy2); }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(268px,1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .svc { background: var(--navy3); padding: 2.2rem 1.8rem; transition: background 0.3s; position: relative; overflow: hidden; }
+    .svc::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,var(--accent),var(--accent3)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+    .svc:hover { background: rgba(26,53,84,0.5); }
+    .svc:hover::before { transform: scaleX(1); }
+    .svc-ico { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.3rem; border: 1px solid var(--border); }
+    .svc-ico svg { width: 20px; height: 20px; stroke-width: 1.5; }
+    .svc-ico.blue { background: rgba(80,104,134,0.15); }
+    .svc-ico.blue svg { color: #7AAFD4; }
+    .svc-ico.gold { background: rgba(176,138,85,0.12); }
+    .svc-ico.gold svg { color: var(--accent2); }
+    .svc-ico.green { background: rgba(58,158,112,0.12); }
+    .svc-ico.green svg { color: #5AC890; }
+    .svc-title { font-family: 'Syne',sans-serif; font-size: 0.97rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; }
+    .svc-desc { font-size: 0.84rem; color: var(--muted); line-height: 1.7; }
+
+    /* ABOUT */
+    .about-strip { position: relative; z-index: 1; padding: 0; display: grid; grid-template-columns: 1fr 1fr; min-height: 420px; }
+    .about-img { position: relative; overflow: hidden; background: var(--navy3); display: flex; align-items: center; justify-content: center; }
+    .about-img::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(80,104,134,0.22) 0%,rgba(58,158,112,0.1) 100%); }
+    .about-quote { position: relative; z-index: 1; font-family: 'Syne',sans-serif; font-size: clamp(1.3rem,2vw,1.9rem); font-weight: 700; color: var(--white); line-height: 1.3; letter-spacing: -0.02em; text-align: center; padding: 3rem; }
+    .about-quote em { color: var(--accent2); font-style: normal; }
+    .about-content { background: var(--blue); padding: 5rem 4rem; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--border); }
+    .about-content .section-label { color: rgba(221,216,206,0.55); }
+    .about-content .section-label::before { background: var(--accent); }
+    .about-content p { color: rgba(221,216,206,0.6); font-size: 1rem; line-height: 1.8; margin-bottom: 1rem; }
+
+    /* PROCESO */
+    .how { background: var(--navy2); }
+    .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .step-card { background: var(--navy3); padding: 2.4rem 2rem; transition: background 0.2s; }
+    .step-card:hover { background: rgba(26,53,84,0.45); }
+    .step-num-badge { font-family: 'Syne',sans-serif; font-size: 2rem; font-weight: 800; color: rgba(176,138,85,0.18); line-height: 1; margin-bottom: 1rem; }
+    .step-card h3 { font-family: 'Syne',sans-serif; font-size: 0.97rem; font-weight: 700; color: var(--white); margin-bottom: 0.6rem; }
+    .step-card p { font-size: 0.83rem; color: var(--muted); line-height: 1.7; }
+
+    /* TOOLS */
+    .tools { background: var(--navy); }
+    .tools-grid { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .pill { padding: 0.45rem 1.1rem; background: rgba(12,26,46,0.8); border: 1px solid var(--border); border-radius: 100px; font-size: 0.8rem; color: var(--muted); transition: border-color 0.2s, color 0.2s; }
+    .pill:hover { border-color: var(--borderhi); color: var(--off); }
+
+    /* CTA */
+    .cta-section { position: relative; z-index: 1; padding: 8rem 6vw; background: var(--navy2); border-top: 1px solid var(--border); text-align: center; overflow: hidden; }
+    .cta-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 60%,rgba(176,138,85,0.06) 0%,transparent 65%); pointer-events: none; }
+    .cta-inner { position: relative; z-index: 2; max-width: 640px; margin: 0 auto; }
+    .cta-badge-w { display: inline-block; padding: 0.35rem 1rem; background: rgba(176,138,85,0.1); border: 1px solid var(--borderhi); border-radius: 100px; font-size: 0.73rem; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 1.8rem; }
+    .cta-section p { color: var(--muted); font-size: 1rem; max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.8; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-white { padding: 0.88rem 2.2rem; background: var(--off); color: var(--navy); font-family: 'Syne',sans-serif; font-weight: 700; font-size: 0.88rem; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(0,0,0,0.4); }
+    .btn-ghost-w { padding: 0.88rem 2rem; background: transparent; color: var(--off); font-family: 'DM Sans',sans-serif; font-weight: 400; font-size: 0.88rem; border: 1px solid rgba(221,216,206,0.25); border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: border-color 0.2s, color 0.2s; }
+    .btn-ghost-w:hover { border-color: rgba(221,216,206,0.5); color: var(--white); }
+
+    /* FOOTER */
+    footer { position: relative; z-index: 1; padding: 2.6rem 6vw; background: var(--navy); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+    footer .logo { display: flex; align-items: center; text-decoration: none; }
+    footer .logo img { height: 40px; width: auto; }
+    .footer-copy { font-size: 0.79rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.79rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent2); }
+
+    /* REVEAL */
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; padding: 8rem 6vw 4rem; gap: 3rem; }
+      .hero-visual { display: none; }
+      .about-strip { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      footer { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+    }
+    @media (max-width: 640px) {
+      section { padding: 4.5rem 5vw; }
+      .stats-bar { flex-wrap: wrap; }
+      .stat { flex: 1 1 50%; border-right: none; border-bottom: 1px solid var(--border); }
+      .stat:nth-child(odd) { border-right: 1px solid var(--border); }
+      .stat:nth-child(3), .stat:nth-child(4) { border-bottom: none; }
+      .steps-grid { grid-template-columns: 1fr; }
+      h1 { font-size: clamp(2.2rem,9vw,3rem); }
+      .cta-actions { flex-direction: column; align-items: center; }
+      .btn-login { display: none; }
+      footer { padding: 2rem 5vw; align-items: center; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="/" class="nav-logo">
+    <img src="/assets/gestion360ia.png" alt="Gestión 360 iA"/>
+  </a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#proceso">Proceso</a></li>
+      <li><a href="#tecnologia">Stack</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="https://admin.g360ia.com.ar" class="btn-login">Acceso clientes</a>
+    <button class="hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#servicios">Servicios</a>
+  <a href="#proceso">Proceso</a>
+  <a href="#tecnologia">Stack</a>
+  <a href="#contacto">Contacto</a>
+  <a href="https://admin.g360ia.com.ar">Acceso clientes</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Consultoría IA · Argentina</div>
+    <h1>Tu empresa,<br/>potenciada con<br/><span class="accent-text">Inteligencia<br/>Artificial</span></h1>
+    <p class="hero-sub">Automatización inteligente, chatbots, WhatsApp IA y desarrollo a medida. Soluciones reales que transforman tus procesos y escalan tu negocio.</p>
+    <div class="hero-actions">
+      <a href="#contacto" class="btn-primary">Agendar consulta gratuita</a>
+      <a href="#servicios" class="btn-outline">Ver servicios <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="card-stack">
+      <div class="fc main">
+        <div class="fc-lbl">Impacto en tu negocio</div>
+        <div class="fc-title">Resultados con IA</div>
+        <div class="bars">
+          <div class="bar-row"><span class="bar-lbl">Automatización</span><div class="bar-track"><div class="bar-fill blue" data-w="88"></div></div><span class="bar-val">88%</span></div>
+          <div class="bar-row"><span class="bar-lbl">Conversión web</span><div class="bar-track"><div class="bar-fill green" data-w="72"></div></div><span class="bar-val">72%</span></div>
+          <div class="bar-row"><span class="bar-lbl">Tiempo ahorrado</span><div class="bar-track"><div class="bar-fill gold" data-w="94"></div></div><span class="bar-val">94%</span></div>
+        </div>
+      </div>
+      <div class="fc tr">
+        <div class="mini">
+          <div class="mini-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div><div class="mini-lbl">Chatbot activo</div><div class="mini-val">24/7</div></div>
+        </div>
+      </div>
+      <div class="fc bl">
+        <div class="mini">
+          <div class="mini-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+          <div><div class="mini-lbl">Eficiencia</div><div class="mini-val">+3x</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar reveal">
+  <div class="stat"><span class="stat-num c1">+50</span><span class="stat-label">Empresas asesoradas</span></div>
+  <div class="stat"><span class="stat-num c2">8</span><span class="stat-label">Servicios especializados</span></div>
+  <div class="stat"><span class="stat-num c3">360°</span><span class="stat-label">Cobertura integral</span></div>
+  <div class="stat"><span class="stat-num c4">100%</span><span class="stat-label">Soluciones a medida</span></div>
+</div>
+
+<!-- SERVICIOS -->
+<section class="services" id="servicios">
+  <div class="section-label reveal">Qué hacemos</div>
+  <h2 class="reveal">Servicios diseñados<br/>para escalar tu negocio</h2>
+  <p class="section-intro reveal">Cada solución está construida desde cero para tu industria, tus procesos y tus objetivos. Sin templates, sin atajos.</p>
+  <div class="services-grid">
+    <div class="svc reveal">
+      <div class="svc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg></div>
+      <div class="svc-title">Consultoría en IA</div>
+      <div class="svc-desc">Diagnóstico, hoja de ruta y acompañamiento estratégico para incorporar inteligencia artificial en tus operaciones con resultados medibles.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h5M7 11h3"/></svg></div>
+      <div class="svc-title">Diseño Web</div>
+      <div class="svc-desc">Sitios y plataformas digitales de alto impacto, optimizados para conversión, experiencia de usuario y posicionamiento orgánico.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+      <div class="svc-title">SEO &amp; Posicionamiento</div>
+      <div class="svc-desc">Estrategia técnica y de contenido para liderar los resultados de búsqueda, atraer tráfico calificado y convertir visitas en clientes.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="svc-title">Redes Sociales</div>
+      <div class="svc-desc">Gestión estratégica y contenido potenciado por IA que construye marca y capta leads calificados de forma constante.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></div>
+      <div class="svc-title">Chatbots Web</div>
+      <div class="svc-desc">Asistentes conversacionales que atienden, califican y convierten visitantes de forma automática las 24 horas del día.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 2 3.35A2 2 0 0 1 4 1.35h3a2 2 0 0 1 2 1.72 12.8 12.8 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><path d="M17 2s2 2 2 5-2 5-2 5"/></svg></div>
+      <div class="svc-title">WhatsApp con IA</div>
+      <div class="svc-desc">Flujos automatizados en WhatsApp Business que venden, dan soporte y fidelizan clientes sin intervención humana.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><path d="M13 13h4v4M17 13v4h-4"/></svg></div>
+      <div class="svc-title">Automatizaciones n8n</div>
+      <div class="svc-desc">Conectamos tus apps, CRMs y sistemas en flujos de trabajo inteligentes que eliminan tareas manuales y reducen errores.</div>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <div class="svc-title">Desarrollo de Software</div>
+      <div class="svc-desc">Aplicaciones web y móviles a medida con IA integrada, arquitectura escalable y foco total en la experiencia del usuario.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<div class="about-strip">
+  <div class="about-img reveal">
+    <div class="about-quote">No vendemos tecnología.<br/><em>Implementamos resultados.</em></div>
+  </div>
+  <div class="about-content reveal">
+    <div class="section-label">Quiénes somos</div>
+    <h2>Un equipo que<br/>habla tu idioma</h2>
+    <p>Somos consultores, desarrolladores y estrategas digitales con foco en resultados concretos. No creemos en la IA por la IA.</p>
+    <p>Creemos en usar la tecnología correcta para resolver el problema correcto, con acompañamiento real desde el primer día.</p>
+  </div>
+</div>
+
+<!-- PROCESO -->
+<section class="how" id="proceso">
+  <div class="section-label reveal">Metodología</div>
+  <h2 class="reveal">Un proceso claro<br/>desde el día uno</h2>
+  <p class="section-intro reveal">Sin promesas vacías. Metodología comprobada para entregar resultados desde las primeras semanas.</p>
+  <div class="steps-grid">
+    <div class="step-card reveal"><div class="step-num-badge">01</div><h3>Diagnóstico y Estrategia</h3><p>Analizamos tu negocio y objetivos. Identificamos dónde la IA genera mayor impacto y trazamos el plan de implementación.</p></div>
+    <div class="step-card reveal"><div class="step-num-badge">02</div><h3>Diseño de la Solución</h3><p>Prototipamos flujos y arquitecturas. Todo validado con vos antes de escribir la primera línea de código.</p></div>
+    <div class="step-card reveal"><div class="step-num-badge">03</div><h3>Implementación Ágil</h3><p>Ciclos cortos con entregas parciales. Iteramos rápido con visibilidad total del avance del proyecto.</p></div>
+    <div class="step-card reveal"><div class="step-num-badge">04</div><h3>Lanzamiento y Mejora</h3><p>Activamos, medimos y optimizamos continuamente. Tu crecimiento es nuestro KPI principal.</p></div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="tools" id="tecnologia">
+  <div class="section-label reveal">Stack tecnológico</div>
+  <h2 class="reveal">Herramientas de clase mundial,<br/>implementadas con criterio</h2>
+  <p class="section-intro reveal">Las plataformas líderes del mercado, integradas estratégicamente según cada caso de uso.</p>
+  <div class="tools-grid reveal">
+    <span class="pill">n8n</span><span class="pill">OpenAI</span><span class="pill">Claude AI</span>
+    <span class="pill">WhatsApp Business API</span><span class="pill">Make</span><span class="pill">Zapier</span>
+    <span class="pill">React</span><span class="pill">Node.js</span><span class="pill">Python</span>
+    <span class="pill">WordPress</span><span class="pill">Webflow</span><span class="pill">Google Analytics 4</span>
+    <span class="pill">Meta Ads</span><span class="pill">HubSpot</span><span class="pill">Supabase</span><span class="pill">Vercel</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contacto">
+  <div class="cta-inner">
+    <div class="cta-badge-w">Hablemos</div>
+    <h2 class="reveal">¿Listo para transformar<br/>tu empresa con IA?</h2>
+    <p class="reveal">La primera consulta es gratuita. En 30 minutos te mostramos exactamente cómo la IA puede impactar tu negocio.</p>
+    <div class="cta-actions reveal">
+      <a href="mailto:contacto@g360ia.com.ar" class="btn-white">Escribirnos ahora</a>
+      <a href="#" onclick="if(window.g360OpenWidget){g360OpenWidget();}return false;" class="btn-ghost-w">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Abrir chat
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/" class="logo"><img src="/assets/gestion360ia.png" alt="Gestión 360 iA"/></a>
+  <p class="footer-copy">© <?= date('Y') ?> Gestión 360 iA · Buenos Aires, Argentina</p>
+  <ul class="footer-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#proceso">Proceso</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</footer>
+
+<?php if (file_exists('gestion360ia_chat_widget.html')) { include 'gestion360ia_chat_widget.html'; } ?>
+
+<script>
+/* CANVAS */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes=[], raf;
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  function Node(){ this.x=Math.random()*W; this.y=Math.random()*H; this.vx=(Math.random()-.5)*.28; this.vy=(Math.random()-.5)*.28; this.r=Math.random()*1.8+.7; this.gold=Math.random()>.75; }
+  function init(){ resize(); nodes=[]; const c=Math.min(Math.floor(W*H/10000),110); for(let i=0;i<c;i++) nodes.push(new Node()); }
+  function draw(){
+    /* fondo azul con gradiente — más claro que el navy puro */
+    const grad = ctx.createRadialGradient(W*.5, H*.4, 0, W*.5, H*.4, Math.max(W,H)*.8);
+    grad.addColorStop(0,  '#0F2040');
+    grad.addColorStop(.5, '#0A1830');
+    grad.addColorStop(1,  '#071020');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+
+    const n=nodes.length;
+    for(let i=0;i<n;i++){
+      const a=nodes[i];
+      for(let j=i+1;j<n;j++){
+        const b=nodes[j], dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy;
+        if(d2<25000){
+          const al=(1-d2/25000)*.55;
+          ctx.strokeStyle=(a.gold||b.gold?'rgba(196,160,96,':'rgba(90,140,200,')+al+')';
+          ctx.lineWidth=.9;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+      ctx.beginPath(); ctx.arc(a.x,a.y,a.r,0,Math.PI*2);
+      ctx.fillStyle=a.gold?'rgba(196,160,96,.9)':'rgba(100,160,220,.7)'; ctx.fill();
+      a.x+=a.vx; a.y+=a.vy;
+      if(a.x<0||a.x>W) a.vx*=-1;
+      if(a.y<0||a.y>H) a.vy*=-1;
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  init(); draw();
+  window.addEventListener('resize',()=>{ cancelAnimationFrame(raf); init(); draw(); });
+})();
+
+/* NAV */
+const nav=document.getElementById('mainNav');
+window.addEventListener('scroll',()=>{ nav.classList.toggle('scrolled',window.scrollY>40); });
+
+/* HAMBURGER */
+const ham=document.getElementById('hamburger'), mob=document.getElementById('mobileMenu');
+ham.addEventListener('click',()=>{ ham.classList.toggle('open'); mob.classList.toggle('open'); });
+mob.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{ ham.classList.remove('open'); mob.classList.remove('open'); }));
+document.addEventListener('click',e=>{ if(!nav.contains(e.target)&&!mob.contains(e.target)){ ham.classList.remove('open'); mob.classList.remove('open'); }});
+
+/* REVEAL */
+const obs=new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),60); obs.unobserve(e.target); }}); },{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* BARS */
+setTimeout(()=>{ document.querySelectorAll('.bar-fill').forEach(el=>{ el.style.width=el.dataset.w+'%'; }); },900);
+</script>
+</body>
+</html>

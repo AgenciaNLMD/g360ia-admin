@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión 360 iA — Árbol de Rubros, Módulos y Herramientas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0F4F0;
+  --surface: #ffffff;
+  --surface2: #F7FAF7;
+  --border: #E2E8E2;
+  --border2: #D0DAD0;
+  --text: #1A2A1A;
+  --text2: #4A604A;
+  --text3: #7A927A;
+  --green: #1A7A4A;
+  --green-l: #E8F5EE;
+  --green-m: #C2E0CE;
+  --amber: #B07A20;
+  --amber-l: #FDF3E0;
+  --blue: #1A4A7A;
+  --blue-l: #E8F0F8;
+  --red: #8A2020;
+  --red-l: #FAE8E8;
+  --ia: #7A4A1A;
+  --ia-l: #F5EDE0;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  --shadow-hover: 0 2px 8px rgba(0,0,0,.1), 0 8px 24px rgba(0,0,0,.06);
+  --r: 12px;
+  --r-sm: 7px;
+  --r-xs: 4px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-head {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.logo-hex {
+  width: 32px; height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.logo-text { font-size: 13px; font-weight: 600; color: var(--text); }
+.logo-sub { font-size: 10px; color: var(--text3); letter-spacing: .05em; text-transform: uppercase; }
+
+.search-wrap { position: relative; }
+.search-wrap input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 8px 12px 8px 32px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.search-wrap input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(26,122,74,.1);
+}
+.search-wrap input::placeholder { color: var(--text3); }
+.search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--text3); pointer-events: none;
+}
+
+.filters {
+  padding: .75rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.filter-btn {
+  font-size: 10.5px; font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .12s;
+}
+.filter-btn:hover { border-color: var(--green); color: var(--green); }
+.filter-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+.stats-mini {
+  padding: .75rem 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.stat-mini {
+  text-align: center;
+  background: var(--surface2);
+  border-radius: var(--r-xs);
+  padding: 6px 4px;
+}
+.stat-mini-num { font-size: 16px; font-weight: 600; color: var(--green); display: block; }
+.stat-mini-lbl { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
+
+.sidebar-nav {
+  overflow-y: auto;
+  flex: 1;
+  padding: .5rem 0;
+}
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.nav-label {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3);
+  padding: .6rem 1.25rem .3rem;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 1.25rem;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .12s;
+  font-size: 12.5px;
+  color: var(--text2);
+  user-select: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); border-left-color: var(--border2); }
+.nav-item.active { background: var(--green-l); color: var(--green); border-left-color: var(--green); font-weight: 500; }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: .75rem 1.25rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.expand-ctrl {
+  font-size: 11px; color: var(--text3);
+  cursor: pointer; background: none; border: none;
+  font-family: inherit; padding: 0;
+  display: flex; align-items: center; gap: 5px;
+}
+.expand-ctrl:hover { color: var(--green); }
+
+/* ── MAIN ── */
+.main {
+  padding: 2rem 2.5rem;
+  max-width: 900px;
+}
+
+.section { display: none; animation: fadeIn .18s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.section-head {
+  margin-bottom: 1.5rem;
+}
+.section-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--green-l);
+  color: var(--green);
+  font-size: 10px; font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: .06em; text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+.section-title { font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: .4rem; }
+.section-desc { font-size: 13px; color: var(--text2); max-width: 640px; }
+
+/* ── RUBRO OVERVIEW (módulos universales + resumen) ── */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: .75rem;
+  margin-top: 1rem;
+}
+.ov-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.ov-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+  border-color: var(--green-m);
+}
+.ov-icon { font-size: 22px; margin-bottom: .5rem; display: block; }
+.ov-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.ov-meta { font-size: 11px; color: var(--text3); }
+
+/* ── MÓDULO CARDS ── */
+.modulo-list { display: flex; flex-direction: column; gap: .5rem; }
+
+.modulo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: box-shadow .15s;
+}
+.modulo-card:hover { box-shadow: var(--shadow-hover); }
+
+.modulo-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: .85rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s;
+}
+.modulo-header:hover { background: var(--surface2); }
+
+.mod-ico {
+  width: 34px; height: 34px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.mod-info { flex: 1; min-width: 0; }
+.mod-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.mod-desc { font-size: 11.5px; color: var(--text3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.mod-badges { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+.badge {
+  font-size: 9.5px; font-weight: 600;
+  padding: 2px 7px; border-radius: 10px;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.badge-univ { background: var(--green-l); color: var(--green); }
+.badge-star { background: var(--amber-l); color: var(--amber); }
+.badge-new  { background: var(--blue-l); color: var(--blue); }
+
+.chevron-ico {
+  width: 16px; height: 16px; flex-shrink: 0;
+  color: var(--text3);
+  transition: transform .2s;
+}
+.modulo-header.open .chevron-ico { transform: rotate(90deg); }
+
+.modulo-body {
+  display: none;
+  padding: 0 1rem 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+.modulo-body.open { display: block; }
+
+.tools-section { margin-top: .75rem; }
+.tools-label {
+  font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: .4rem;
+}
+.tools-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.chip {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  background: var(--surface2);
+  transition: background .1s;
+}
+.chip.ia {
+  background: var(--ia-l);
+  border-color: transparent;
+  color: var(--ia);
+  font-weight: 500;
+}
+.chip.key {
+  background: var(--blue-l);
+  border-color: transparent;
+  color: var(--blue);
+  font-weight: 500;
+}
+.chip.diff {
+  background: var(--green-l);
+  border-color: var(--green-m);
+  color: var(--green);
+  font-weight: 500;
+}
+
+.flow-block {
+  margin-top: .75rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: .75rem 1rem;
+}
+.flow-title {
+  font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: .5rem;
+}
+.flow-step {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin-bottom: .4rem;
+  font-size: 12px; color: var(--text2);
+}
+.flow-step:last-child { margin-bottom: 0; }
+.fnum {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600;
+  flex-shrink: 0; margin-top: 2px;
+}
+.fnum-std { background: var(--border); color: var(--text2); }
+.fnum-ia  { background: var(--ia-l); color: var(--ia); }
+.fnum-key { background: var(--blue-l); color: var(--blue); }
+
+.mock-preview {
+  margin-top: .75rem;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.mock-bar {
+  background: var(--surface2);
+  padding: 6px 10px;
+  font-size: 10px; color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+}
+.mock-dots { display: flex; gap: 4px; }
+.mock-dot { width: 7px; height: 7px; border-radius: 50%; }
+.mock-url {
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 7px;
+  color: var(--text3);
+}
+.mock-body { padding: 10px 12px; background: var(--surface); }
+.mock-status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.mock-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.mock-label { font-size: 12.5px; font-weight: 600; }
+.mock-sub { font-size: 11px; color: var(--text3); }
+.progress-track { height: 4px; border-radius: 2px; background: var(--border); margin-top: 8px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; background: var(--blue); }
+.progress-steps {
+  display: flex; gap: 0; margin: 6px 0 3px;
+  font-size: 10px; color: var(--text3);
+}
+.progress-steps span { flex: 1; text-align: center; }
+.progress-steps span.act { font-weight: 600; color: var(--blue); }
+
+.info-note {
+  margin-top: .6rem;
+  font-size: 11.5px; color: var(--text2);
+  padding: 6px 10px;
+  background: var(--green-l);
+  border-left: 2px solid var(--green);
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+}
+
+/* ── LEGEND ── */
+.legend {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  margin-bottom: 1.25rem;
+  padding: .75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+.legend-chip { font-size: 10px; padding: 2px 7px; border-radius: 10px; }
+
+/* ── VARIANTES ── */
+.variantes { display: flex; flex-wrap: wrap; gap: 5px; margin-top: .5rem; }
+.var-chip {
+  font-size: 11px; padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  background: var(--surface);
+}
+.var-chip.similar {
+  border-color: var(--blue-l);
+  color: var(--blue);
+  background: var(--blue-l);
+}
+
+/* ── SECTION: OVERVIEW (home) ── */
+.rubros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .65rem;
+}
+.rubro-thumb {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: all .15s;
+  text-align: center;
+}
+.rubro-thumb:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+  border-color: var(--green-m);
+}
+.rth-ico { font-size: 26px; display: block; margin-bottom: .4rem; }
+.rth-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.rth-count { font-size: 10px; color: var(--text3); }
+
+/* ── NO RESULTS ── */
+#no-results { text-align: center; padding: 3rem 1rem; color: var(--text3); display: none; }
+#no-results.visible { display: block; }
+
+/* ── DESCRIPCIÓN DEL MÓDULO ── */
+.mod-description {
+  margin-top: .85rem;
+  padding: .7rem .9rem;
+  background: var(--surface2);
+  border-radius: var(--r-sm);
+  border-left: 3px solid var(--border2);
+}
+.mod-description-label {
+  font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: .3rem;
+}
+.mod-description-text {
+  font-size: 12px; color: var(--text2); line-height: 1.65;
+}
+
+/* ── IA INSIGHT ── */
+.ia-insight {
+  margin-top: .75rem;
+  border: 1px solid #E8D8B8;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.ia-insight-header {
+  background: var(--ia-l);
+  padding: .45rem .9rem;
+  display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid #E8D8B8;
+}
+.ia-insight-label {
+  font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ia);
+}
+.ia-insight-body {
+  padding: .7rem .9rem;
+  background: #FDFAF5;
+}
+.ia-insight-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin-bottom: .45rem;
+  font-size: 12px; color: var(--text2); line-height: 1.6;
+}
+.ia-insight-item:last-child { margin-bottom: 0; }
+.ia-bullet {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--ia-l); color: var(--ia);
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.ia-insight-skill {
+  margin-top: .55rem;
+  padding: .5rem .75rem;
+  background: var(--amber-l);
+  border-radius: var(--r-xs);
+  font-size: 11.5px; color: var(--amber);
+  font-style: italic;
+  line-height: 1.55;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-head">
+    <div class="logo-mark">
+      <div class="logo-hex">G</div>
+      <div>
+        <div class="logo-text">Gestión 360 iA</div>
+        <div class="logo-sub">Árbol de rubros v2.1</div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" placeholder="Buscar módulo o herramienta..." oninput="handleSearch()">
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
+    <button class="filter-btn" onclick="setFilter('universal',this)">Universales</button>
+    <button class="filter-btn" onclick="setFilter('ia',this)">Con IA ✦</button>
+    <button class="filter-btn" onclick="setFilter('diferencial',this)">Diferenciales</button>
+  </div>
+
+  <div class="stats-mini">
+    <div class="stat-mini"><span class="stat-mini-num" id="cnt-r">10</span><span class="stat-mini-lbl">Rubros</span></div>
+    <div class="stat-mini"><span class="stat-mini-num" id="cnt-m">0</span><span class="stat-mini-lbl">Módulos</span></div>
+    <div class="stat-mini"><span class="stat-mini-num" id="cnt-t">0</span><span class="stat-mini-lbl">Herram.</span></div>
+    <div class="stat-mini"><span class="stat-mini-num" id="cnt-i">0</span><span class="stat-mini-lbl">Con IA</span></div>
+  </div>
+
+  <div class="sidebar-nav" id="sidebar-nav">
+    <div class="nav-label">Inicio</div>
+    <div class="nav-item active" onclick="showSection('overview', this)">
+      <span class="nav-dot" style="background:#1A7A4A"></span>Vista general
+    </div>
+
+    <div class="nav-label">Módulos universales</div>
+    <div class="nav-item" onclick="showSection('universal', this)">
+      <span class="nav-dot" style="background:#1A7A4A"></span>⬡ Todos los rubros
+    </div>
+
+    <div class="nav-label">Rubros</div>
+    <div class="nav-item" onclick="showSection('hotel', this)"><span class="nav-dot" style="background:#3A9E70"></span>🏨 Hotel / Cabañas</div>
+    <div class="nav-item" onclick="showSection('salud', this)"><span class="nav-dot" style="background:#B08A55"></span>🏥 Consultorio / Clínica / Spa</div>
+    <div class="nav-item" onclick="showSection('salon', this)"><span class="nav-dot" style="background:#506886"></span>🎉 Salón de Eventos</div>
+    <div class="nav-item" onclick="showSection('inmobiliaria', this)"><span class="nav-dot" style="background:#3A9E70"></span>🏢 Inmobiliaria</div>
+    <div class="nav-item" onclick="showSection('restaurante', this)"><span class="nav-dot" style="background:#B08A55"></span>🍽️ Restaurante / Gastronomía</div>
+    <div class="nav-item" onclick="showSection('profesional', this)"><span class="nav-dot" style="background:#506886"></span>⚖️ Contador / Abogado</div>
+    <div class="nav-item" onclick="showSection('seguros', this)"><span class="nav-dot" style="background:#3A9E70"></span>🛡️ Gestor de Seguros</div>
+    <div class="nav-item" onclick="showSection('distribuidora', this)"><span class="nav-dot" style="background:#B08A55"></span>🚚 Distribuidora / Logística</div>
+    <div class="nav-item" onclick="showSection('tecnico', this)"><span class="nav-dot" style="background:#8A4A1A"></span>🔧 Servicio Técnico</div>
+    <div class="nav-item" onclick="showSection('govtech', this)"><span class="nav-dot" style="background:#506886"></span>🏛️ GovTech / Municipios</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="expand-ctrl" onclick="toggleAll()" id="expand-btn">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Expandir todo
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- ─ OVERVIEW ─ -->
+<div class="section active" id="s-overview">
+  <div class="section-head">
+    <div class="section-tag">Gestión 360 iA</div>
+    <h1 class="section-title">Rubros, módulos y herramientas</h1>
+    <p class="section-desc">Cada rubro es un paquete de módulos que se activa al dar de alta un tenant. Hacé click en cualquier rubro para explorar sus módulos y herramientas.</p>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="chip diff legend-chip">Diferencial</span>Ventaja competitiva clave</div>
+    <div class="legend-item"><span class="chip ia legend-chip">✦ IA</span>Herramienta con inteligencia artificial</div>
+    <div class="legend-item"><span class="chip key legend-chip">Core</span>Funcionalidad central del módulo</div>
+    <div class="legend-item"><span class="chip legend-chip">Herramienta</span>Funcionalidad estándar</div>
+  </div>
+
+  <div class="rubros-grid">
+    <div class="rubro-thumb" onclick="showSection('universal', document.querySelector('[onclick*=universal]'))">
+      <span class="rth-ico">⬡</span>
+      <div class="rth-name">Universales</div>
+      <div class="rth-count">9 módulos · todos los rubros</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('hotel', document.querySelector('[onclick*=hotel]'))">
+      <span class="rth-ico">🏨</span>
+      <div class="rth-name">Hotel / Cabañas</div>
+      <div class="rth-count">6 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('salud', document.querySelector('[onclick*=salud]'))">
+      <span class="rth-ico">🏥</span>
+      <div class="rth-name">Consultorio / Spa</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('salon', document.querySelector('[onclick*=salon]'))">
+      <span class="rth-ico">🎉</span>
+      <div class="rth-name">Salón de Eventos</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('inmobiliaria', document.querySelector('[onclick*=inmobiliaria]'))">
+      <span class="rth-ico">🏢</span>
+      <div class="rth-name">Inmobiliaria</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('restaurante', document.querySelector('[onclick*=restaurante]'))">
+      <span class="rth-ico">🍽️</span>
+      <div class="rth-name">Restaurante</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('profesional', document.querySelector('[onclick*=profesional]'))">
+      <span class="rth-ico">⚖️</span>
+      <div class="rth-name">Contador / Abogado</div>
+      <div class="rth-count">4 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('seguros', document.querySelector('[onclick*=seguros]'))">
+      <span class="rth-ico">🛡️</span>
+      <div class="rth-name">Gestor de Seguros</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('distribuidora', document.querySelector('[onclick*=distribuidora]'))">
+      <span class="rth-ico">🚚</span>
+      <div class="rth-name">Distribuidora</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('tecnico', document.querySelector('[onclick*=tecnico]'))">
+      <span class="rth-ico">🔧</span>
+      <div class="rth-name">Servicio Técnico</div>
+      <div class="rth-count">7 módulos · nuevo</div>
+    </div>
+    <div class="rubro-thumb" onclick="showSection('govtech', document.querySelector('[onclick*=govtech]'))">
+      <span class="rth-ico">🏛️</span>
+      <div class="rth-name">GovTech</div>
+      <div class="rth-count">5 módulos</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── UNIVERSALES ─── -->
+<div class="section" id="s-universal">
+  <div class="section-head">
+    <div class="section-tag">⬡ Base</div>
+    <h1 class="section-title">Módulos universales</h1>
+    <p class="section-desc">Disponibles para todos los rubros desde el día 1. Son la base que cualquier tenant recibe al activarse.</p>
+  </div>
+  <div class="modulo-list" id="ml-universal"></div>
+</div>
+
+<!-- ─── HOTEL ─── -->
+<div class="section" id="s-hotel">
+  <div class="section-head">
+    <div class="section-tag">🏨 Alojamiento</div>
+    <h1 class="section-title">Hotel / Cabañas / Alojamiento</h1>
+    <p class="section-desc">Gestión completa de reservas, habitaciones y experiencia del huésped con IA integrada en cada punto de contacto.</p>
+  </div>
+  <div class="modulo-list" id="ml-hotel"></div>
+</div>
+
+<!-- ─── SALUD ─── -->
+<div class="section" id="s-salud">
+  <div class="section-head">
+    <div class="section-tag">🏥 Salud</div>
+    <h1 class="section-title">Consultorio / Clínica / Spa</h1>
+    <p class="section-desc">Turnos, historia clínica básica y gestión de pacientes con recordatorios automáticos y predicción de ausentismo.</p>
+  </div>
+  <div class="modulo-list" id="ml-salud"></div>
+</div>
+
+<!-- ─── SALON ─── -->
+<div class="section" id="s-salon">
+  <div class="section-head">
+    <div class="section-tag">🎉 Eventos</div>
+    <h1 class="section-title">Salón de Eventos</h1>
+    <p class="section-desc">Presupuestos automáticos, agenda de eventos y gestión de proveedores con IA que optimiza cada operación.</p>
+  </div>
+  <div class="modulo-list" id="ml-salon"></div>
+</div>
+
+<!-- ─── INMOBILIARIA ─── -->
+<div class="section" id="s-inmobiliaria">
+  <div class="section-head">
+    <div class="section-tag">🏢 Real estate</div>
+    <h1 class="section-title">Inmobiliaria</h1>
+    <p class="section-desc">Propiedades en mapa, pipeline de ventas y matching cliente-propiedad con valuación estimada por IA.</p>
+  </div>
+  <div class="modulo-list" id="ml-inmobiliaria"></div>
+</div>
+
+<!-- ─── RESTAURANTE ─── -->
+<div class="section" id="s-restaurante">
+  <div class="section-head">
+    <div class="section-tag">🍽️ Gastronomía</div>
+    <h1 class="section-title">Restaurante / Gastronomía</h1>
+    <p class="section-desc">Menú digital, reservas, pedidos y estadísticas con predicción de demanda y overbooking inteligente.</p>
+  </div>
+  <div class="modulo-list" id="ml-restaurante"></div>
+</div>
+
+<!-- ─── PROFESIONAL ─── -->
+<div class="section" id="s-profesional">
+  <div class="section-head">
+    <div class="section-tag">⚖️ Servicios profesionales</div>
+    <h1 class="section-title">Contador / Abogado / Profesional</h1>
+    <p class="section-desc">Expedientes, agenda profesional, vencimientos AFIP automáticos y generación de documentos con IA.</p>
+  </div>
+  <div class="modulo-list" id="ml-profesional"></div>
+</div>
+
+<!-- ─── SEGUROS ─── -->
+<div class="section" id="s-seguros">
+  <div class="section-head">
+    <div class="section-tag">🛡️ Seguros</div>
+    <h1 class="section-title">Gestor de Seguros</h1>
+    <p class="section-desc">Pólizas, renovaciones y siniestros con detección automática de oportunidades de cross-selling.</p>
+  </div>
+  <div class="modulo-list" id="ml-seguros"></div>
+</div>
+
+<!-- ─── DISTRIBUIDORA ─── -->
+<div class="section" id="s-distribuidora">
+  <div class="section-head">
+    <div class="section-tag">🚚 Logística</div>
+    <h1 class="section-title">Distribuidora / Logística</h1>
+    <p class="section-desc">Rutas inteligentes, stock en tiempo real y seguimiento GPS con optimización de recorridos por IA.</p>
+  </div>
+  <div class="modulo-list" id="ml-distribuidora"></div>
+</div>
+
+<!-- ─── SERVICIO TÉCNICO ─── -->
+<div class="section" id="s-tecnico">
+  <div class="section-head">
+    <div class="section-tag">🔧 Nuevo rubro</div>
+    <h1 class="section-title">Servicio Técnico / Reparaciones</h1>
+    <p class="section-desc">OT trazable, tracking público para que el cliente consulte el estado sin llamar, y compra de repuestos a proveedores integrada.</p>
+  </div>
+  <div class="variantes" style="margin-bottom:1rem">
+    <span class="var-chip">📺 Electrónica</span>
+    <span class="var-chip">📱 Celulares</span>
+    <span class="var-chip">💻 Computación</span>
+    <span class="var-chip">🧺 Electrodomésticos</span>
+    <span class="var-chip">❄️ Aire acondicionado</span>
+    <span class="var-chip">🚗 Mecánica</span>
+    <span class="var-chip">💎 Joyería / Relojería</span>
+    <span class="var-chip similar">🔌 IT empresarial</span>
+    <span class="var-chip similar">🌿 Mantenimiento</span>
+    <span class="var-chip similar">🎸 Instrumentos</span>
+  </div>
+  <div class="modulo-list" id="ml-tecnico"></div>
+</div>
+
+<!-- ─── GOVTECH ─── -->
+<div class="section" id="s-govtech">
+  <div class="section-head">
+    <div class="section-tag">🏛️ Sector público</div>
+    <h1 class="section-title">GovTech / Municipios</h1>
+    <p class="section-desc">Reclamos ciudadanos con clasificación IA, turnos, mapa de incidencias y comunicación masiva segmentada.</p>
+  </div>
+  <div class="modulo-list" id="ml-govtech"></div>
+</div>
+
+<!-- NO RESULTS -->
+<div id="no-results">
+  <div style="font-size:2rem;margin-bottom:.5rem">🔍</div>
+  <div style="font-size:14px">Sin resultados para esta búsqueda</div>
+</div>
+
+</main>
+</div>
+
+<script>
+const DATA = {
+  universal: {
+    label: 'Todos los rubros', icon: '⬡', color: '#E8F5EE',
+    modulos: [
+      { name:'Dashboard del negocio', desc:'KPIs + panel IA', ico:'📊', icoBg:'#E8F5EE',
+        tools:[{n:'KPIs en tiempo real'},{n:'Actividad reciente'},{n:'Alertas del día'},{n:'Panel IA sugerencias',ia:true},{n:'Gráficos de crecimiento'}],
+        description:'Centro de comando operativo del negocio. Concentra en una sola pantalla los indicadores más importantes del día: clientes activos, ingresos, tareas pendientes y alertas críticas. Permite al dueño tomar decisiones rápidas sin navegar entre secciones. Es la primera pantalla que ve al entrar al portal.',
+        insight:{points:['La IA analiza cada mañana los eventos de las últimas 24 horas y genera un resumen ejecutivo personalizado con las 3 acciones más importantes del día, ordenadas por impacto potencial.','Cruza datos de todos los módulos activos para detectar anomalías: una baja repentina en reservas, un aumento en cancelaciones o un cliente clave sin actividad reciente generan alertas proactivas antes de que el dueño las note.','Con el tiempo el panel aprende el ritmo del negocio: días pico, horas de mayor consulta, módulos más usados. Esto permite sugerencias contextuales como "hoy es martes, históricamente tu día de mayor demanda. Tenés 3 turnos libres a las 11h".'],skill:'Dashboard Inteligente — skill transversal que cruza datos de todos los módulos para generar el briefing diario del negocio en lenguaje natural, adaptado al rubro y al historial específico del tenant.'} },
+      { name:'CRM — Gestión de clientes', desc:'Base de contactos inteligente', ico:'👥', icoBg:'#E8F0F8',
+        tools:[{n:'Base de contactos'},{n:'Ficha con historial'},{n:'Segmentación'},{n:'Scoring de leads',ia:true},{n:'Reactivación automática',ia:true,key:true}],
+        description:'Repositorio central de todos los clientes del negocio. Cada contacto tiene una ficha completa con historial de interacciones, servicios contratados, pagos y conversaciones de WhatsApp. Es la memoria del negocio: cualquier miembro del equipo puede retomar una relación desde donde la dejó otro.',
+        insight:{points:['El scoring de leads asigna un puntaje 0-100 a cada cliente según frecuencia de compra, ticket promedio, engagement y comportamiento de pago. Los clientes con score bajo reciben atención prioritaria automática.','La detección de inactividad cruza la última interacción con el ciclo promedio del rubro: un paciente sin turno en 90 días, un huésped que no reservó en temporada alta, un cliente de distribuidora que no hizo pedido en 3 semanas. Cada caso dispara un mensaje de reactivación personalizado vía WA.','La segmentación automática agrupa clientes por comportamiento real, no por categorías manuales: "clientes que vienen solo en temporada", "clientes de alto valor con compra única", "ex-clientes con cierre positivo".'],skill:'Reactivación Inteligente — detecta el momento óptimo para contactar a cada cliente inactivo según su historial, el ciclo del rubro y el contexto estacional, generando el mensaje exacto para cada caso.'} },
+      { name:'WhatsApp con IA', desc:'Bot + respuestas sugeridas', ico:'💬', icoBg:'#E8F5EE',
+        tools:[{n:'Bot de respuestas',ia:true,key:true},{n:'Historial por cliente'},{n:'Respuestas sugeridas',ia:true},{n:'Campañas masivas'},{n:'Resumen de conversación',ia:true}],
+        description:'Canal de comunicación central entre el negocio y sus clientes. Centraliza todas las conversaciones de WhatsApp en un solo panel, vinculando cada mensaje al cliente correspondiente en el CRM. El bot atiende consultas frecuentes 24/7 sin intervención humana, mientras que el operador recibe sugerencias de respuesta para los casos que requieren atención personal.',
+        insight:{points:['El bot aprende del historial de cada cliente: si Juan siempre reserva los viernes a las 10h, cuando consulta disponibilidad el bot prioriza ese horario en su respuesta. La memoria de cliente transforma el bot genérico en un asistente que "conoce" a cada persona.','El resumen automático de conversaciones permite que cualquier operador retome un hilo sin leer 40 mensajes. La IA sintetiza: "cliente consulta precio servicio premium, pidió descuento, se le ofreció 10%, quedó en confirmar". Contexto completo en 2 líneas.','Las campañas masivas combinan segmentación del CRM con generación de texto por IA: el mismo mensaje base se personaliza automáticamente con el nombre, el último servicio contratado y una oferta relevante para ese perfil específico.'],skill:'Asistente WhatsApp contextual — skill que combina memoria de cliente, historial de servicios y contexto del rubro para que cada interacción del bot sea relevante, personalizada y accionable, sin parecer genérica.'} },
+      { name:'Agenda / Turnos', desc:'Calendario + predicción de demanda', ico:'📅', icoBg:'#FDF3E0',
+        tools:[{n:'Calendario'},{n:'Recordatorios WA'},{n:'Predicción de demanda',ia:true},{n:'Detección de huecos',ia:true},{n:'Confirmación online',key:true}],
+        description:'Sistema de gestión de tiempo del negocio. Centraliza todos los turnos, reservas o citas en un calendario unificado, accesible para el equipo y configurable por profesional, espacio o recurso. Los recordatorios automáticos por WhatsApp reducen el ausentismo y el sistema permite confirmación o cancelación con un clic desde el mensaje.',
+        insight:{points:['La predicción de demanda analiza el historial de turnos para anticipar los días y horarios de mayor ocupación, alertando al dueño antes de que sucedan: "el próximo fin de semana largo históricamente tiene 40% más demanda, ya tenés 3 huecos sin cubrir en el horario pico".','La detección de huecos optimizables identifica espacios en la agenda que podrían llenarse: turnos cortos entre citas largas, franjas con baja demanda histórica, horarios de alta cancelación. La IA sugiere acciones concretas para cada caso.','Cuando un turno se cancela, la IA identifica automáticamente a los clientes en lista de espera o con historial de reserva en ese horario y genera una notificación de disponibilidad instantánea.'],skill:'Optimizador de agenda — skill que cruza historial de turnos, comportamiento de cancelación por cliente, estacionalidad del rubro y eventos externos para maximizar la ocupación real de la agenda.'} },
+      { name:'Facturación y presupuestos', desc:'Generación + AFIP', ico:'🧾', icoBg:'#E8F0F8',
+        tools:[{n:'Generador de facturas'},{n:'Generador de presupuestos'},{n:'Descripciones automáticas',ia:true},{n:'Seguimiento de pagos'},{n:'Integración AFIP'}],
+        description:'Módulo financiero operativo del negocio. Permite generar presupuestos y facturas desde el portal sin herramientas externas. Las descripciones de servicios y productos se completan automáticamente basándose en el historial del negocio. El seguimiento de pagos centraliza el estado de cada documento emitido.',
+        insight:{points:['La generación de descripciones por IA elimina el tiempo perdido en redactar cada ítem manualmente. El sistema aprende del vocabulario y el tono del negocio: una clínica describe "consulta médica dermatológica con diagnóstico y tratamiento", no solo "consulta".','El seguimiento inteligente de pagos detecta patrones de morosidad por cliente: si un cliente habitualmente paga tarde, el sistema genera recordatorios preventivos antes del vencimiento, no después.','La integración con AFIP en Fase 2 permite validar CUIT, condición fiscal y generar comprobantes electrónicos directamente desde el módulo, sin doble carga de datos.'],skill:'Asistente de facturación — genera descripciones profesionales adaptadas al rubro, detecta inconsistencias en los importes según historial del cliente y anticipa problemas de cobro antes de que escalen.'} },
+      { name:'Estadísticas en lenguaje natural', desc:'"¿Cómo me fue este mes?"', ico:'📈', icoBg:'#F5EDE0',
+        tools:[{n:'Chat con tus datos',ia:true,key:true},{n:'Reportes automáticos',ia:true},{n:'Comparativas de períodos'},{n:'Exportación de datos'}],
+        description:'Interfaz de análisis conversacional para el dueño del negocio. En lugar de interpretar gráficos y tablas, el usuario puede preguntar en lenguaje natural y recibir respuestas con datos reales del negocio. Es el módulo que democratiza el análisis: cualquier dueño de negocio, sin conocimientos técnicos, puede entender cómo le está yendo y por qué.',
+        insight:{points:['Preguntas como "¿cuál fue mi mejor semana del año?", "¿qué servicio me dejó más margen este trimestre?" o "¿cuántos clientes nuevos traje desde Instagram?" tienen respuesta inmediata basada en datos reales, sin abrir una hoja de cálculo.','Los reportes automáticos se generan sin pedirlos: cada lunes el sistema envía un resumen de la semana anterior por WhatsApp al dueño. Cada fin de mes, un reporte ejecutivo con los 5 indicadores más importantes y las 3 recomendaciones prioritarias.','La comparativa inteligente de períodos detecta no solo qué cambió sino por qué: "tus ingresos de octubre están 18% por debajo de septiembre principalmente porque tuviste 12 cancelaciones de último momento, 3 veces más que el mes anterior".'],skill:'Analista IA del negocio — skill de razonamiento que sintetiza datos de todos los módulos activos para responder preguntas del dueño en lenguaje natural, identificando causas, tendencias y oportunidades de mejora.'} },
+      { name:'Notificaciones automáticas', desc:'WA / Email / SMS', ico:'🔔', icoBg:'#E8F5EE',
+        tools:[{n:'Reglas de envío'},{n:'Personalización por IA',ia:true},{n:'Canal WA / Email / SMS'},{n:'Historial de envíos'}],
+        description:'Motor de comunicación proactiva del negocio. Permite configurar reglas de envío automático basadas en eventos del sistema: un turno confirmado dispara un recordatorio 24h antes, un presupuesto sin respuesta en 48h genera un seguimiento, un cliente cumpleaños recibe un saludo con descuento. Toda la comunicación sale sin intervención manual.',
+        insight:{points:['La personalización por IA va más allá del nombre: adapta el tono, el canal y el momento del mensaje según el perfil del cliente. Un cliente que siempre responde por la noche recibe sus notificaciones después de las 19h. Un cliente que nunca abre emails recibe solo por WA.','El historial de envíos permite medir efectividad real: qué mensajes generan respuesta, qué horarios tienen mayor apertura, qué tipo de comunicación convierte mejor en cada segmento.','Las reglas se pueden combinar: "si un cliente no confirma su turno en 4 horas, enviar WA de recordatorio; si no responde en 2 horas más, enviar SMS; si sigue sin confirmar, liberar el turno y notificar al siguiente en lista de espera".'],skill:'Orquestador de comunicaciones — skill que determina el canal óptimo, el momento ideal y el texto más efectivo para cada tipo de notificación según el perfil histórico de cada cliente y las métricas de engagement del negocio.'} },
+      { name:'Marketing y RRSS', desc:'Contenido generado por IA', ico:'📣', icoBg:'#FDF3E0',
+        tools:[{n:'Generador de posts',ia:true},{n:'Campaña WA masivo',ia:true},{n:'Calendario editorial',ia:true},{n:'Banco de contenido'},{n:'Métricas de campaña'}],
+        description:'Herramienta de marketing integrada para negocios que no tienen equipo de comunicación. El dueño describe en lenguaje natural lo que quiere comunicar y la IA genera el contenido listo para publicar, adaptado al canal, al tono del negocio y al momento del año. Elimina la barrera de "no sé qué poner" en redes sociales.',
+        insight:{points:['El generador de posts toma como contexto los datos reales del negocio: si hay 3 cabañas libres este fin de semana, la IA genera el post con esa disponibilidad específica, el precio actual y el link de reserva, sin que el dueño tenga que redactar nada.','El calendario editorial propuesto por IA considera la estacionalidad del rubro, los feriados, los eventos locales relevantes y el historial de qué contenido generó más interacción en el negocio. No es un calendario genérico, es un plan adaptado.','Las métricas de campaña cierran el ciclo: el sistema mide qué mensajes generaron más reservas, qué posts más consultas, y ajusta las sugerencias futuras basándose en lo que realmente funcionó para ese negocio específico.'],skill:'Estratega de contenido contextual — skill que analiza los datos del negocio, la estacionalidad del rubro y el comportamiento de la audiencia para proponer contenido relevante, medir su impacto y mejorar la estrategia mes a mes.'} },
+      { name:'Mapas y geolocalización', desc:'Google Maps + seguimiento GPS', ico:'🗺️', icoBg:'#E8F0F8',
+        tools:[{n:'Mapa de clientes'},{n:'Seguimiento en tiempo real'},{n:'Heatmaps de demanda',ia:true},{n:'Filtros por zona'}],
+        description:'Capa geográfica sobre los datos del negocio. Permite visualizar clientes, propiedades, incidencias o repartidores en un mapa interactivo. El seguimiento en tiempo real es clave para negocios con personal móvil: distribuidoras, técnicos a domicilio, agentes inmobiliarios. Los filtros por zona permiten segmentar estratégicamente.',
+        insight:{points:['Los heatmaps de demanda identifican zonas geográficas con mayor concentración de clientes o pedidos, permitiendo optimizar la distribución del equipo, decidir dónde abrir un nuevo punto de atención o dónde enfocar la publicidad geolocalizando.','El seguimiento en tiempo real combinado con IA detecta desvíos de ruta, demoras anómalas o zonas de baja cobertura. Para una distribuidora, esto puede traducirse en "el repartidor 3 lleva 45 minutos en una entrega que normalmente tarda 10. Posible problema".','La evolución futura de este módulo incluye predicción de zonas de alta demanda futura basada en tendencias, ideal para inmobiliarias, franquicias y negocios con expansión geográfica planificada.'],skill:'Analista geográfico — skill que superpone datos del CRM, historial de operaciones y comportamiento del equipo sobre el mapa para identificar oportunidades de cobertura, optimizar recursos en campo y anticipar demanda por zona.'} },
+    ]
+  },
+  hotel: {
+    modulos: [
+      { name:'Reservas', desc:'Motor + tarifas dinámicas', ico:'🛏️', icoBg:'#E8F5EE',
+        tools:[{n:'Motor de reservas',key:true},{n:'Tarifas dinámicas',ia:true},{n:'Calendar de ocupación'},{n:'Pre check-in online'}],
+        description:'El corazón del negocio de alojamiento. Gestiona todo el ciclo de reserva: disponibilidad en tiempo real, confirmación, modificación y cancelación. El pre check-in online permite que el huésped complete sus datos antes de llegar, reduciendo el tiempo de entrada y mejorando la experiencia desde el primer contacto.',
+        insight:{points:['Las tarifas dinámicas analizan la ocupación proyectada, los eventos locales, la temporada y el comportamiento histórico de reservas para sugerir el precio óptimo en cada fecha. Un fin de semana largo con alta demanda histórica activa automáticamente una tarifa premium.','La IA detecta patrones de cancelación: ciertos perfiles de clientes o canales de captación tienen mayor tasa de no-show. Con esa información, el sistema puede aplicar políticas de confirmación diferenciadas o habilitar overbooking controlado en fechas críticas.','Cuando la ocupación baja del umbral configurado para una fecha futura, la IA activa una secuencia de acciones: primero sugiere bajar la tarifa, luego propone una campaña WA a clientes anteriores, finalmente alerta al dueño para intervención manual.'],skill:'Revenue Manager IA — skill que optimiza precios y ocupación cruzando datos históricos del alojamiento con demanda del mercado local, eventos y comportamiento de la cartera de huéspedes para maximizar el ingreso por habitación disponible.'} },
+      { name:'Habitaciones / Unidades', desc:'Mapa de estado en tiempo real', ico:'🏠', icoBg:'#FDF3E0',
+        tools:[{n:'Mapa de estado',key:true},{n:'Asignación por perfil',ia:true},{n:'Estado en tiempo real'}],
+        description:'Panel operativo visual del alojamiento. Muestra en tiempo real el estado de cada unidad: libre, ocupada, en limpieza, en mantenimiento o bloqueada. El equipo de housekeeping y recepción trabajan desde la misma pantalla actualizada al instante, eliminando llamadas internas y errores de comunicación.',
+        insight:{points:['La asignación inteligente por perfil de huésped cruza las características de cada unidad con el historial y las preferencias del cliente: familias con niños a unidades de planta baja, huéspedes frecuentes en sus habitaciones preferidas, grupos en unidades contiguas. Pequeños detalles que construyen fidelización.','El historial de estado por unidad alimenta el módulo de mantenimiento: si la cabaña 3 tuvo 3 reclamos de plomería en 6 meses, el sistema sugiere una revisión preventiva antes de la temporada alta, antes de que un huésped lo sufra.','La integración con el módulo de reservas permite proyectar el estado futuro de cada unidad: el mapa muestra no solo lo que pasa hoy sino lo que va a pasar mañana y la próxima semana, facilitando la planificación del equipo de limpieza.'],skill:'Operaciones de alojamiento — skill que cruza estado de unidades, historial de mantenimiento y perfil de huéspedes para anticipar necesidades operativas, optimizar la asignación y detectar unidades con riesgo de incidencia antes del próximo check-in.'} },
+      { name:'Check-in / Check-out', desc:'Digital + carta de bienvenida IA', ico:'🔑', icoBg:'#E8F0F8',
+        tools:[{n:'Registro digital',key:true},{n:'Carta de bienvenida IA',ia:true},{n:'Factura automática'}],
+        description:'Puntos de contacto más críticos de la experiencia del huésped. El check-in digital elimina el papeleo y reduce el tiempo de espera. La carta de bienvenida personalizada —generada por IA con datos reales del huésped, su historial y el contexto de la estadía— transforma un trámite administrativo en un momento memorable.',
+        insight:{points:['La carta de bienvenida IA va más allá del "estimado Juan": menciona que es su tercera visita, que llegó en temporada de lluvia y que hay excursiones locales disponibles este fin de semana. Usa el contexto real para hacer sentir al huésped reconocido.','La factura automática al momento del checkout elimina errores de carga manual y acelera el proceso. La IA verifica que todos los consumos del módulo de proveedores y servicios adicionales estén incluidos antes de generar el documento final.','El historial de check-in y check-out por huésped alimenta el CRM con datos de comportamiento: hora habitual de llegada, servicios adicionales solicitados, duración promedio de estadía. Esta información mejora la personalización en la próxima reserva.'],skill:'Experiencia del huésped — skill que sintetiza el perfil del huésped, su historial y el contexto de la estadía para generar comunicaciones de bienvenida, recomendaciones durante la estadía y mensajes de seguimiento post-checkout que construyen fidelización genuina.'} },
+      { name:'WhatsApp Concierge', desc:'Bot 24/7 para huéspedes', ico:'💬', icoBg:'#E8F5EE',
+        tools:[{n:'Bot 24/7',ia:true,key:true},{n:'Solicitudes de estadía',ia:true},{n:'FAQ automático',ia:true}],
+        description:'Asistente virtual disponible las 24 horas para los huéspedes durante su estadía. Responde consultas sobre horarios de desayuno, servicios disponibles, actividades locales y solicitudes especiales sin que el personal tenga que estar disponible de madrugada. Las solicitudes se registran y asignan automáticamente al área correspondiente.',
+        insight:{points:['El bot conoce el contexto completo de la estadía de cada huésped: sabe que llegó hoy, que tiene reserva hasta el domingo, que es su segunda visita y que la última vez pidió toallas extra. Esa memoria permite respuestas contextuales, no genéricas.','Las solicitudes durante la estadía se clasifican automáticamente: urgencias (falta agua caliente, problema eléctrico) se escalan con alerta inmediata al personal; solicitudes de servicio (toallas, menú) se registran y confirman; preguntas informativas se responden directo.','El análisis de las conversaciones del bot identifica las preguntas más frecuentes, los problemas recurrentes y los momentos del día con mayor actividad. Esta información mejora los procesos operativos y el contenido del FAQ.'],skill:'Concierge inteligente — skill especializada en hospitalidad que responde consultas en lenguaje natural, gestiona solicitudes durante la estadía, detecta huéspedes con experiencia negativa antes del checkout para intervención proactiva y genera recomendaciones locales personalizadas.'} },
+      { name:'Mapa de ocupación', desc:'Heatmap histórico + proyección', ico:'📊', icoBg:'#FDF3E0',
+        tools:[{n:'Heatmap histórico'},{n:'Proyección de ocupación',ia:true},{n:'Alertas de oportunidad de tarifa',ia:true}],
+        description:'Vista estratégica del negocio de alojamiento a lo largo del tiempo. El heatmap histórico muestra visualmente qué fechas y períodos tuvieron mayor y menor ocupación en el pasado. La proyección futura combina reservas confirmadas, tendencias históricas y factores externos para anticipar cómo se verá la ocupación las próximas semanas.',
+        insight:{points:['La proyección de ocupación permite tomar decisiones anticipadas: si el próximo mes muestra ocupación baja, es el momento de activar promociones, no cuando ya pasó. La IA sugiere el timing óptimo para cada acción según el tiempo de anticipación habitual de los clientes del negocio.','Las alertas de oportunidad de tarifa detectan ventanas donde se puede subir el precio sin afectar la demanda: fechas con alta demanda histórica que aún tienen disponibilidad, períodos donde la competencia local está cerrada, fines de semana con eventos locales relevantes.','La evolución del heatmap año a año permite identificar tendencias de mediano plazo: si agosto creció 3 años consecutivos, la proyección incorpora esa tendencia. Si marzo cayó por una decisión de política pública, el modelo lo registra como excepción.'],skill:'Proyección de demanda hotelera — skill que combina historial de ocupación, estacionalidad, comportamiento de reservas anticipadas y factores externos para generar una proyección de ocupación accionable con recomendaciones de pricing y marketing.'} },
+      { name:'Reclamos y mantenimiento', desc:'Clasificación + priorización IA', ico:'🔧', icoBg:'#FAE8E8',
+        tools:[{n:'Registro de incidencias'},{n:'Clasificación automática',ia:true},{n:'Priorización por check-in próximo',ia:true},{n:'Historial por unidad'}],
+        description:'Sistema de gestión de problemas operativos del alojamiento. Desde una falla en el aire acondicionado hasta una gotera, cada incidencia se registra, clasifica y asigna automáticamente al responsable correspondiente. El historial por unidad es el activo más valioso: permite detectar problemas recurrentes antes de que afecten la experiencia del huésped.',
+        insight:{points:['La priorización inteligente por check-in próximo es el diferencial clave: si la cabaña 2 tiene un problema de plomería y el próximo huésped llega en 3 horas, ese reclamo sube automáticamente al tope de la cola. Si no tiene check-in en 5 días, puede resolverse en el orden habitual.','El historial de mantenimiento por unidad alimenta la skill de mantenimiento preventivo: la IA detecta patrones como "la habitación 5 tuvo 4 reclamos de aire acondicionado en 8 meses" y recomienda un service preventivo antes de la temporada alta, evitando la incidencia en plena ocupación.','El análisis cruzado de reclamos por tipo y por época del año permite planificar el presupuesto de mantenimiento: si en noviembre siempre hay problemas de pileta, el presupuesto de octubre debe incluir la revisión preventiva.'],skill:'Mantenimiento predictivo — skill que analiza el historial de incidencias por unidad, detecta patrones de falla recurrente y sugiere intervenciones preventivas antes de que el problema afecte la experiencia del huésped o genere un reclamo en plena temporada.'} },
+    ]
+  },
+  salud: {
+    modulos: [
+      { name:'Turnos médicos', desc:'Agenda + predicción de ausentismo', ico:'📅', icoBg:'#E8F5EE',
+        tools:[{n:'Agenda por profesional'},{n:'Turno online',key:true},{n:'Predicción de ausentismo',ia:true},{n:'Rellenado automático de huecos',ia:true}],
+        description:'Sistema de gestión de agenda clínica por profesional y espacio. Permite a los pacientes sacar turnos online las 24 horas, reduce la carga telefónica del personal administrativo y centraliza la agenda de todo el equipo médico en una sola vista. El calendario puede configurarse por duración de consulta, tipo de prestación y disponibilidad horaria de cada profesional.',
+        insight:{points:['La predicción de ausentismo analiza el historial de cancelaciones de cada paciente: quien canceló más de 2 veces en el último año tiene mayor probabilidad de no-show. El sistema puede aplicar confirmaciones dobles, reducir el tiempo de reserva anticipada o habilitar doble turno en esos casos.','El rellenado automático de huecos actúa cuando se libera un turno: identifica a los pacientes en lista de espera o con historial de solicitud en ese horario y envía una notificación inmediata de disponibilidad. El turno se reasigna en minutos, no queda vacío.','La IA detecta patrones de demanda por especialidad y horario: si los martes a las 9h la agenda de pediatría siempre está llena con 2 semanas de anticipación, el sistema sugiere abrir un turno extra o redistribuir la agenda del profesional.'],skill:'Optimizador de agenda clínica — skill que minimiza huecos, predice ausentismo por perfil de paciente y maximiza la productividad de cada profesional cruzando patrones de demanda, comportamiento de cancelación y disponibilidad real de la agenda.'} },
+      { name:'Historia clínica básica', desc:'Fichas + resumen pre-consulta IA', ico:'📋', icoBg:'#FDF3E0',
+        tools:[{n:'Fichas digitales'},{n:'Evoluciones clínicas'},{n:'Adjunto de estudios'},{n:'Resumen pre-consulta',ia:true,key:true}],
+        description:'Repositorio digital de la información clínica de cada paciente. Reemplaza la carpeta de papel con una ficha digital accesible desde cualquier dispositivo del consultorio. Incluye datos personales, antecedentes, evoluciones por consulta, adjunto de estudios e indicaciones. El acceso está restringido por rol y toda acción queda registrada con fecha, hora y profesional.',
+        insight:{points:['El resumen pre-consulta es la herramienta más valorada por los profesionales: antes de que el paciente entre al consultorio, la IA genera en 3 líneas el contexto completo: "última consulta hace 6 meses, motivo lumbalgia, se indicó fisioterapia, paciente refirió mejora parcial, no volvió a consultar". El médico entra a la consulta ya contextualizado.','La IA detecta inconsistencias o alertas clínicas en los registros: un paciente con antecedente de alergia a penicilina que tiene indicado amoxicilina genera una alerta. Un paciente con hipertensión que no tiene registro de control en 90 días genera un recordatorio.','El análisis agregado de evoluciones clínicas (anonimizado) permite identificar patrones del rubro: qué diagnósticos son más frecuentes en determinadas épocas, qué tratamientos tienen mejor adherencia, qué tipo de paciente vuelve más. Información valiosa para la gestión del consultorio.'],skill:'Asistente clínico pre-consulta — skill que sintetiza el historial del paciente, detecta alertas relevantes (alergias, vencimiento de estudios, tiempo sin control) y prepara el contexto que el profesional necesita antes de cada consulta, en lenguaje claro y ordenado por relevancia.'} },
+      { name:'Pacientes', desc:'Base + reactivación automática', ico:'👤', icoBg:'#E8F0F8',
+        tools:[{n:'Base de pacientes'},{n:'Historial completo'},{n:'Detección inactivos 90+ días',ia:true},{n:'Reactivación por WA',ia:true}],
+        description:'CRM clínico del consultorio. Centraliza todos los datos de cada paciente: ficha personal, historial de turnos, estudios adjuntos, evoluciones y comunicaciones. A diferencia de un CRM genérico, está orientado a los ciclos de atención de salud: seguimiento de tratamientos, control periódico y detección de pacientes que abandonaron el cuidado.',
+        insight:{points:['La detección de inactivos usa el ciclo de atención del rubro como referencia: en un consultorio de diabetes, 90 días sin control es una señal de alerta. En un centro de estética, 60 días sin tratamiento puede indicar pérdida del cliente. Cada especialidad configura su umbral de inactividad.','El mensaje de reactivación generado por IA es contextual: no es un WA genérico de "hace tiempo que no venís". Es "Hola María, hacen 4 meses desde tu última consulta con el Dr. García. Si querés retomar tu control de rutina, podés sacar turno online desde acá". Personal, específico y con llamado a la acción claro.','El análisis de la base de pacientes identifica segmentos para acciones específicas: pacientes que vienen una sola vez y no regresan (posible mala experiencia o competencia), pacientes de alta frecuencia con baja en los últimos meses (posible cambio de situación), pacientes referidos por otro paciente (segmento de alta fidelidad).'],skill:'Retención de pacientes — skill que monitorea el ciclo de atención por tipo de especialidad, detecta abandono precoz del tratamiento y genera intervenciones de reactivación en el momento óptimo con el contexto clínico específico de cada paciente.'} },
+      { name:'Recordatorios automáticos', desc:'WA 24h antes + confirmación', ico:'🔔', icoBg:'#E8F5EE',
+        tools:[{n:'WA 24h antes',key:true},{n:'Confirmación / cancelación'},{n:'Reagenda automática',ia:true}],
+        description:'Sistema de reducción de ausentismo mediante comunicación proactiva. El recordatorio 24 horas antes por WhatsApp tiene tasas de confirmación significativamente superiores al recordatorio telefónico tradicional: el paciente puede confirmar o cancelar con un clic, en el momento que le resulta cómodo, sin tener que llamar al consultorio.',
+        insight:{points:['La reagenda automática cierra el ciclo: cuando un paciente cancela por WA, el sistema libera el turno, notifica al próximo en lista de espera y ofrece al paciente que canceló las opciones disponibles más cercanas. Todo sin intervención del personal administrativo.','La IA adapta el tono y el momento del recordatorio según el perfil del paciente: pacientes mayores reciben el recordatorio con instrucciones más detalladas; pacientes que históricamente confirman rápido reciben mensajes más cortos; pacientes con historial de no-show reciben un segundo recordatorio el mismo día del turno.','El análisis de los patrones de confirmación y cancelación por día de la semana, horario y tipo de consulta permite ajustar los criterios de envío. Si los turnos del lunes a las 8h tienen 40% de no-show, ese segmento puede recibir confirmación 48h antes además de las 24h.'],skill:'Gestor de ausentismo clínico — skill que predice la probabilidad de no-show por turno, ajusta la estrategia de confirmación según el perfil del paciente y gestiona automáticamente las cancelaciones para maximizar la ocupación real de la agenda.'} },
+      { name:'Stats de ocupación', desc:'Dashboard por profesional y horario', ico:'📈', icoBg:'#FDF3E0',
+        tools:[{n:'Dashboard por profesional'},{n:'Análisis de horarios',ia:true},{n:'"¿Cuál es mi turno más productivo?"',ia:true}],
+        description:'Tablero de análisis de productividad clínica. Muestra la ocupación real versus la capacidad instalada por profesional, especialidad y horario. Permite identificar qué franjas horarias están subutilizadas, qué profesionales tienen mayor demanda y cómo evoluciona la ocupación mes a mes.',
+        insight:{points:['El análisis de horarios revela patrones no obvios: puede ser que los turnos de las 14h tengan 35% de no-show consistentemente, lo que hace que ese bloque sea improductivo aunque aparezca ocupado en el calendario. La IA lo detecta y lo propone como candidato a rediseño.','La pregunta "¿cuál es mi turno más productivo?" considera múltiples dimensiones: no solo ocupación sino también ticket promedio, tasa de retorno del paciente, tipo de prestación y tiempo de consulta real versus asignado. El turno más corto puede ser el más rentable.','La comparativa entre profesionales (con privacidad y acceso controlado) permite al director del consultorio identificar quién necesita apoyo en captación de nuevos pacientes, quién tiene alta demanda insatisfecha y dónde hay oportunidades de redistribución de agenda.'],skill:'Analista de productividad clínica — skill que mide la eficiencia real de cada profesional y horario, detecta capacidad ociosa disfrazada de ocupación (turnos con alta cancelación) y sugiere ajustes de agenda para maximizar el rendimiento del consultorio.'} },
+    ]
+  },
+  salon: {
+    modulos: [
+      { name:'Configuración del salón', desc:'Espacios, capacidades y equipamiento', ico:'🏛️', icoBg:'#E8F5EE',
+        tools:[{n:'Espacios y capacidades'},{n:'Equipamiento disponible'},{n:'Sugerencia de configuración',ia:true}],
+        description:'Base de datos operativa del salón como espacio físico. Define cada área disponible —salón principal, jardín, terraza, salita íntima— con su capacidad máxima, equipamiento incluido y restricciones. Es la fuente de verdad que alimenta los presupuestos, la agenda y las sugerencias de la IA sobre qué espacio se adapta mejor a cada tipo de evento.',
+        insight:{points:['La sugerencia de configuración IA cruza el tipo de evento, el número de invitados y el presupuesto disponible para recomendar el espacio óptimo. Para una empresa que quiere un evento de 80 personas con cena sentada, la IA descarta los espacios sin capacidad y sugiere la combinación salón + terraza con la disposición más común para ese perfil.','El historial de uso por espacio revela qué configuraciones funcionan mejor para cada tipo de evento: bodas prefieren disposición de mesas redondas en salón principal, corporativos prefieren teatro en salita con proyector. La IA aprende y afina las sugerencias con cada evento registrado.','Con el tiempo, la IA puede detectar espacios subutilizados y proponer estrategias de comercialización: "el jardín solo se usa en verano. Podrías ofrecer paquetes especiales de primavera con carpa como diferencial".'],skill:'Configurador inteligente de espacios — skill que aprende de cada evento realizado para mejorar la recomendación de espacio y configuración, considerando tipo de evento, perfil del cliente, estacionalidad y disponibilidad del equipamiento.'} },
+      { name:'Presupuestos IA', desc:'Generación automática por evento', ico:'💰', icoBg:'#FDF3E0',
+        tools:[{n:'Generador por tipo de evento',ia:true,key:true},{n:'Plantillas personalizables'},{n:'Envío por WA / email'}],
+        description:'Módulo de comercialización del salón. Genera presupuestos completos a partir de una descripción del evento: tipo, fecha, número de invitados, servicios requeridos. Elimina el tiempo de armado manual y garantiza consistencia en la presentación. El presupuesto se envía directamente al cliente por WhatsApp o email y el sistema registra si fue abierto, si hay respuesta pendiente y el historial de versiones.',
+        insight:{points:['El generador de presupuestos aprende de los eventos anteriores: si el 80% de los casamientos para 150 personas incluyen barra libre de 5 horas y DJ, el sistema pre-completa esos ítems en el presupuesto y el vendedor solo confirma o ajusta. La velocidad de respuesta mejora radicalmente.','La IA detecta patrones de conversión: qué estructura de presupuesto tiene mayor tasa de cierre, qué ítems generan objeciones frecuentes, qué rango de precio convierte mejor por tipo de evento. Con esa información, sugiere la versión del presupuesto con mayor probabilidad de cierre.','El seguimiento automático del presupuesto enviado alerta cuando lleva más de 48h sin respuesta y sugiere una acción: WA de seguimiento, llamada, o ajuste de propuesta. El sistema sabe cuándo el cliente abrió el email pero no respondió y usa eso para priorizar el seguimiento.'],skill:'Optimizador de conversión de eventos — skill que analiza el historial de presupuestos enviados y cerrados para aprender qué propuesta convierte mejor según tipo de evento, perfil del cliente y temporada, mejorando la tasa de cierre con cada evento registrado.'} },
+      { name:'Agenda de eventos', desc:'Timeline + detección de doble turno', ico:'📅', icoBg:'#E8F0F8',
+        tools:[{n:'Calendario timeline',key:true},{n:'Detección doble turno',ia:true},{n:'Estado por evento'}],
+        description:'Vista temporal de todos los eventos confirmados y pendientes del salón. El formato timeline es clave en este rubro: permite ver de un vistazo si hay solapamiento entre eventos, tiempos de montaje y desmontaje, y ventanas disponibles. El estado por evento (presupuestado, confirmado, señado, finalizado) permite gestionar el pipeline comercial desde la misma vista.',
+        insight:{points:['La detección de doble turno identifica oportunidades donde el mismo espacio puede utilizarse dos veces en un día: un desayuno de empresa de 8 a 12h y una boda desde las 19h, con tiempo suficiente de preparación entre ambos. La IA evalúa factibilidad según el tipo de evento y el tiempo de montaje histórico.','El análisis de la agenda histórica detecta períodos de baja ocupación estacional y sugiere estrategias de captación: si marzo y agosto son meses bajos, propone promociones específicas para esas fechas antes de que lleguen.','La integración con el módulo de proveedores permite ver en el timeline no solo los eventos sino también las entregas de insumos, las visitas de inspección y los montajes de terceros, coordinando toda la operación del salón en una sola vista.'],skill:'Planificador de capacidad de salón — skill que optimiza el uso de cada espacio detectando oportunidades de doble turno, anticipando conflictos de agenda y sugiriendo acciones comerciales para los períodos de baja ocupación proyectada.'} },
+      { name:'Proveedores', desc:'Base + scoring + cotizaciones', ico:'🤝', icoBg:'#E8F5EE',
+        tools:[{n:'Base de proveedores'},{n:'Scoring de proveedores',ia:true},{n:'Cotizaciones'},{n:'Recomendación por evento',ia:true}],
+        description:'Red de proveedores del salón organizada y evaluada. Incluye catering, florería, DJ, fotografía, iluminación, animación y todo el ecosistema de servicios que se subcontratan en cada evento. El sistema registra el historial de trabajo con cada proveedor y las evaluaciones de cada evento para construir un ranking objetivo de calidad y confiabilidad.',
+        insight:{points:['El scoring de proveedores no es solo una calificación manual: la IA cruza las evaluaciones de eventos pasados, la tasa de cumplimiento en tiempo y forma, el precio relativo y las quejas de clientes atribuibles al proveedor. Un catering que siempre llega tarde baja su score aunque la comida sea buena.','La recomendación por evento considera múltiples variables: tipo de celebración, presupuesto disponible, disponibilidad del proveedor en esa fecha y compatibilidad con otros proveedores del evento. No recomienda el mismo DJ para un casamiento íntimo y para una fiesta corporativa de 300 personas.','El análisis de costos por proveedor a lo largo del tiempo detecta inflaciones de precio o cambios en la calidad que justifican revisar la relación o buscar alternativas. La IA genera alertas cuando un proveedor aumenta su precio más del umbral histórico del rubro.'],skill:'Gestión inteligente de proveedores — skill que construye y mantiene el ranking objetivo de cada proveedor combinando evaluaciones, historial de cumplimiento y relación precio-calidad, para recomendar automáticamente la combinación óptima para cada tipo de evento.'} },
+      { name:'Galería', desc:'Portfolio de eventos realizados', ico:'🖼️', icoBg:'#FAE8E8',
+        tools:[{n:'Portfolio de eventos'},{n:'Fotos por evento'},{n:'Sugerencia para presupuesto',ia:true}],
+        description:'Repositorio visual del historial del salón. Organiza las fotos de cada evento realizado, categorizadas por tipo (bodas, corporativos, cumpleaños, etc.), espacio utilizado y configuración. Es la herramienta de ventas más poderosa del salón: cuando un cliente potencial consulta, la galería permite mostrar eventos reales similares a lo que está buscando.',
+        insight:{points:['La sugerencia de fotos para presupuesto automatiza la selección visual: cuando se genera un presupuesto para una boda de 100 personas en el jardín, la IA selecciona automáticamente las 5-6 fotos del portfolio más relevantes para incluir en la propuesta, sin que el vendedor tenga que buscarlas manualmente.','Con el tiempo, la IA puede analizar qué tipo de fotografías generan mayor tasa de conversión en los presupuestos: si las fotos de mesa de dulce tienen más impacto que las de la pista de baile, las prioriza en las propuestas futuras.','La galería también alimenta el módulo de marketing: la IA puede seleccionar las mejores fotos de eventos recientes para generar posts de Instagram o WhatsApp, manteniendo el feed del salón actualizado con contenido real sin esfuerzo adicional.'],skill:'Curación de contenido visual — skill que selecciona y organiza el material fotográfico del salón para maximizar el impacto comercial en cada presupuesto, y que alimenta automáticamente el módulo de marketing con contenido fresco y relevante.'} },
+    ]
+  },
+  inmobiliaria: {
+    modulos: [
+      { name:'Propiedades', desc:'Fichas + descripción automática IA', ico:'🏠', icoBg:'#E8F5EE',
+        tools:[{n:'Fichas con fotos'},{n:'Descripción automática',ia:true},{n:'Estado de la propiedad'}],
+        description:'Catálogo digital del portfolio inmobiliario. Cada propiedad tiene su ficha completa: fotos, características técnicas, precio, estado de la operación y documentación asociada. Es la base de datos que alimenta el mapa, el matching con clientes y el módulo de documentos. El estado de la propiedad (disponible, reservada, vendida, arrendada) se actualiza en tiempo real.',
+        insight:{points:['La descripción automática por IA elimina uno de los trabajos más tediosos del rubro: redactar la publicación de cada propiedad. La IA toma las características técnicas (ambientes, superficie, ubicación, amenities) y genera una descripción atractiva y profesional en segundos, adaptada al tono de la agencia.','La IA detecta inconsistencias en el portfolio: propiedades sin precio actualizado hace más de 30 días en un mercado volátil, propiedades sin fotos recientes, fichas incompletas que bajan la calidad de la búsqueda. Genera alertas de mantenimiento del catálogo.','El análisis de propiedades similares permite posicionar correctamente cada precio: si hay 5 departamentos similares en el mismo radio con precios entre X e Y, la IA sugiere el precio de publicación óptimo para generar consultas sin dejar dinero sobre la mesa.'],skill:'Gestión inteligente de portfolio — skill que mantiene el catálogo actualizado, genera descripciones profesionales automáticamente, detecta propiedades subvaloradas o sobrevaloradas respecto al mercado y prioriza las fichas con mayor probabilidad de cierre en cada período.'} },
+      { name:'Mapa de propiedades', desc:'Google Maps + valuación IA', ico:'🗺️', icoBg:'#FDF3E0',
+        tools:[{n:'Google Maps integrado',key:true},{n:'Valuación estimada IA',ia:true},{n:'Filtros por zona y radio'}],
+        description:'Visualización geográfica del portfolio y del mercado. Las propiedades de la agencia aparecen en el mapa con su estado y precio. Los filtros por zona y radio permiten buscar disponibilidad en un área específica. Es la herramienta clave para la primera reunión con un cliente: en lugar de mostrar una lista, se muestra el mapa del mercado.',
+        insight:{points:['La valuación estimada por IA cruza múltiples variables: precio por m² histórico de la zona, características de la propiedad, distancia a servicios, tendencia de precios del barrio y comparables recientes. Es una estimación de partida, no un tasación formal, pero orienta al cliente y al asesor desde el primer momento.','El mapa de propiedades evoluciona hacia un heatmap del mercado: zonas de alta rotación, zonas con tendencia alcista, zonas con sobreoferta. Información estratégica para el asesor que trabaja ese segmento.','La integración de la geolocalización con el perfil del cliente permite hacer matching geográfico: si un cliente busca vivienda a no más de 1km de una escuela específica, el sistema filtra automáticamente el portfolio y la búsqueda en el mapa.'],skill:'Análisis de mercado inmobiliario geolocalizado — skill que cruza datos del portfolio propio con indicadores del mercado para identificar oportunidades de valuación, detectar zonas con alta demanda insatisfecha y posicionar estratégicamente cada propiedad en su contexto geográfico.'} },
+      { name:'Pipeline de ventas', desc:'Leads + matching cliente-propiedad', ico:'📊', icoBg:'#E8F0F8',
+        tools:[{n:'Seguimiento de leads'},{n:'Matching cliente-propiedad',ia:true,key:true},{n:'Etapas configurables'}],
+        description:'CRM inmobiliario estructurado por etapas de la operación. Cada lead entra al pipeline con su perfil de búsqueda y avanza por las etapas configuradas: consulta, visita agendada, visita realizada, oferta, negociación, escritura. El asesor tiene visibilidad completa de su cartera de operaciones en curso y el director puede ver el pipeline de todo el equipo.',
+        insight:{points:['El matching cliente-propiedad es el motor de valor del pipeline: la IA cruza el perfil de búsqueda de cada cliente (zona, precio, ambientes, características) con el portfolio disponible y genera una lista rankeada de propiedades más relevantes para ese cliente específico. Elimina la búsqueda manual y acelera la primera propuesta.','El análisis del pipeline detecta cuellos de botella: si muchos leads quedan estancados en la etapa "visita agendada → realizada", puede haber un problema en la coordinación de visitas o en la calidad de las propiedades propuestas. La IA identifica el patrón y sugiere intervención.','La IA detecta operaciones en riesgo de caerse: clientes que llevan más de X días sin interacción, propuestas sin respuesta hace más de una semana, operaciones en negociación que superaron el tiempo promedio. Cada caso genera una alerta con la acción sugerida.'],skill:'Acelerador de cierre inmobiliario — skill que optimiza el matching cliente-propiedad, detecta operaciones en riesgo de abandono y sugiere el siguiente paso óptimo para cada lead según el historial de operaciones exitosas del mismo tipo y zona.'} },
+      { name:'Agenda de visitas', desc:'Calendario + optimización de ruta', ico:'📅', icoBg:'#E8F5EE',
+        tools:[{n:'Calendario con asesores'},{n:'Optimización de ruta del día',ia:true},{n:'Confirmación automática'}],
+        description:'Coordinación operativa de las visitas a propiedades. El calendario centraliza todas las visitas del equipo, asignadas a cada asesor con la propiedad, el cliente y el horario. La confirmación automática por WhatsApp garantiza que el cliente llegue y que la propiedad esté disponible. El sistema también coordina con el propietario cuando es necesario.',
+        insight:{points:['La optimización de ruta del día agrupa las visitas geográficamente para reducir tiempos de traslado. Si un asesor tiene 4 visitas en el día, la IA sugiere el orden óptimo considerando ubicaciones, horarios de los clientes y tiempo estimado por visita. Un asesor puede hacer más visitas en el mismo tiempo.','La IA aprende de las visitas exitosas: qué propiedades convierten mejor en segunda visita, qué tipo de cliente necesita ver más opciones antes de decidir, qué horario tiene mayor tasa de confirmación asistida. Esta información mejora la planificación de visitas futuras.','El seguimiento post-visita automático envía un WA al cliente pocas horas después: "¿qué te pareció la propiedad de Palermo? Si querés ver algo similar pero con terraza, tenemos una opción que quizás te interesa". Mantiene el momentum comercial sin esfuerzo del asesor.'],skill:'Logística de visitas inmobiliarias — skill que optimiza la agenda diaria del asesor combinando disponibilidad de propiedades, perfiles de clientes y rutas geográficas, y genera seguimiento automático post-visita para mantener el interés del cliente activo.'} },
+      { name:'Documentos', desc:'Contratos + pre-completado IA', ico:'📄', icoBg:'#FAE8E8',
+        tools:[{n:'Contratos y reservas'},{n:'Pre-completado con IA',ia:true},{n:'Firma digital'}],
+        description:'Módulo de documentación de las operaciones inmobiliarias. Centraliza los contratos de reserva, alquiler y venta en un repositorio digital ordenado por operación. El pre-completado automático toma los datos del cliente, la propiedad y las condiciones pactadas en el pipeline para generar el borrador del contrato, reduciendo el tiempo de elaboración y los errores de copia.',
+        insight:{points:['El pre-completado por IA cruza los datos del pipeline con las plantillas legales del tipo de operación: un contrato de alquiler completado con CUIT, CBUIR, datos de la propiedad, precio acordado, cláusulas estándar y condiciones específicas pactadas. El escribano o asesor revisa y ajusta, no carga desde cero.','La IA detecta documentos incompletos o con inconsistencias antes de que lleguen al cliente: importes que no coinciden con lo acordado en el pipeline, fechas incoherentes, datos del cliente desactualizados. Un filtro de calidad que reduce errores en operaciones de alto valor.','El historial de documentos por operación permite tener trazabilidad completa del negocio: cuántas reservas se cayeron antes de escritura, en qué etapa, con qué tipo de cliente. Información valiosa para mejorar el proceso comercial.'],skill:'Documentación inteligente de operaciones — skill que genera borradores de contratos pre-completados desde los datos del pipeline, detecta inconsistencias antes de la firma y mantiene el repositorio organizado para cumplimiento y auditoría.'} },
+    ]
+  },
+  restaurante: {
+    modulos: [
+      { name:'Menú digital', desc:'QR dinámico + descripciones IA', ico:'📋', icoBg:'#E8F5EE',
+        tools:[{n:'QR dinámico',key:true},{n:'Descripciones de platos',ia:true},{n:'Precios por período'}],
+        description:'Carta digital del restaurante accesible desde cualquier dispositivo mediante código QR en la mesa. Elimina las cartas físicas, permite actualizaciones instantáneas de precios y disponibilidad, y puede mostrar fotos, información de alérgenos y sugerencias del chef. Los precios por período permiten tener precios de almuerzo y cena distintos, o precios de temporada, sin reimprimir nada.',
+        insight:{points:['Las descripciones de platos generadas por IA no son solo más rápidas: son más efectivas. La IA describe los ingredientes, la técnica de preparación y el perfil de sabor de forma apetitosa. "Risotto de hongos porcini con reducción de vino tinto y parmesano añejo" convierte mejor que "risotto de hongos".','La IA detecta platos con baja rotación y sugiere acciones: reescribir la descripción, moverlo de posición en el menú, combinarlo con una sugerencia del mozo, o retirarlo directamente. Pequeños cambios en el menú digital pueden impactar significativamente en las ventas.','Los precios por período permiten implementar revenue management gastronómico: precio premium en horario pico de fin de semana, precio de happy hour en la franja de baja demanda de entre semana. La IA puede sugerir los rangos horarios óptimos basándose en el historial de ocupación y pedidos.'],skill:'Revenue management gastronómico — skill que analiza la rentabilidad de cada plato, la elasticidad de precios por horario y la composición del pedido promedio para sugerir ajustes de menú, descripción y pricing que maximicen el ticket y el margen del restaurante.'} },
+      { name:'Reservas de mesa', desc:'Overbooking inteligente', ico:'🪑', icoBg:'#FDF3E0',
+        tools:[{n:'Calendario por grupos'},{n:'Overbooking inteligente',ia:true},{n:'Confirmación WA'}],
+        description:'Sistema de gestión de reservas del salón gastronómico. Organiza las mesas por capacidad y distribución, asigna reservas según el tamaño del grupo y gestiona la lista de espera. La confirmación por WhatsApp reduce los no-show y permite al restaurante anticipar la ocupación real del servicio.',
+        insight:{points:['El overbooking inteligente es la herramienta de revenue más sofisticada del módulo: la IA calcula la tasa de no-show histórica por día y horario, y permite aceptar más reservas de las que tiene capacidad en la medida en que esa tasa lo justifique. Si los sábados a las 21h hay 20% de no-show, se puede aceptar un 15% de sobreocupación sin riesgo.','La IA aprende el comportamiento de cancelación por tipo de cliente y canal: las reservas hechas por Instagram tienen mayor no-show que las de Google? Los grupos de más de 6 personas cancelan con más frecuencia? Esa información ajusta la política de confirmaciones y depósitos.','El análisis de la distribución de mesas en el tiempo permite detectar patrones: si las mesas de 2 personas siempre están llenas mientras las de 4 quedan vacías en martes y miércoles, la configuración del salón o la política de reservas puede ajustarse para ese día.'],skill:'Optimizador de ocupación de salón — skill que gestiona el overbooking de forma inteligente minimizando el riesgo de sobreocupación real, aprende los patrones de no-show por perfil de cliente y sugiere políticas de confirmación diferenciadas para maximizar la ocupación efectiva.'} },
+      { name:'Pedidos', desc:'Mesa + delivery + predicción', ico:'🛵', icoBg:'#E8F0F8',
+        tools:[{n:'Pedidos en mesa y delivery'},{n:'Estado en tiempo real'},{n:'Predicción de demanda por hora',ia:true}],
+        description:'Sistema de gestión de pedidos en tiempo real para consumo en local y delivery. Los pedidos de mesa llegan directamente a la cocina sin intermediarios. El estado de cada pedido es visible para el salón y para el cliente en el caso del delivery. La trazabilidad completa reduce errores y mejora los tiempos de entrega.',
+        insight:{points:['La predicción de demanda por hora es la herramienta operativa más valiosa de la cocina: si la IA proyecta que entre las 13h y las 14h habrá 45 pedidos en base al historial del día y las reservas confirmadas, el chef puede preparar las bases con anticipación, reduciendo tiempos de espera y estrés en el servicio.','El análisis de pedidos detecta combinaciones frecuentes: qué platos se piden juntos, qué bebidas acompañan cada menú, qué postres tienen mayor conversión. Esta información alimenta las sugerencias del mozo y el diseño de combos y menús ejecutivos.','La integración con el módulo de proveedores cierra el ciclo: si la predicción indica que el próximo fin de semana habrá 20% más de demanda del plato estrella, el sistema genera una alerta para verificar el stock de insumos clave antes del fin de semana.'],skill:'Predicción y optimización de servicio — skill que proyecta la demanda por plato y por franja horaria para optimizar la preparación en cocina, reducir tiempos de espera y minimizar el desperdicio de insumos, cruzando historial de pedidos con reservas confirmadas y estacionalidad.'} },
+      { name:'Caja y estadísticas', desc:'Cierre + plato más rentable IA', ico:'💰', icoBg:'#E8F5EE',
+        tools:[{n:'Cierre de caja'},{n:'Ticket promedio'},{n:'"¿Cuál fue mi plato más rentable?"',ia:true}],
+        description:'Módulo financiero operativo del restaurante. El cierre de caja diario registra todos los ingresos por canal (efectivo, tarjeta, delivery), el ticket promedio por servicio y la comparativa con períodos anteriores. Es la radiografía financiera del negocio que el dueño necesita ver todos los días para entender cómo le va.',
+        insight:{points:['La pregunta "¿cuál fue mi plato más rentable?" tiene una respuesta más compleja de lo que parece: no es el plato más caro sino el que tiene mayor margen neto considerando el costo de los insumos, el tiempo de preparación y la frecuencia de pedido. La IA hace ese cálculo automáticamente cruzando precio de venta con costo de receta.','El análisis del ticket promedio por horario, por día y por tipo de mesa permite identificar oportunidades: los grupos de 4 en cena de sábado tienen el ticket más alto, pero representan solo el 15% de los servicios. ¿Cómo atraer más de ese segmento?','La comparativa inteligente de períodos detecta tendencias preocupantes antes de que se vuelvan críticas: si el ticket promedio lleva 3 semanas cayendo, puede ser que los clientes eviten ciertos platos, que haya una tendencia hacia el menú del día en lugar de la carta, o que la mezcla de delivery esté diluyendo el promedio.'],skill:'Analista de rentabilidad gastronómica — skill que calcula el margen real de cada plato considerando costo de receta, tiempo de preparación y rotación, y genera recomendaciones accionables sobre qué vender más, qué retirar del menú y qué ajuste de precios mejoraría el margen global.'} },
+      { name:'Proveedores e insumos', desc:'Stock + alertas de faltante IA', ico:'📦', icoBg:'#FAE8E8',
+        tools:[{n:'Stock básico'},{n:'Alertas de faltante',ia:true},{n:'Órdenes de compra'}],
+        description:'Gestión de la cadena de aprovisionamiento del restaurante. El stock básico registra los insumos clave con su nivel actual. Las alertas de faltante previenen la situación más crítica de la cocina: descubrir en pleno servicio que falta un ingrediente del plato estrella. Las órdenes de compra agilizan la reposición con los proveedores habituales.',
+        insight:{points:['Las alertas de faltante por IA no reaccionan cuando el stock ya está bajo: anticipan cuándo va a ser insuficiente basándose en la predicción de demanda. Si el fin de semana se proyectan 60 porciones del plato con salmón y el stock alcanza para 40, la alerta se dispara el jueves, no el sábado a las 12h.','La integración con el módulo de pedidos permite calcular el consumo teórico de insumos: si se vendieron 30 porciones de risotto, el sistema sabe cuánto arroz, caldo y queso se usó. La diferencia entre consumo teórico y stock real revela merma, desperdicio o robo.','El análisis de proveedores registra precios históricos y calidad de entrega. Si un proveedor de verduras aumenta sus precios consistentemente por encima de la inflación del rubro, la IA lo detecta y alerta para renegociar o buscar alternativas.'],skill:'Gestión predictiva de insumos — skill que anticipa necesidades de reposición cruzando stock actual con predicción de demanda, detecta desvíos entre consumo teórico y real para identificar merma, y alerta sobre cambios de precios de proveedores que impacten el margen.'} },
+    ]
+  },
+  profesional: {
+    modulos: [
+      { name:'Expedientes / Asuntos', desc:'Casos + resumen IA', ico:'📁', icoBg:'#E8F5EE',
+        tools:[{n:'Gestión de casos'},{n:'Etapas y estados'},{n:'Resumen del caso',ia:true},{n:'Próximos pasos sugeridos',ia:true}],
+        description:'Sistema de gestión de la cartera de trabajo del profesional. Cada expediente o asunto tiene su ficha completa: datos del cliente, tipo de materia (para abogados: civil, laboral, comercial; para contadores: monotributo, pyme, RRHH), etapa actual, documentación adjunta y registro de movimientos. Permite gestionar decenas de casos simultáneos sin perder el hilo de ninguno.',
+        insight:{points:['El resumen del caso generado por IA transforma el tiempo de puesta en contexto antes de cada reunión o llamada: en lugar de releer 20 notas, el profesional lee "Caso laboral por despido sin causa. Acuerdo fallido en octubre. Audiencia fijada para el 15/05. Pendiente: presentar prueba documental antes del 01/05. Riesgo de vencimiento de plazo". Todo lo relevante en 4 líneas.','Los próximos pasos sugeridos se basan en el tipo de caso y la etapa actual: para un expediente en etapa de prueba, la IA sugiere las diligencias pendientes más comunes para esa instancia. Para un cliente con vencimiento AFIP próximo, genera el checklist de documentación necesaria.','El análisis cruzado de la cartera detecta carga de trabajo desbalanceada: si un profesional tiene 40 casos activos y 15 con vencimiento esta semana, la IA prioriza y alerta sobre los casos más urgentes antes de que el plazo se incumpla.'],skill:'Asistente de gestión de cartera profesional — skill que mantiene el contexto actualizado de cada caso, detecta vencimientos críticos antes de que sean urgentes, sugiere próximos pasos según el tipo de materia y alerta sobre conflictos de agenda que puedan afectar plazos procesales o fiscales.'} },
+      { name:'Agenda profesional', desc:'Reuniones + vencimientos AFIP auto', ico:'📅', icoBg:'#FDF3E0',
+        tools:[{n:'Reuniones y vencimientos'},{n:'Vencimientos AFIP automáticos',ia:true,key:true},{n:'Recordatorios'}],
+        description:'Agenda integrada que combina compromisos propios con los vencimientos fiscales y legales de los clientes. Para un contador, el calendario fiscal de AFIP (IVA, Ganancias, Bienes Personales, Monotributo) se carga automáticamente según el tipo de cliente. Para un abogado, los plazos procesales de cada expediente. Es la diferencia entre una agenda de citas y un sistema de gestión de vencimientos críticos.',
+        insight:{points:['Los vencimientos AFIP automáticos son el diferencial más valorado por los clientes del rubro: el sistema sabe la fecha de vencimiento de cada obligación de cada cliente según su categoría fiscal y la carga en el calendario del contador de forma automática. Si hay 30 clientes con vencimiento de IVA el mismo día, el sistema los agrupa y prioriza por complejidad.','La IA detecta semanas sobrecargadas con anticipación: si en la primera semana de octubre vencen 12 presentaciones simultáneamente, el sistema alerta en septiembre para que el profesional reorganice el trabajo o gestione prioridades con los clientes.','El cruce entre la agenda profesional y los expedientes activos detecta conflictos: una audiencia judicial y una presentación AFIP el mismo día para el mismo profesional generan una alerta inmediata, no el día anterior cuando ya no hay margen de maniobra.'],skill:'Planificador fiscal y legal integrado — skill que carga automáticamente los vencimientos de cada cliente según su categoría fiscal o tipo de proceso, detecta semanas sobrecargadas con anticipación y sugiere redistribución de trabajo para cumplir todos los plazos sin improvisación.'} },
+      { name:'Documentos', desc:'Generación + pre-completado IA', ico:'📄', icoBg:'#E8F0F8',
+        tools:[{n:'Generación de contratos'},{n:'Pre-completado IA',ia:true},{n:'Repositorio de archivos'}],
+        description:'Centro de documentación del estudio profesional. Centraliza todos los documentos generados y recibidos por cliente y por asunto: contratos, escritos, declaraciones juradas, poderes, cartas documento, informes. El repositorio permite encontrar cualquier documento en segundos y garantiza que el equipo trabaja siempre con la versión actualizada.',
+        insight:{points:['El pre-completado por IA acelera la generación de documentos estándar: una carta documento para un abogado pre-completa con los datos del expediente, el domicilio constituido, la materia y la intimación correspondiente al estado del caso. El profesional revisa y ajusta, no escribe desde cero.','La IA detecta documentos que se aproximan a su vencimiento de validez: un poder notarial con más de 2 años de antigüedad, una autorización con fecha límite próxima, un certificado que necesita renovación. Alertas preventivas que evitan problemas en el momento de presentación.','El análisis del repositorio identifica tipos de documentos que se generan frecuentemente y propone plantillas optimizadas: si el 70% de los contratos de locación siguen la misma estructura, la IA propone una plantilla base que reduce el tiempo de redacción al mínimo.'],skill:'Asistente documental profesional — skill que genera borradores de documentos frecuentes pre-completados con los datos del caso, detecta documentos próximos a vencer, mantiene el repositorio organizado por cliente y materia y aprende de los ajustes del profesional para mejorar las plantillas futuras.'} },
+      { name:'Clientes profesionales', desc:'Ficha + alertas de vencimiento', ico:'👥', icoBg:'#E8F5EE',
+        tools:[{n:'Ficha por cliente'},{n:'Historial de asuntos'},{n:'Alertas de vencimiento',ia:true}],
+        description:'CRM adaptado al rubro de servicios profesionales. La ficha de cada cliente incluye datos personales, categoría fiscal (para contadores), tipo de relación legal (para abogados), historial de asuntos tramitados y estado de honorarios. Es diferente a un CRM genérico porque el centro no es el "prospecto" sino el "expediente" y el vínculo a largo plazo.',
+        insight:{points:['Las alertas de vencimiento por cliente van más allá del calendario fiscal: la IA cruza la fecha del último asunto tramitado con el ciclo habitual de ese tipo de cliente. Si un cliente de servicios contables no tuvo actividad en 2 meses en un período que históricamente sí tiene, puede indicar que está usando otro estudio.','El análisis de la cartera de clientes detecta clientes de alto valor en riesgo: aquellos con muchos asuntos activos históricamente que llevan tiempo sin nuevas consultas son señales de alerta. La IA genera un reporte de "clientes a cuidar" para que el profesional refuerce la relación proactivamente.','El historial de asuntos por cliente permite detectar oportunidades de servicios adicionales: un cliente que tramitó una sucesión probablemente necesite asesoramiento patrimonial. Un cliente con varios empleados en negro puede estar expuesto a riesgo laboral. La IA detecta esas conexiones y las presenta como oportunidades.'],skill:'Fidelización de cartera profesional — skill que monitorea el nivel de actividad de cada cliente respecto a su historial, detecta señales de posible migración a otro estudio o bufete y genera alertas proactivas para que el profesional refuerce la relación antes de perder el cliente.'} },
+    ]
+  },
+  seguros: {
+    modulos: [
+      { name:'Pólizas', desc:'Gestión + alertas de renovación IA', ico:'📋', icoBg:'#E8F5EE',
+        tools:[{n:'Gestión de pólizas'},{n:'Estados y vencimientos'},{n:'Alertas de renovación',ia:true,key:true}],
+        description:'Repositorio central de toda la cartera de pólizas del productor. Cada póliza tiene su ficha completa: asegurado, tipo de cobertura, vigencia, prima, compañía aseguradora y estado. La gestión centralizada permite al productor tener visibilidad total de su cartera y garantizar que ninguna póliza venza sin gestión, lo que protege al cliente y cuida la comisión.',
+        insight:{points:['Las alertas de renovación por IA no son un recordatorio 30 días antes del vencimiento: es una secuencia de contactos adaptada a cada cliente. Un cliente que siempre renueva rápido recibe un recordatorio 15 días antes. Un cliente que históricamente dilata recibe el primer contacto 45 días antes con más tiempo para trabajar la renovación.','La IA detecta pólizas en riesgo de no renovación: clientes con historial de reclamos frecuentes que podrían tener problemas con la aseguradora, clientes cuya situación económica cambió según patrones de pago recientes, pólizas con primas que aumentaron significativamente más que el promedio de la cartera.','El análisis de la cartera por vencimientos futuros permite proyectar el MRR del productor para los próximos 3 meses y detectar períodos de alta concentración de renovaciones donde se necesitará más capacidad de gestión.'],skill:'Gestión proactiva de renovaciones — skill que diseña estrategias de renovación diferenciadas por perfil de cliente, anticipa las pólizas en riesgo con semanas de anticipación y proyecta el flujo de renovaciones futuras para que el productor nunca sea tomado por sorpresa.'} },
+      { name:'Pipeline de renovaciones', desc:'Probabilidad de renovación IA', ico:'🔄', icoBg:'#FDF3E0',
+        tools:[{n:'Seguimiento de vencimientos'},{n:'Probabilidad de renovación',ia:true},{n:'Gestión automatizada',ia:true}],
+        description:'Vista del proceso de renovación de cada póliza como un pipeline comercial. Igual que un CRM de ventas pero orientado a retención: cada póliza próxima a vencer entra al pipeline y avanza por etapas (contactado, presupuestado, renovado, no renovado). El seguimiento sistemático garantiza que ninguna oportunidad de renovación quede sin gestión.',
+        insight:{points:['El score de probabilidad de renovación es la herramienta de priorización más valiosa: la IA calcula para cada póliza la probabilidad de que el cliente renueve basándose en historial de renovaciones, comportamiento de pago, cantidad de reclamos y variación de prima. Un score bajo en una póliza de alto valor dispara atención prioritaria.','La gestión automatizada de renovaciones maneja los casos de alta probabilidad: envía el recordatorio, el presupuesto actualizado y el link de pago sin intervención manual. El productor se concentra en los casos de riesgo que necesitan gestión personalizada.','El análisis del pipeline de renovaciones completado (renovadas vs. perdidas) revela patrones: qué tipo de cobertura tiene mayor churn, qué compañía aseguradora genera más no-renovaciones, en qué mes del año la tasa de abandono es más alta. Información para ajustar la estrategia de retención.'],skill:'Predictor de churn de pólizas — skill que calcula la probabilidad de no-renovación de cada póliza considerando múltiples variables históricas, prioriza la cartera en función de ese score y diseña la secuencia de contactos óptima para maximizar la tasa de renovación global.'} },
+      { name:'Siniestros', desc:'Registro + pre-completado IA', ico:'⚠️', icoBg:'#FAE8E8',
+        tools:[{n:'Registro de siniestros'},{n:'Pre-completado formulario',ia:true},{n:'Estado y seguimiento'}],
+        description:'Módulo de gestión del proceso de denuncia y seguimiento de siniestros. El registro estructurado del siniestro captura toda la información relevante: fecha, tipo, descripción, documentación adjunta y compañía involucrada. El seguimiento del estado permite al productor mantener informado al cliente durante todo el proceso, que suele ser el momento de mayor ansiedad en la relación asegurador-asegurado.',
+        insight:{points:['El pre-completado del formulario de denuncia reduce el tiempo y los errores en el momento más estresante para el cliente: con los datos de la póliza ya cargados, el formulario se pre-completa con el asegurado, el bien asegurado, la compañía y el tipo de cobertura. El cliente solo describe el siniestro, el sistema hace el resto.','El seguimiento de siniestros abiertos por tiempo detecta demoras anómalas: si el promedio de resolución para el tipo de siniestro es 15 días y hay uno abierto hace 35, la IA alerta al productor para que gestione activamente el caso con la compañía antes de que el cliente reclame.','El historial de siniestros por cliente y por bien asegurado alimenta el módulo de cross-selling: un cliente con 2 siniestros de robo en 2 años puede necesitar cobertura adicional o una revisión de la suma asegurada. La IA detecta esa oportunidad y la presenta al productor.'],skill:'Gestión de la experiencia del siniestro — skill que acelera la carga de la denuncia, monitorea los tiempos de resolución alertando cuando se superan los promedios del rubro y detecta oportunidades de mejora de cobertura derivadas del historial de siniestros de cada cliente.'} },
+      { name:'Cross-selling IA', desc:'Oportunidades + brechas de cobertura', ico:'📈', icoBg:'#E8F0F8',
+        tools:[{n:'Detección de oportunidades',ia:true,key:true},{n:'Perfil de cliente'},{n:'Alertas de brechas de cobertura',ia:true}],
+        description:'Motor de crecimiento de la cartera a partir de los clientes existentes. Analiza el perfil de cada cliente para detectar coberturas que debería tener según su situación y que actualmente no tiene: un cliente con auto sin cobertura de hogar, un empresario con seguro de vehículo de empresa sin cobertura de responsabilidad civil, una familia sin seguro de vida. El cross-selling basado en datos es más efectivo y menos invasivo que el basado en intuición.',
+        insight:{points:['La IA cruza el perfil de cada cliente (edad, situación patrimonial inferida, bienes asegurados) con los patrones de cobertura de clientes similares para detectar brechas: "el 85% de los clientes con auto + hogar también tienen seguro de vida. Tu cliente Juan tiene solo auto. Oportunidad potencial: seguro de vida familiar."','Las alertas de brechas de cobertura se activan también por eventos de vida detectados: un cliente que aseguró un auto nuevo probablemente cambió de vehículo, lo que puede implicar ajuste de suma asegurada o cambio de categoría. Un cliente que agregó una propiedad al hogar puede necesitar revisar la suma asegurada.','El análisis de rentabilidad por cliente detecta clientes con alta prima acumulada en un solo ramo: un cliente que tiene todo en automotor pero nada en vida o accidentes personales es un perfil con alta oportunidad de diversificación y mayor fidelización por mayor cantidad de vínculos.'],skill:'Detección de oportunidades de cartera — skill que mapea las brechas de cobertura de cada cliente comparando su perfil actual con los patrones de clientes similares de alta fidelización, y genera propuestas de cross-selling priorizadas por probabilidad de aceptación y valor de la prima potencial.'} },
+      { name:'Estadísticas de cartera', desc:'Pólizas activas + análisis por ramo', ico:'📊', icoBg:'#E8F5EE',
+        tools:[{n:'Pólizas activas'},{n:'Tasa de retención'},{n:'Análisis por ramo',ia:true}],
+        description:'Dashboard estratégico de la cartera del productor. Muestra el estado global del negocio: cantidad de pólizas activas, prima acumulada, distribución por ramo y compañía, tasa de renovación histórica y proyección de ingresos. Es el cockpit que le permite al productor entender la salud de su negocio más allá del día a día de las renovaciones.',
+        insight:{points:['El análisis por ramo detecta la exposición y la diversificación de la cartera: si el 70% de las pólizas son automotor, cualquier cambio en la regulación o competencia de ese ramo afecta al negocio entero. La IA propone estrategias de diversificación con los rubros de mayor crecimiento en la cartera de clientes actuales.','La tasa de retención por cohorte de clientes revela cuánto tiempo permanece un cliente en la cartera: si los clientes captados vía Instagram tienen el doble de churn que los referidos por otros clientes, el canal de captación no es rentable aunque tenga costo bajo de adquisición.','La proyección de ingresos de comisiones para los próximos 3 meses basada en renovaciones proyectadas permite al productor planificar inversiones, contrataciones y estrategias de crecimiento con datos reales, no con intuición.'],skill:'Analista estratégico de cartera — skill que evalúa la salud de la cartera desde múltiples dimensiones (concentración por ramo, evolución de retención, rentabilidad por segmento), detecta riesgos de concentración y genera proyecciones de ingresos basadas en las renovaciones proyectadas.'} },
+    ]
+  },
+  distribuidora: {
+    modulos: [
+      { name:'Clientes y pedidos', desc:'Historial + riesgo de abandono IA', ico:'👥', icoBg:'#E8F5EE',
+        tools:[{n:'Base de clientes'},{n:'Historial de pedidos'},{n:'Cobranzas'},{n:'Riesgo de abandono',ia:true}],
+        description:'CRM operativo de la distribuidora. Cada cliente tiene su ficha con datos de contacto, historial completo de pedidos, frecuencia de compra, ticket promedio, estado de cuenta y saldo pendiente. Es la base desde donde se planifican las rutas, se calculan las cobranzas y se detectan cambios en el comportamiento de compra.',
+        insight:{points:['El riesgo de abandono por IA detecta señales tempranas que el equipo de ventas puede perder en el día a día: un cliente que compra cada 10 días y lleva 18 días sin pedido, un cliente cuyo ticket promedio bajó 30% en el último mes, un cliente que canceló 2 pedidos consecutivos. Cada señal se convierte en una alerta con el vendedor asignado y la acción sugerida.','El análisis de la cartera de clientes por rentabilidad real revela que no todos los clientes que "compran mucho" son igualmente rentables: un cliente con pedidos frecuentes pero en zonas de baja densidad puede tener un costo de reparto que erosiona el margen. La IA calcula la rentabilidad por cliente considerando el costo logístico.','La gestión de cobranzas integrada con el historial de pedidos permite detectar el ciclo de pago real de cada cliente y ajustar la política de crédito: clientes que siempre pagan en 30 días pueden acceder a condiciones preferenciales; clientes con mora habitual requieren pedidos con pago anticipado.'],skill:'Rentabilidad y retención de cartera comercial — skill que calcula la rentabilidad real de cada cliente incluyendo costo logístico, detecta señales de abandono anticipado y prioriza la intervención del equipo de ventas en los clientes de mayor valor en riesgo.'} },
+      { name:'Rutas inteligentes', desc:'Optimización de orden de visitas', ico:'🗺️', icoBg:'#FDF3E0',
+        tools:[{n:'Planificación de rutas'},{n:'Optimización de orden',ia:true,key:true},{n:'Priorización por zona',ia:true}],
+        description:'Sistema de planificación logística diaria. Organiza las visitas de cada repartidor en el orden óptimo para minimizar tiempo de traslado y maximizar la cantidad de entregas por turno. La priorización por zona agrupa entregas geográficamente cercanas, reduciendo distancias recorridas y costo de combustible.',
+        insight:{points:['La optimización de rutas no es solo minimizar kilómetros: considera las ventanas horarias de cada cliente (un cliente que solo recibe mercadería de 8 a 10h no puede ser visitado a las 14h), el volumen de carga del vehículo por entrega y la prioridad comercial de cada parada.','La IA aprende del comportamiento histórico de cada ruta: si determinado cliente siempre agrega pedidos en el momento de la entrega (pedidos de mostrador), el repartidor asignado sabe que debe llevar stock adicional de ciertos productos. Ese conocimiento operativo se codifica y se transfiere incluso si cambia el repartidor.','El análisis de rutas completadas versus planificadas detecta ineficiencias: si un repartidor consistentemente tarda un 40% más de lo planificado en cierta zona, puede haber un problema de navegación, de demoras en la recepción de mercadería en esos clientes, o simplemente que la estimación de tiempo es incorrecta. La IA ajusta automáticamente.'],skill:'Optimizador logístico de última milla — skill que diseña rutas considerando ventanas horarias, capacidad de carga, prioridad comercial y comportamiento histórico de cada cliente, y ajusta las estimaciones de tiempo basándose en el desempeño real de rutas anteriores.'} },
+      { name:'Stock e inventario', desc:'Tiempo real + predicción por temporada', ico:'📦', icoBg:'#E8F0F8',
+        tools:[{n:'Stock en tiempo real'},{n:'Alertas de reposición',ia:true},{n:'Predicción por temporada',ia:true}],
+        description:'Control del inventario del depósito en tiempo real. Cada movimiento de entrada y salida actualiza el stock al momento. Las alertas de reposición se disparan cuando un producto baja del mínimo configurado. La predicción por temporada anticipa picos de demanda con anticipación suficiente para gestionar compras sin urgencia.',
+        insight:{points:['La predicción por temporada es especialmente valiosa para distribuidoras con productos estacionales: bebidas frías en verano, chocolates en invierno, productos para fiestas. La IA analiza 2 o 3 años de historial de ventas para proyectar la demanda mes a mes y sugerir el nivel de stock óptimo para cada período.','Las alertas de reposición por IA no son solo un semáforo de stock mínimo: consideran el lead time de cada proveedor. Si un producto tarda 5 días en llegar y la demanda proyectada lo agotará en 3, la alerta se activa hoy, no cuando el stock ya esté a 0.','El análisis de rotación por producto detecta productos que ocupan espacio de depósito sin venderse: un producto con rotación de 90 días en una distribuidora de consumo masivo es una señal de stock muerto que inmoviliza capital. La IA genera un reporte de productos candidatos a discontinuar o renegociar con el proveedor.'],skill:'Planificación de inventario predictiva — skill que proyecta la demanda por producto y por período considerando estacionalidad y tendencias, calcula alertas de reposición adelantadas según el lead time de cada proveedor y detecta stock muerto que impacta en el capital de trabajo.'} },
+      { name:'Seguimiento en tiempo real', desc:'GPS + recálculo automático', ico:'📍', icoBg:'#E8F5EE',
+        tools:[{n:'GPS de repartidores',key:true},{n:'Estado por entrega'},{n:'Recálculo automático de ruta',ia:true}],
+        description:'Visibilidad operativa en tiempo real de toda la flota en movimiento. El GPS de cada repartidor actualiza su posición continuamente en el mapa del panel. El estado de cada entrega (en camino, entregado, no entregado, rechazado) se actualiza desde la app móvil del repartidor. El cliente puede consultar el estado de su pedido en tiempo real.',
+        insight:{points:['El recálculo automático de ruta actúa cuando hay una desviación o problema: si un repartidor detecta que un cliente no está disponible, el sistema recalcula el orden del resto de las visitas para aprovechar el tiempo liberado. Si hay un corte de tránsito, sugiere una ruta alternativa en tiempo real.','El análisis del seguimiento detecta patrones de demora sistemática: si el repartidor 3 siempre tarda más de lo proyectado en la zona norte, puede haber un problema de ruta, de cliente o de capacidad personal. La IA identifica el patrón para que el supervisor intervenga antes de que afecte el servicio.','El historial de GPS combinado con el estado de cada entrega permite calcular el costo real de distribución por cliente y por zona, considerando tiempo efectivo en ruta y entregas fallidas. Información clave para decisiones de pricing o de política de mínimo de compra por zona.'],skill:'Inteligencia de flota en tiempo real — skill que detecta desvíos respecto a la ruta planificada, recalcula el orden de entregas dinámicamente ante imprevistos, y genera análisis de eficiencia por repartidor y por zona para optimización operativa continua.'} },
+      { name:'Stats de reparto', desc:'Eficiencia + repartidor más eficiente', ico:'📈', icoBg:'#FAE8E8',
+        tools:[{n:'Eficiencia por ruta'},{n:'Tiempos de entrega'},{n:'"¿Cuál es mi repartidor más eficiente?"',ia:true}],
+        description:'Tablero analítico de la operación logística. Mide la eficiencia real de cada ruta y cada repartidor: entregas completadas vs. planificadas, tiempo promedio por entrega, kilómetros recorridos, devoluciones y rechazos. Es la base para las decisiones de optimización de flota, incentivos al equipo y diseño de zonas de reparto.',
+        insight:{points:['La pregunta "¿cuál es mi repartidor más eficiente?" considera múltiples dimensiones: no solo velocidad sino también tasa de entrega exitosa, satisfacción del cliente, cero rechazos y gestión de pedidos de mostrador. El repartidor más rápido puede no ser el más rentable si tiene alta tasa de entrega fallida.','El análisis de eficiencia por zona detecta zonas donde el costo de reparto supera el margen de los pedidos: si la zona sur tiene pedidos promedio bajos y alta densidad de tráfico, puede ser candidata a un mínimo de pedido más alto o a un día de reparto específico para concentrar las entregas.','La evolución temporal de las métricas de reparto detecta degradación de performance antes de que se vuelva un problema: si la tasa de entrega exitosa de un repartidor bajó 8 puntos en el último mes, hay algo que está cambiando. La IA identifica el patrón para intervención temprana.'],skill:'Optimización continua de operaciones logísticas — skill que evalúa la eficiencia real de cada repartidor y cada zona considerando múltiples variables, detecta degradación de performance antes de que afecte el servicio y propone ajustes de rutas, zonas y políticas de reparto basados en datos históricos.'} },
+    ]
+  },
+  tecnico: {
+    modulos: [
+      { name:'Órdenes de trabajo (OT)', desc:'Alta + ciclo de vida trazable', ico:'📋', icoBg:'#E8F5EE', diff:true,
+        tools:[{n:'Alta de OT',key:true},{n:'Código QR por equipo',key:true},{n:'Fotos de ingreso'},{n:'Firma digital del cliente'},{n:'Asignación a técnico'},{n:'Fecha estimada'},{n:'Diagnóstico sugerido',ia:true},{n:'Tiempo estimado IA',ia:true},{n:'Historial de estados'},{n:'Cierre con fotos'}],
+        flow:[
+          {t:'Cliente deja el equipo → OT generada automáticamente con código único',s:'key'},
+          {t:'Técnico adjunta fotos de ingreso y registra el problema',s:'std'},
+          {t:'IA sugiere diagnóstico probable y repuestos según el modelo del equipo',s:'ia'},
+          {t:'Presupuesto enviado por WA — cliente aprueba online con un clic',s:'key'},
+          {t:'Estado actualizado en tiempo real — el cliente consulta sin llamar',s:'key'},
+        ],
+        description:'El núcleo operativo del servicio técnico. Cada equipo que ingresa al taller genera una Orden de Trabajo con código único que lo identifica a lo largo de todo el proceso: ingreso, diagnóstico, reparación, presupuesto, aprobación y entrega. Reemplaza la libreta de papel, el pizarrón y los mensajes de WhatsApp dispersos con un sistema trazable y consultable en tiempo real.',
+        insight:{points:['El diagnóstico sugerido por IA analiza el modelo del equipo y los síntomas descriptos para predecir la falla más probable. Para un Samsung UN55 que "no enciende", la IA sugiere "posible falla en fuente de alimentación o backlight — verificar con multímetro antes de avanzar". Ahorra tiempo de diagnóstico y reduce el riesgo de error en el presupuesto.','La firma digital del cliente al momento del ingreso es la protección legal del taller: documenta el estado del equipo, los accesorios entregados y las condiciones del servicio. Las fotos de ingreso son la evidencia visual que protege ante reclamos de daños que el equipo ya traía.','El historial de OTs por modelo de equipo es un activo que crece con el tiempo: cuántas veces se reparó ese modelo, qué fallas son más frecuentes, cuánto tardó la reparación en promedio, qué repuesto se usó. Con esa base de datos, el diagnóstico y el presupuesto del próximo equipo similar se hacen en minutos.'],skill:'Diagnóstico asistido por IA — skill que aprende del historial de reparaciones del taller para predecir la falla más probable por modelo y síntoma, sugiere el tiempo de reparación estimado basándose en OTs similares previas y detecta modelos con alta tasa de falla recurrente para alertar al técnico antes de comprometerse con el cliente.'} },
+      { name:'Tracking público', desc:'URL pública + bot WA 24/7', ico:'🔍', icoBg:'#E8F0F8', diff:true,
+        tools:[{n:'URL pública por OT',key:true,diff:true},{n:'Consulta por código o DNI',key:true},{n:'Bot WA "¿cómo está mi equipo?"',ia:true,diff:true},{n:'Estado visual paso a paso'},{n:'Fotos antes / después'},{n:'Notificación automática WA'},{n:'Aprobación presupuesto online',key:true},{n:'Aviso de retiro listo'},{n:'Calificación del servicio'}],
+        preview: true,
+        description:'El diferencial que hace que el cliente elija este taller sobre el de la cuadra. El cliente ya no llama para preguntar si su tele está lista: consulta por WhatsApp o entra a la URL pública de su OT y ve el estado en tiempo real, las fotos del proceso y la fecha estimada. Elimina la pregunta más repetida del día en cualquier taller y libera al personal para enfocarse en las reparaciones.',
+        insight:{points:['El bot de WhatsApp no solo responde "en reparación" o "listo": tiene acceso al contexto completo de la OT. Sabe el modelo del equipo, el técnico asignado, la falla detectada, si se pidió un repuesto y cuándo se espera. Puede responder "tu tele está esperando la fuente de alimentación que pedimos al proveedor, estimamos tenerla el jueves y terminar la reparación el viernes". Eso es lo que el cliente quiere saber.','La aprobación del presupuesto online cierra otro cuello de botella habitual: el cliente no tiene que llamar para decir que sí. Recibe el presupuesto por WA, ve el detalle y aprueba con un clic. La OT avanza automáticamente a "en reparación" sin que el técnico tenga que gestionar la confirmación manualmente.','La calificación del servicio al momento del retiro cierra el ciclo y construye reputación online: el cliente satisfecho puede convertirse en reseña de Google con un clic. Los servicios con baja calificación generan una alerta interna para que el dueño gestione el caso antes de que sea una reseña negativa pública.'],skill:'Experiencia del cliente de servicio técnico — skill que gestiona todas las comunicaciones del cliente durante el ciclo de reparación en lenguaje natural y contextual, detecta clientes con potencial de queja (OT demorada, presupuesto alto, segunda reparación del mismo equipo) e interviene proactivamente para transformar una experiencia negativa en una oportunidad de fidelización.'} },
+      { name:'Gestión de técnicos', desc:'Cola de trabajo + asignación IA', ico:'👨‍🔧', icoBg:'#E8F5EE',
+        tools:[{n:'Alta de técnicos'},{n:'Especialidades por técnico'},{n:'Cola de trabajo asignada',key:true},{n:'Asignación automática por especialidad',ia:true},{n:'Balanceo de carga',ia:true},{n:'Tiempo promedio por tipo'},{n:'Ranking de eficiencia'},{n:'App móvil PWA para técnicos'}],
+        description:'Módulo de gestión del equipo técnico. Cada técnico tiene su perfil con especialidades (electrónica de potencia, celulares, electrodomésticos), su cola de OTs asignadas en orden de prioridad y su historial de resolución. La app móvil PWA permite al técnico actualizar el estado de cada OT desde el banco de trabajo sin tener que ir a la computadora.',
+        insight:{points:['La asignación automática por especialidad evita el error de asignar una reparación de placa madre a un técnico especializado en mecánica de lavarropas. La IA cruza el tipo de equipo y la falla diagnosticada con las especialidades de cada técnico disponible y la carga de trabajo actual para hacer la asignación óptima.','El balanceo de carga detecta cuando un técnico tiene su cola sobrecargada mientras otro está libre: distribuye automáticamente las OTs nuevas considerando la carga actual, el tiempo estimado de cada reparación en curso y las especialidades. Evita que unos técnicos tengan 10 OTs y otros 2.','El tiempo promedio por tipo de reparación por técnico es un indicador de eficiencia y de calidad: si un técnico tarda el doble que el promedio en reparar una falla específica, puede necesitar capacitación o apoyo. Si tarda la mitad, puede ser el referente para ese tipo de equipo.'],skill:'Optimización del equipo técnico — skill que balancea la carga de trabajo considerando especialidades, tiempos de resolución históricos y OTs urgentes, detecta técnicos con performance por debajo del promedio en tipos específicos de reparación y sugiere redistribución o capacitación.'} },
+      { name:'Proveedores y repuestos', desc:'OC vinculada a OT + repuesto sugerido IA', ico:'🛒', icoBg:'#FDF3E0', diff:true,
+        tools:[{n:'Base de proveedores',key:true},{n:'Catálogo de repuestos',key:true},{n:'OC vinculada a la OT',key:true,diff:true},{n:'Stock mínimo de repuestos'},{n:'Alertas de stock bajo'},{n:'Repuesto sugerido por modelo',ia:true,diff:true},{n:'Proveedor más conveniente',ia:true},{n:'Predicción de repuestos más pedidos',ia:true},{n:'Costo repuesto → impacto en presupuesto'}],
+        flow:[
+          {t:'Técnico indica modelo → IA sugiere repuestos probables necesarios',s:'ia'},
+          {t:'Orden de compra generada y vinculada a la OT con un clic',s:'key'},
+          {t:'Al llegar el repuesto, OT avanza automáticamente a "En reparación"',s:'key'},
+        ],
+        description:'Segundo diferencial clave del módulo. El taller de servicio técnico vive de conseguir el repuesto correcto al mejor precio en el menor tiempo. Este módulo integra el proceso de compra de repuestos directamente en el flujo de la OT, eliminando la búsqueda manual de proveedores, los mensajes de WhatsApp dispersos y el riesgo de pedir el repuesto equivocado.',
+        insight:{points:['El repuesto sugerido por modelo es la herramienta más valorada por el técnico: ingresa el modelo del equipo y la falla, y la IA sugiere los repuestos más probables basándose en el historial de reparaciones del taller y de reparaciones similares en la base de conocimiento del rubro. Para un Samsung UN55MU8000, sugiere "con alta probabilidad: fuente BN44-00807A o BN44-00808A — verificar con medición antes de pedir".','La vinculación OC-OT crea trazabilidad financiera completa: cada repuesto comprado está asociado a una OT específica. El sistema calcula automáticamente el costo del repuesto en el presupuesto y en el margen final de la reparación. El dueño sabe exactamente cuánto ganó en cada OT, no solo en promedio.','La predicción de repuestos más pedidos permite mantener stock preventivo de los repuestos más frecuentes: si las fuentes de alimentación de ciertos modelos de TV se piden 5 veces por mes, conviene tener 2 o 3 en stock para reducir el tiempo de reparación de los modelos más comunes.'],skill:'Inteligencia de repuestos — skill que aprende del historial de reparaciones del taller para sugerir repuestos con alta precisión, recomienda el proveedor más conveniente considerando precio y tiempo de entrega, y proyecta la demanda de repuestos frecuentes para optimizar el stock preventivo.'} },
+      { name:'Presupuestos y facturación', desc:'Automático desde OT + aprobación online', ico:'💰', icoBg:'#F5EDE0',
+        tools:[{n:'Presupuesto automático desde OT',key:true},{n:'Desglose MO + repuestos'},{n:'Aprobación online del cliente',key:true},{n:'Precio sugerido por tipo',ia:true},{n:'Envío WA / email'},{n:'Conversión a factura'},{n:'MercadoPago integrado'},{n:'Garantía en factura'}],
+        description:'Módulo financiero del taller integrado con la OT. El presupuesto se genera automáticamente desde los datos de la OT: costo del repuesto ya cargado, mano de obra sugerida según el tipo de reparación y el tiempo estimado, y descuentos configurables. El cliente lo recibe por WA, aprueba con un clic y el sistema convierte la aprobación en confirmación de trabajo automáticamente.',
+        insight:{points:['El precio sugerido por tipo de reparación es una herramienta de pricing basada en datos: si el promedio de mano de obra para cambio de pantalla de notebook es $X en el taller, con variación según modelo y marca, la IA sugiere ese rango como punto de partida. El técnico ajusta según complejidad específica, pero tiene una base objetiva para no cobrar de menos ni de más.','El desglose transparente de repuesto + mano de obra en el presupuesto construye confianza con el cliente: ve exactamente de qué está compuesto el costo y puede tomar una decisión informada. Los talleres con presupuestos transparentes tienen mayor tasa de aprobación.','La garantía incluida en la factura protege al taller y al cliente: documenta el alcance de la reparación, el plazo de garantía y las exclusiones. Es la evidencia formal que evita disputas posteriores y diferencia al taller profesional del que opera informalmente.'],skill:'Pricing inteligente de reparaciones — skill que sugiere el precio de mano de obra basándose en el historial de precios del taller para tipos de reparación similares, detecta reparaciones donde el margen histórico es bajo y propone ajustes de pricing para mejorar la rentabilidad por OT.'} },
+      { name:'Clientes y fidelización', desc:'Historial + mantenimiento preventivo IA', ico:'👥', icoBg:'#E8F5EE',
+        tools:[{n:'Ficha del cliente'},{n:'Historial de OTs'},{n:'Equipos registrados por cliente'},{n:'Detección clientes recurrentes',ia:true},{n:'Reactivación inactivos',ia:true},{n:'Mantenimiento preventivo sugerido',ia:true},{n:'Garantía por reparación'},{n:'Recordatorio de garantía WA'}],
+        description:'CRM del taller de servicio técnico. Cada cliente tiene su ficha con el historial completo de equipos traídos a reparar, reparaciones realizadas, repuestos utilizados y estado de garantías activas. El registro de equipos por cliente es el activo más valioso: permite construir una relación de largo plazo basada en el conocimiento del historial de cada dispositivo.',
+        insight:{points:['El mantenimiento preventivo sugerido es la oportunidad de negocio más subutilizada del rubro: si el cliente trajo su lavarropas a reparar hace 18 meses y ese modelo tiene vida útil de 10 años, la IA puede sugerir un servicio de mantenimiento preventivo (limpieza de filtros, revisión de gomas, lubricación) antes de que falle de nuevo. Un ingreso adicional con cliente ya fidelizado.','La reactivación de clientes inactivos en este rubro tiene una particularidad: el cliente no vuelve si sus equipos funcionan bien, que es el objetivo. La reactivación inteligente se orienta a nuevos equipos: "hace 2 años reparamos tu TV Samsung. Si ahora tenés un celular, notebook o electrodoméstico con problemas, recordá que tenemos garantía de trabajo y precio justo".','El recordatorio de garantía por WA al acercarse el vencimiento es un gesto de servicio que genera confianza: "en 15 días vence la garantía de la reparación de tu TV. Si notás algo, traéla antes de que venza para que lo revisemos sin costo". Ese mensaje genera fidelización real.'],skill:'Fidelización de clientes de servicio técnico — skill que gestiona el ciclo de vida de cada equipo reparado para detectar oportunidades de mantenimiento preventivo, construye el historial técnico por cliente para personalizar cada interacción y genera campañas de reactivación basadas en el tiempo transcurrido desde la última reparación.'} },
+      { name:'Estadísticas del taller', desc:'Fallas + margen + rendimiento por técnico', ico:'📊', icoBg:'#FAE8E8',
+        tools:[{n:'OTs por período'},{n:'Tiempo promedio de reparación'},{n:'Tasa de resolución exitosa'},{n:'Ranking de fallas frecuentes'},{n:'Margen por tipo de reparación'},{n:'Rendimiento por técnico'},{n:'"¿Cuál fue mi reparación más rentable?"',ia:true},{n:'Predicción de demanda por equipo',ia:true}],
+        description:'Tablero analítico completo del taller. Mide la eficiencia operativa (tiempo de reparación, tasa de resolución exitosa), la rentabilidad por tipo de trabajo (margen por OT, por tipo de equipo, por técnico) y el rendimiento del equipo. Es el dashboard que el dueño del taller necesita para gestionar el negocio con datos y no solo con intuición.',
+        insight:{points:['El margen por tipo de reparación revela datos contraintuitivos: cambiar una pantalla de notebook puede parecer simple pero si el tiempo de trabajo es alto y la competencia de precio es fuerte, el margen es bajo. Reparar una fuente de TV puede ser más rápido y rentable aunque el presupuesto sea menor. La IA calcula el margen real por tipo y sugiere en cuáles enfocarse.','La predicción de demanda por tipo de equipo permite anticipar épocas de alta demanda: los aires acondicionados fallan más en verano, los calefactores en invierno, los celulares antes del ciclo escolar. Saber esto permite dimensionar el equipo técnico y el stock de repuestos con anticipación.','El análisis de la tasa de resolución exitosa por técnico y por tipo de reparación detecta áreas de mejora técnica: si un técnico tiene 90% de resolución en TV pero 60% en celulares, claramente necesita capacitación o apoyo específico en ese tipo de equipo. La IA identifica el patrón y lo presenta con datos objetivos.'],skill:'Analítica de operaciones del taller — skill que calcula el margen real por tipo de reparación considerando tiempo de trabajo y costo de repuesto, detecta tendencias de demanda por tipo de equipo para planificación anticipada y genera el ranking objetivo de rentabilidad que permite al dueño tomar decisiones de especialización del taller.'} },
+    ]
+  },
+  govtech: {
+    modulos: [
+      { name:'Reclamos ciudadanos', desc:'Clasificación + asignación IA', ico:'📢', icoBg:'#E8F5EE',
+        tools:[{n:'Portal de reclamos',key:true},{n:'Clasificación automática',ia:true,key:true},{n:'Asignación por área',ia:true},{n:'Estimación de resolución',ia:true},{n:'Panel ciudadano público'}],
+        description:'Sistema de gestión de demandas ciudadanas para municipios y organismos públicos. El portal de reclamos permite al vecino registrar su queja o solicitud de forma digital, con número de seguimiento y actualizaciones de estado. Reemplaza el proceso de formulario en papel en ventanilla o la llamada telefónica, disponibilizando el servicio las 24 horas desde cualquier dispositivo.',
+        insight:{points:['La clasificación automática por IA es el diferencial operativo más importante: un reclamo que dice "hay agua en la calle de mi barrio" se clasifica automáticamente como "infraestructura / pluviales / posible obstrucción" y se asigna al área de obras sin intervención del personal de guardia. La velocidad de clasificación escala con el volumen sin necesidad de más personal.','La estimación de resolución por IA considera el tipo de reclamo, el área asignada y el historial de tiempos de resolución de casos similares para dar al ciudadano un plazo realista. "Tu reclamo de arreglo de vereda suele resolverse en 15 días hábiles. Te notificaremos cuando esté programado" es infinitamente mejor que el silencio administrativo habitual.','El panel ciudadano público permite al vecino seguir el estado de su reclamo sin llamar al municipio: abre la URL, ingresa su número de seguimiento y ve el estado actualizado, el área responsable y la fecha estimada. Reduce dramáticamente la carga telefónica del organismo.'],skill:'Clasificador y enrutador de demandas ciudadanas — skill que aprende del historial de reclamos del municipio para mejorar la clasificación automática por tipo e impacto, detecta reclamos que requieren atención urgente (riesgo para la seguridad pública) y prioriza su asignación, y calcula estimaciones de resolución realistas basadas en la capacidad operativa real de cada área.'} },
+      { name:'Turnos ciudadanos', desc:'Reserva online + predicción de demanda', ico:'📅', icoBg:'#FDF3E0',
+        tools:[{n:'Reserva online por dependencia',key:true},{n:'Predicción de demanda',ia:true},{n:'Redistribución de capacidad',ia:true}],
+        description:'Sistema de gestión de la demanda presencial del organismo. Permite al ciudadano reservar turno online por trámite y dependencia, eliminando las filas de madrugada y los reclamos por espera excesiva. El personal del organismo puede ver la agenda del día con anticipación y preparar la documentación necesaria para cada trámite.',
+        insight:{points:['La predicción de demanda por dependencia permite anticipar días de alta concurrencia: vencimientos de patentes, inicio de ciclo escolar para trámites educativos, fin de mes para trámites tributarios. Con esa proyección, el organismo puede reforzar la dotación de personal con anticipación, en lugar de improvisar cuando la sala de espera ya está desbordada.','La redistribución de capacidad entre dependencias actúa cuando una ventanilla tiene sobredemanda y otra tiene capacidad ociosa: la IA sugiere derivar los turnos nuevos o reasignar el personal para equilibrar la carga en tiempo real. Una gestión activa de recursos que los organismos públicos raramente hacen por falta de visibilidad.','El análisis de los trámites más demandados por período permite planificar campañas de comunicación: si en junio siempre hay pico de renovación de habilitaciones comerciales, el municipio puede comunicar con anticipación la apertura de turnos y evitar la saturación del primer día.'],skill:'Gestión predictiva de capacidad de atención ciudadana — skill que proyecta la demanda por dependencia y trámite anticipando picos, sugiere redistribución de capacidad entre ventanillas y detecta patrones de demanda cíclica para que el organismo planifique sus recursos con semanas de anticipación.'} },
+      { name:'Mapa de incidencias', desc:'Heatmap + zonas recurrentes IA', ico:'🗺️', icoBg:'#E8F0F8',
+        tools:[{n:'Heatmap geográfico',key:true},{n:'Zonas con reclamos recurrentes',ia:true},{n:'Filtros por categoría'}],
+        description:'Visualización geográfica de los reclamos ciudadanos sobre el mapa del municipio. Permite identificar zonas con alta concentración de problemas y detectar áreas geográficas que reciben reclamos recurrentes del mismo tipo. Es la herramienta que transforma los reclamos individuales en información colectiva para la toma de decisiones de política pública.',
+        insight:{points:['Las zonas con reclamos recurrentes del mismo tipo son la señal más valiosa del mapa: si en un radio de 3 cuadras hubo 12 reclamos de "bache" en 6 meses, no es casualidad — hay un problema estructural de pavimentación que reclamos individuales nunca evidencian pero el mapa sí. La IA detecta esos clusters y los eleva como prioridad de obra pública.','El filtro por tipo de reclamo y por período permite análisis temporales: ¿cuándo aparecen los problemas de pluviales? ¿Qué zonas tienen más reclamos de alumbrado nocturno? ¿Los reclamos de residuos aumentaron desde el cambio de circuito? El mapa responde esas preguntas visualmente.','La integración del mapa con las áreas de responsabilidad de cada concejal o sector permite generar reportes por zona política: qué problemas tiene cada barrio, cuánto tardó en resolverse, qué tipos de reclamos son más frecuentes. Información para la rendición de cuentas y la planificación presupuestaria.'],skill:'Análisis territorial de demandas ciudadanas — skill que identifica clusters de reclamos similares en zonas geográficas específicas para elevarlos como problemas de infraestructura estructural (no como casos aislados), detecta tendencias temporales por zona y genera reportes de priorización de obra pública basados en la densidad y recurrencia de reclamos.'} },
+      { name:'Notificaciones masivas', desc:'WA / Email / SMS segmentado', ico:'📣', icoBg:'#E8F5EE',
+        tools:[{n:'WA / Email / SMS segmentado'},{n:'Comunicados en lenguaje claro',ia:true},{n:'Segmentación por zona'}],
+        description:'Canal de comunicación masiva del organismo hacia los ciudadanos. Permite enviar notificaciones segmentadas por zona geográfica, tipo de padrón o perfil del ciudadano: un aviso de corte de agua solo a los vecinos del barrio afectado, un recordatorio de vencimiento de patente solo a los propietarios de vehículos. La segmentación precisa reduce el ruido y aumenta la relevancia.',
+        insight:{points:['Los comunicados en lenguaje claro generados por IA resuelven uno de los problemas más crónicos de la comunicación pública: el lenguaje técnico y burocrático que el ciudadano no entiende. La IA transforma "se informa que a partir del día XX del corriente mes se procederá a la habilitación del nuevo circuito de recolección domiciliaria" en "desde el lunes 15 de abril tu día de recolección de residuos cambia. Los martes y viernes en lugar de lunes y jueves".','La segmentación por zona permite comunicaciones de alta relevancia local: vecinos de un barrio específico, propietarios en una calle con obra programada, comerciantes de una zona con cambio de habilitación. El ciudadano recibe solo lo que le importa, no todo lo que hace el municipio.','El análisis del engagement de las comunicaciones (apertura, respuesta, consultas generadas) permite mejorar la estrategia: qué horarios tienen mayor apertura de WA, qué tipo de mensajes generan más consultas de seguimiento, qué canales prefiere cada segmento etario.'],skill:'Comunicador público digital — skill que genera comunicados municipales en lenguaje claro y accesible adaptados al tipo de ciudadano receptor, optimiza el canal y el horario de envío según el perfil demográfico y el historial de engagement, y mide el impacto de cada comunicación para mejorar la estrategia.'} },
+      { name:'Reportes de gestión', desc:'KPIs + informe narrativo mensual IA', ico:'📄', icoBg:'#FAE8E8',
+        tools:[{n:'KPIs por área y período'},{n:'Informe narrativo mensual',ia:true,key:true},{n:'Exportación a PDF'}],
+        description:'Módulo de rendición de cuentas y análisis de gestión del organismo. Los KPIs por área y período muestran la evolución de los indicadores clave: reclamos recibidos, tiempo promedio de resolución, tasa de resolución, satisfacción ciudadana. El informe narrativo mensual sintetiza toda esa información en un documento legible para autoridades y ciudadanos.',
+        insight:{points:['El informe narrativo mensual generado por IA transforma tablas de datos en un relato de la gestión: "En octubre se recibieron 342 reclamos, 12% más que en septiembre. El área de infraestructura resolvió el 87% en plazo, mientras que el área de tránsito tuvo demoras en el 23% de los casos por falta de personal. Los reclamos de zona sur se redujeron 40% tras la finalización de la obra de pluviales". Un informe que cualquier funcionario puede presentar sin necesidad de interpretar datos.','El análisis de tendencias de resolución por área detecta problemas sistémicos: si el tiempo de resolución de un área lleva 3 meses aumentando, hay algo que está cambiando (más demanda, menos recursos, cambio de proceso) que requiere atención de la dirección antes de que se convierta en crisis de servicio.','Los KPIs de satisfacción ciudadana (basados en la calificación del servicio al cierre de cada reclamo) permiten identificar áreas con percepción positiva y negativa, más allá del tiempo de resolución formal. Un reclamo resuelto en plazo pero con mala comunicación puede tener baja calificación.'],skill:'Analista de gestión pública — skill que sintetiza los indicadores de desempeño del organismo en informes narrativos comprensibles para funcionarios y ciudadanos, detecta tendencias preocupantes en la calidad del servicio antes de que escalen y genera recomendaciones de mejora basadas en el análisis comparado de áreas y períodos.'} },
+    ]
+  },
+};
+
+let expandedAll = false;
+let activeFilter = 'all';
+let searchTerm = '';
+let activeSection = 'overview';
+
+function buildAll() {
+  let totalM = 0, totalT = 0, totalI = 0;
+  Object.values(DATA).forEach(rubro => {
+    totalM += rubro.modulos.length;
+    rubro.modulos.forEach(m => {
+      totalT += m.tools.length;
+      totalI += m.tools.filter(t => t.ia).length;
+    });
+  });
+  document.getElementById('cnt-m').textContent = totalM;
+  document.getElementById('cnt-t').textContent = totalT;
+  document.getElementById('cnt-i').textContent = totalI;
+
+  Object.entries(DATA).forEach(([key, rubro]) => {
+    const el = document.getElementById('ml-' + key);
+    if (!el) return;
+    el.innerHTML = rubro.modulos.map((m, mi) => buildModulo(m, key, mi)).join('');
+  });
+}
+
+function buildModulo(m, rubroKey, idx) {
+  const badges = [];
+  if (rubroKey === 'universal') badges.push('<span class="badge badge-univ">universal</span>');
+  if (m.diff) badges.push('<span class="badge badge-star">✦ diferencial</span>');
+  if (rubroKey === 'tecnico' && idx === 0) badges.push('<span class="badge badge-new">nuevo rubro</span>');
+
+  const toolsHtml = m.tools.map(t => {
+    let cls = 'chip';
+    if (t.diff) cls += ' diff';
+    else if (t.ia) cls += ' ia';
+    else if (t.key) cls += ' key';
+    const prefix = t.ia ? '✦ ' : '';
+    return `<span class="${cls}">${prefix}${t.n}</span>`;
+  }).join('');
+
+  let extra = '';
+  if (m.flow) {
+    const stepsHtml = m.flow.map(f => {
+      const cls = f.s === 'ia' ? 'fnum-ia' : f.s === 'key' ? 'fnum-key' : 'fnum-std';
+      const sym = f.s === 'ia' ? '✦' : f.s === 'key' ? '→' : '·';
+      return `<div class="flow-step"><span class="fnum ${cls}">${sym}</span><span>${f.t}</span></div>`;
+    }).join('');
+    extra += `<div class="flow-block"><div class="flow-title">Flujo de trabajo</div>${stepsHtml}</div>`;
+  }
+  if (m.preview) {
+    extra += `
+    <div class="mock-preview">
+      <div class="mock-bar">
+        <div class="mock-dots">
+          <div class="mock-dot" style="background:#f87171"></div>
+          <div class="mock-dot" style="background:#fbbf24"></div>
+          <div class="mock-dot" style="background:#4ade80"></div>
+        </div>
+        <span class="mock-url">reparaciones.cliente.com/ot/A-1042</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-status-row">
+          <div class="mock-status-dot" style="background:#3B8BD4"></div>
+          <div>
+            <div class="mock-label">En reparación</div>
+            <div class="mock-sub">TV Samsung 55" · OT #A-1042 · Ingresó 14 mar</div>
+          </div>
+        </div>
+        <div class="progress-steps">
+          <span>Ingreso</span><span>Diagnóstico</span><span class="act">Reparando</span><span>Listo</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:65%"></div></div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text3)">Técnico: Martín · Fecha estimada: <strong style="color:var(--text2)">18 mar</strong></div>
+      </div>
+    </div>
+    <div class="info-note">El cliente escribe por WA "¿cómo está mi tele?" y el bot responde con el estado real en tiempo real, sin intervención del técnico.</div>`;
+  }
+
+  return `
+  <div class="modulo-card" data-rubro="${rubroKey}" data-ia="${m.tools.some(t=>t.ia)}" data-diff="${!!m.diff}">
+    <div class="modulo-header" onclick="toggleMod(this)">
+      <div class="mod-ico" style="background:${m.icoBg}">${m.ico}</div>
+      <div class="mod-info">
+        <div class="mod-name">${m.name}</div>
+        <div class="mod-desc">${m.desc}</div>
+      </div>
+      <div class="mod-badges">${badges.join('')}</div>
+      <svg class="chevron-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l4 4-4 4"/></svg>
+    </div>
+    <div class="modulo-body">
+      <div class="tools-section">
+        <div class="tools-label">Herramientas</div>
+        <div class="tools-wrap">${toolsHtml}</div>
+      </div>
+      ${extra}
+      ${m.description ? `<div class="mod-description"><div class="mod-description-label">Función del módulo</div><div class="mod-description-text">${m.description}</div></div>` : ''}
+      ${m.insight ? `<div class="ia-insight"><div class="ia-insight-header"><span class="ia-bullet">✦</span><span class="ia-insight-label">IA &amp; Skills — cómo se complementa en este módulo</span></div><div class="ia-insight-body">${m.insight.points.map(p=>`<div class="ia-insight-item"><span class="ia-bullet">→</span><span>${p}</span></div>`).join('')}${m.insight.skill ? `<div class="ia-insight-skill">Skill propuesta: ${m.insight.skill}</div>` : ''}</div></div>` : ''}
+    </div>
+  </div>`;
+}
+
+function toggleMod(header) {
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+}
+
+function showSection(id, navEl) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('s-' + id);
+  if (sec) sec.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  activeSection = id;
+  window.scrollTo(0,0);
+  applyFilters();
+}
+
+function toggleAll() {
+  expandedAll = !expandedAll;
+  document.querySelectorAll('.modulo-header').forEach(h => {
+    h.classList.toggle('open', expandedAll);
+    h.nextElementSibling.classList.toggle('open', expandedAll);
+  });
+  document.getElementById('expand-btn').innerHTML = expandedAll
+    ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Colapsar todo'
+    : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Expandir todo';
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function handleSearch() {
+  searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+  applyFilters();
+}
+
+function applyFilters() {
+  const cards = document.querySelectorAll('.modulo-card');
+  let anyVisible = false;
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    const hasIa = card.dataset.ia === 'true';
+    const hasDiff = card.dataset.diff === 'true';
+    let show = true;
+    if (activeFilter === 'universal') show = card.dataset.rubro === 'universal';
+    else if (activeFilter === 'ia') show = hasIa;
+    else if (activeFilter === 'diferencial') show = hasDiff;
+    if (searchTerm && !text.includes(searchTerm)) show = false;
+    card.style.display = show ? '' : 'none';
+    if (show && searchTerm) {
+      card.querySelector('.modulo-header').classList.add('open');
+      card.querySelector('.modulo-body').classList.add('open');
+    }
+    if (show) anyVisible = true;
+  });
+  document.getElementById('no-results').classList.toggle('visible', !anyVisible && activeSection !== 'overview' && searchTerm !== '');
+}
+
+buildAll();
+</script>
+</body>
+</html>

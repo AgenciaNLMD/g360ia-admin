@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Maestro — Gestión 360 iA</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F2EE;--white:#FFFFFF;--ink:#1A1A18;--ink2:#3D3D38;--ink3:#7A7A72;--green:#1A7A4A;--green-l:#E8F5EE;--green-d:#0F5030;--gold:#B08A55;--gold-l:#F7F0E6;--slate:#506886;--slate-l:#EDF1F6;--red:#C0392B;--red-l:#FDF2F2;--amber:#D4860A;--amber-l:#FDF6E8;--purple:#6B48C8;--purple-l:#F0EEFF;--border:#E0DDD6;--sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--sh-md:0 4px 24px rgba(0,0,0,.10);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.7;}
+.layout{display:grid;grid-template-columns:272px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{background:var(--ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.sb-head{padding:1.75rem 1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.sb-logo-mark{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb-brand{font-family:'Fraunces',serif;font-size:.95rem;font-weight:600;color:#fff;line-height:1.2;}
+.sb-brand-sub{font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+.sb-version{display:inline-flex;align-items:center;gap:5px;background:rgba(176,138,85,.15);border:1px solid rgba(176,138,85,.25);border-radius:20px;padding:3px 10px;font-size:.62rem;color:#C8A472;font-family:'DM Mono',monospace;}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
+.sb-nav{flex:1;overflow-y:auto;padding:.75rem 0;scrollbar-width:none;}
+.sb-nav::-webkit-scrollbar{display:none;}
+.sb-section-label{font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:.55rem 1.5rem .25rem;font-family:'DM Mono',monospace;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:6px 1.5rem;cursor:pointer;font-size:.78rem;color:rgba(255,255,255,.5);transition:all .12s;border-left:2px solid transparent;text-decoration:none;}
+.sb-item:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.04);}
+.sb-item.active{color:#fff;border-left-color:var(--green);background:rgba(26,122,74,.12);}
+.sb-num{font-size:.58rem;font-family:'DM Mono',monospace;color:rgba(255,255,255,.2);width:16px;flex-shrink:0;}
+.sb-foot{padding:.85rem 1.5rem;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;font-size:.62rem;color:rgba(255,255,255,.18);font-family:'DM Mono',monospace;}
+
+/* MAIN */
+.main{min-width:0;}
+.hero{background:var(--ink);padding:3.5rem 3.5rem 2.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(26,122,74,.15) 0%,transparent 70%);pointer-events:none;}
+.hero-eyebrow{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--green);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:8px;}
+.hero-eyebrow::before{content:'';display:inline-block;width:20px;height:1px;background:var(--green);}
+.hero-title{font-family:'Fraunces',serif;font-size:2.8rem;font-weight:600;color:#fff;line-height:1.1;margin-bottom:.7rem;letter-spacing:-.02em;}
+.hero-title span{color:var(--gold);}
+.hero-sub{font-size:.95rem;color:rgba(255,255,255,.45);max-width:560px;line-height:1.6;margin-bottom:1.75rem;}
+.hero-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.hero-tag{font-size:.68rem;font-family:'DM Mono',monospace;padding:3px 11px;border-radius:20px;border:1px solid;}
+.tag-green{background:rgba(26,122,74,.15);border-color:rgba(26,122,74,.3);color:#6EC99A;}
+.tag-gold{background:rgba(176,138,85,.12);border-color:rgba(176,138,85,.25);color:#C8A472;}
+.tag-slate{background:rgba(80,104,134,.15);border-color:rgba(80,104,134,.3);color:#A0B8D0;}
+
+.content{padding:2.75rem 3.5rem;max-width:880px;}
+.section{margin-bottom:3.5rem;scroll-margin-top:2rem;}
+.section-header{display:flex;align-items:baseline;gap:14px;margin-bottom:1.4rem;padding-bottom:.9rem;border-bottom:1px solid var(--border);}
+.section-num{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--green);flex-shrink:0;}
+.section-title{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:600;color:var(--ink);letter-spacing:-.02em;line-height:1.2;}
+.subsection{margin-bottom:1.75rem;}
+.subsection-title{font-size:.86rem;font-weight:600;color:var(--ink);margin-bottom:.7rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.subsection-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--green);border-radius:2px;flex-shrink:0;}
+p{color:var(--ink2);font-size:.86rem;line-height:1.75;margin-bottom:.7rem;}
+
+/* CALLOUTS */
+.callout{border-radius:9px;padding:.9rem 1.1rem;margin:1rem 0;display:flex;gap:.7rem;align-items:flex-start;font-size:.81rem;line-height:1.6;}
+.callout-icon{font-size:.95rem;flex-shrink:0;margin-top:1px;}
+.callout-body{flex:1;}
+.callout-label{font-weight:600;margin-bottom:2px;}
+.callout-green{background:var(--green-l);border-left:3px solid var(--green);color:#1A4A30;}
+.callout-gold{background:var(--gold-l);border-left:3px solid var(--gold);color:#6A4A1A;}
+.callout-red{background:var(--red-l);border-left:3px solid var(--red);color:#7A1A1A;}
+.callout-slate{background:var(--slate-l);border-left:3px solid var(--slate);color:#1A3A5C;}
+.callout-amber{background:var(--amber-l);border-left:3px solid var(--amber);color:#7A4A00;}
+.callout-purple{background:var(--purple-l);border-left:3px solid var(--purple);color:#3A1A8A;}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;margin:1rem 0;border-radius:9px;border:1px solid var(--border);box-shadow:var(--sh);}
+table{width:100%;border-collapse:collapse;font-size:.8rem;background:var(--white);}
+thead tr{background:var(--ink);}
+thead th{padding:.6rem 1rem;text-align:left;font-size:.6rem;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55);}
+tbody tr:nth-child(even){background:#FAFAF8;}
+tbody tr:hover{background:var(--green-l);}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border);color:var(--ink2);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td:first-child{font-weight:600;color:var(--ink);}
+td code,p code{font-family:'DM Mono',monospace;font-size:.72rem;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;color:var(--green-d);}
+
+/* BADGES */
+.badge{display:inline-block;font-size:.58rem;font-weight:600;padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.04em;}
+.badge-green{background:var(--green-l);color:var(--green-d);}
+.badge-gold{background:var(--gold-l);color:#7A5800;}
+.badge-red{background:var(--red-l);color:var(--red);}
+.badge-slate{background:var(--slate-l);color:var(--slate);}
+.badge-amber{background:var(--amber-l);color:var(--amber);}
+.badge-gray{background:#F3F4F2;color:#5A5A52;}
+.badge-purple{background:var(--purple-l);color:var(--purple);}
+
+/* STATUS */
+.status{display:inline-flex;align-items:center;gap:4px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace;}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;}
+.status-ok{background:var(--green-l);color:var(--green-d);}
+.status-ok::before{background:var(--green);}
+.status-build{background:var(--amber-l);color:var(--amber);}
+.status-build::before{background:var(--amber);}
+.status-off{background:#F3F4F2;color:#5A5A52;}
+.status-off::before{background:#B0B0A8;}
+.status-delete{background:var(--red-l);color:var(--red);}
+.status-delete::before{background:var(--red);}
+
+/* BULLETS */
+ul.bullets{list-style:none;padding:0;margin:.4rem 0 .9rem;}
+ul.bullets li{font-size:.82rem;color:var(--ink2);padding:3px 0 3px 1.1rem;position:relative;line-height:1.6;}
+ul.bullets li::before{content:'';position:absolute;left:0;top:11px;width:5px;height:5px;border-radius:50%;background:var(--green);}
+
+/* APPS GRID */
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:1rem 0;}
+.app-card{background:var(--white);border:1px solid var(--border);border-radius:9px;padding:.9rem;box-shadow:var(--sh);transition:box-shadow .15s,transform .15s;}
+.app-card:hover{box-shadow:var(--sh-md);transform:translateY(-1px);}
+.app-card-name{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--green-d);font-weight:600;margin-bottom:3px;}
+.app-card-rubro{font-size:.76rem;color:var(--ink2);}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:2rem;margin:1rem 0;}
+.timeline::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--border);border-radius:1px;}
+.tl-item{position:relative;margin-bottom:1.4rem;}
+.tl-item::before{content:'';position:absolute;left:-1.65rem;top:5px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--green);}
+.tl-fase{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.tl-title{font-size:.86rem;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.tl-desc{font-size:.79rem;color:var(--ink3);line-height:1.6;}
+
+/* FOLDER TREE */
+.tree{background:#161614;border-radius:10px;padding:1.4rem 1.6rem;margin:1rem 0;font-family:'DM Mono',monospace;font-size:.75rem;line-height:2;overflow-x:auto;}
+.tree-title{color:rgba(255,255,255,.25);font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.08);}
+.tree .dir{color:#6EC99A;}
+.tree .file{color:rgba(255,255,255,.6);}
+.tree .cmt{color:rgba(255,255,255,.22);font-style:italic;}
+.tree .warn{color:#FF8B8B;}
+.tree .ti{color:rgba(255,255,255,.18);user-select:none;}
+
+/* PILAR CARDS */
+.pilares-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px;margin:1rem 0;}
+.pilar-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1.1rem;box-shadow:var(--sh);}
+.pilar-num{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--green);margin-bottom:4px;}
+.pilar-title{font-size:.9rem;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.pilar-desc{font-size:.78rem;color:var(--ink3);line-height:1.6;}
+.pilar-rule{margin-top:8px;padding:6px 10px;background:var(--green-l);border-radius:6px;font-size:.72rem;color:var(--green-d);font-family:'DM Mono',monospace;}
+
+/* DB */
+.db-group{margin-bottom:2rem;}
+.db-group-header{display:flex;align-items:center;gap:10px;background:var(--ink);color:rgba(255,255,255,.8);padding:.65rem 1rem;border-radius:8px 8px 0 0;font-family:'DM Mono',monospace;font-size:.72rem;}
+.db-icon{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.62rem;flex-shrink:0;color:#fff;}
+.dbi-core{background:var(--amber);}
+.dbi-tenant{background:var(--green);}
+.dbi-module{background:var(--purple);}
+.db-group .table-wrap{margin:0;border-radius:0 0 9px 9px;border-top:none;}
+
+/* TOKENS */
+.tokens-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:1rem 0;}
+.token-card{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--sh);}
+.token-swatch{height:34px;}
+.token-info{padding:6px 9px;}
+.token-name{font-size:.68rem;font-weight:600;color:var(--ink);}
+.token-val{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--ink3);}
+
+/* HAMBURGER */
+.sb-toggle{display:none;position:fixed;top:14px;left:14px;z-index:200;width:36px;height:36px;background:var(--green);border:none;border-radius:8px;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+.sb-toggle span{display:block;width:16px;height:2px;background:#fff;border-radius:1px;transition:all .2s;}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+
+@media print{.sidebar{display:none;}.layout{display:block;}.hero{background:#1A1A18!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.content{padding:2rem;max-width:100%;}}
+
+@media(max-width:900px){
+  .content{padding:2rem 2rem;}
+  .hero{padding:3rem 2rem 2rem;}
+}
+
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:-280px;top:0;height:100vh;z-index:100;transition:left .25s ease;width:272px;}
+  .sidebar.open{left:0;}
+  .sb-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .sb-overlay.open{opacity:1;pointer-events:all;}
+  .sb-toggle{display:flex;}
+  .hero{padding:4.5rem 1.5rem 2rem;}
+  .hero-title{font-size:2rem;}
+  .hero-sub{font-size:.85rem;}
+  .content{padding:1.5rem 1.25rem;}
+  .section-title{font-size:1.3rem;}
+  .pilares-grid{grid-template-columns:1fr;}
+  .apps-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .tokens-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+  .tree{font-size:.68rem;padding:1rem 1rem;line-height:1.8;}
+  table{font-size:.75rem;}
+  thead th{font-size:.55rem;padding:.5rem .7rem;}
+  td{padding:.5rem .7rem;}
+}
+</style>
+</head>
+<body>
+<button class="sb-toggle" id="sbToggle" aria-label="Abrir menú">
+  <span></span><span></span><span></span>
+</button>
+<div class="sb-overlay" id="sbOverlay"></div>
+<div class="layout">
+
+<aside class="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="sb-logo-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="17" height="14">
+          <rect x="0" y="10" width="6" height="6" rx="1.5" fill="white" opacity=".35"/>
+          <rect x="0" y="5" width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+          <rect x="0" y="0" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="8" y="0" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="8" y="5" width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+          <rect x="16" y="0" width="6" height="6" rx="1.5" fill="#B08A55"/>
+        </svg>
+      </div>
+      <div><div class="sb-brand">Gestión 360 iA</div><div class="sb-brand-sub">Plan Maestro</div></div>
+    </div>
+    <div class="sb-version"><div class="sb-dot"></div> v1.0 — Marzo 2026</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Producto</div>
+    <a class="sb-item active" href="#vision"><span class="sb-num">01</span>Visión y objetivo</a>
+    <a class="sb-item" href="#estructura"><span class="sb-num">02</span>Estructura del producto</a>
+    <a class="sb-item" href="#flujo"><span class="sb-num">03</span>Flujo del tenant</a>
+    <a class="sb-item" href="#modulos"><span class="sb-num">04</span>Módulos</a>
+    <a class="sb-item" href="#planes"><span class="sb-num">05</span>Planes</a>
+    <a class="sb-item" href="#ia"><span class="sb-num">06</span>Inteligencia artificial</a>
+    <div class="sb-section-label">Técnico</div>
+    <a class="sb-item" href="#pilares"><span class="sb-num">07</span>6 pilares fundamentales</a>
+    <a class="sb-item" href="#arquitectura"><span class="sb-num">08</span>Arquitectura de repos</a>
+    <a class="sb-item" href="#infra"><span class="sb-num">09</span>Infraestructura</a>
+    <a class="sb-item" href="#auth"><span class="sb-num">10</span>Autenticación y roles</a>
+    <a class="sb-item" href="#db"><span class="sb-num">11</span>Base de datos y tablas</a>
+    <div class="sb-section-label">Operativo</div>
+    <a class="sb-item" href="#estado"><span class="sb-num">12</span>Estado actual</a>
+    <a class="sb-item" href="#roadmap"><span class="sb-num">13</span>Hoja de ruta</a>
+    <a class="sb-item" href="#principios"><span class="sb-num">14</span>Principios de trabajo</a>
+    <a class="sb-item" href="#design"><span class="sb-num">15</span>Design system</a>
+  </nav>
+  <div class="sb-foot">Confidencial — Agencia NLMD © 2026</div>
+</aside>
+
+<main class="main">
+<div class="hero">
+  <div class="hero-eyebrow">Documento de referencia</div>
+  <h1 class="hero-title">Gestión 360 <span>iA</span></h1>
+  <p class="hero-sub">Plan Maestro del Producto — fuente de verdad unificada para todo el equipo. Toda conversación, decisión técnica y desarrollo parte de este documento.</p>
+  <div class="hero-tags">
+    <span class="hero-tag tag-green">SaaS multi-tenant</span>
+    <span class="hero-tag tag-green">IA transversal</span>
+    <span class="hero-tag tag-gold">Apps por rubro</span>
+    <span class="hero-tag tag-gold">DB por tenant</span>
+    <span class="hero-tag tag-slate">Next.js + MySQL</span>
+    <span class="hero-tag tag-slate">Easypanel VPS</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- 01 -->
+<section class="section" id="vision">
+  <div class="section-header"><span class="section-num">01</span><h2 class="section-title">Visión y objetivo</h2></div>
+  <p>Gestión 360 iA es una plataforma SaaS multi-tenant modular con inteligencia artificial integrada como capa transversal, orientada a pymes argentinas de distintos rubros, con proyección regional.</p>
+  <p>El objetivo a 2 años es posicionarse como una de las consultoras e integraciones IA más importantes de Argentina.</p>
+  <div class="callout callout-green"><span class="callout-icon">◆</span><div class="callout-body"><div class="callout-label">Modelo de negocio</div>El cliente descarga la app de su rubro, completa el onboarding, y obtiene acceso automático según el plan adquirido. Sin aprobación manual. Escala a miles de usuarios simultáneos.</div></div>
+  <div class="callout callout-gold"><span class="callout-icon">✦</span><div class="callout-body"><div class="callout-label">Diferenciador principal — Skills IA</div>Sugerencias proactivas y reactivas generadas por IA específicas para cada rubro. No existe equivalente en Argentina ni LATAM. Es el principal driver de valor y retención.</div></div>
+</section>
+
+<!-- 02 -->
+<section class="section" id="estructura">
+  <div class="section-header"><span class="section-num">02</span><h2 class="section-title">Estructura del producto</h2></div>
+  <div class="subsection">
+    <div class="subsection-title">Panel de administración — uso interno <span class="badge badge-green">en producción</span></div>
+    <p><code>admin.g360ia.com.ar</code> · Repo: <code>AgenciaNLMD/g360ia-admin</code></p>
+    <ul class="bullets">
+      <li>Gestión de tenants, planes, rubros y módulos habilitados</li>
+      <li>CRM interno: leads, funnel de ventas, conversaciones WhatsApp</li>
+      <li>Soporte con tickets y mensajería interna</li>
+      <li>Equipo: áreas comercial, marketing, soporte, administración</li>
+      <li>Integraciones: WhatsApp (Evolution API), Google OAuth, Gmail, Calendar</li>
+      <li>Auditoría de accesos y sesiones por usuario</li>
+      <li>Maia (IA interna): alertas sobre tenants, sugerencias comerciales</li>
+      <li>Scripts de migración de módulos hacia las DBs de tenants</li>
+    </ul>
+    <div class="callout callout-amber"><span class="callout-icon">⚠</span><div class="callout-body"><div class="callout-label">Importante</div>El admin NO aprueba usuarios de las apps — imposible a escala. Es la fuente del catálogo de módulos, configuración de planes y métricas del negocio.</div></div>
+  </div>
+  <div class="subsection">
+    <div class="subsection-title">Portal / App del tenant — por rubro <span class="badge badge-amber">a construir</span></div>
+    <p><code>app.g360ia.com.ar</code> · Repo: <code>AgenciaNLMD/g360ia-portal</code></p>
+    <p>Una app por rubro. Cada una con identidad visual propia, pero todas comparten el mismo backend, la misma DB core y el mismo panel admin.</p>
+    <div class="apps-grid">
+      <div class="app-card"><div class="app-card-name">g360ia-prof</div><div class="app-card-rubro">Contadores, abogados, profesionales</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-medical</div><div class="app-card-rubro">Consultorios, clínicas, spas</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-hotel</div><div class="app-card-rubro">Hoteles, cabañas, alojamientos</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-events</div><div class="app-card-rubro">Salones de eventos, catering</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-real</div><div class="app-card-rubro">Inmobiliarias</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-resto</div><div class="app-card-rubro">Restaurantes, locales de comida</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-tech</div><div class="app-card-rubro">Servicio técnico, reparaciones</div></div>
+      <div class="app-card"><div class="app-card-name">g360ia-gov</div><div class="app-card-rubro">GovTech, municipios</div></div>
+    </div>
+  </div>
+  <div class="subsection">
+    <div class="subsection-title">App móvil</div>
+    <ul class="bullets">
+      <li>PWA desde el día 1 — instalable, offline básico, notificaciones push</li>
+      <li>Evolución a app nativa React Native en fase posterior</li>
+      <li>Una app por rubro en la tienda (App Store / Play Store)</li>
+      <li>Los módulos se actualizan desde el admin sin que el usuario lo vea</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="section" id="flujo">
+  <div class="section-header"><span class="section-num">03</span><h2 class="section-title">Flujo del tenant</h2></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Sistema</th></tr></thead>
+    <tbody>
+      <tr><td>1. Descarga</td><td>Usuario descarga la app de su rubro o accede por web</td><td>App Store / Play Store / PWA</td></tr>
+      <tr><td>2. Login</td><td>Se autentica con Google</td><td>NextAuth del portal — independiente del admin</td></tr>
+      <tr><td>3. Detección</td><td>¿El email existe como tenant? Si sí → dashboard. Si no → onboarding</td><td>Consulta <code>g360ia.tenants</code></td></tr>
+      <tr><td>4. Onboarding</td><td>Completa: nombre del negocio, logo, teléfono, rubro, plan</td><td><code>POST /api/portal/onboarding</code></td></tr>
+      <tr><td>5. Provisioning</td><td>Se crea automáticamente la DB del tenant con tablas base</td><td><code>lib/tenant-provisioner.js</code></td></tr>
+      <tr><td>6. Dashboard</td><td>Accede a su portal con módulos habilitados según rubro y plan</td><td>Portal Next.js</td></tr>
+      <tr><td>7. Actualizaciones</td><td>Admin publica módulo nuevo → se propaga automáticamente</td><td><code>scripts/migrar-tenants.js</code></td></tr>
+      <tr><td>8. Upgrade</td><td>Cambia de plan → se desbloquean módulos automáticamente</td><td>Pago automático (a integrar)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout callout-green"><span class="callout-icon">◆</span><div class="callout-body"><div class="callout-label">Automatización total</div>No hay intervención manual en el flujo del tenant. Se registra, paga, usa. El admin ve las métricas pero no aprueba nada.</div></div>
+</section>
+
+<!-- 04 -->
+<section class="section" id="modulos">
+  <div class="section-header"><span class="section-num">04</span><h2 class="section-title">Módulos del sistema</h2></div>
+  <div class="subsection">
+    <div class="subsection-title">Módulos universales — todos los rubros</div>
+    <ul class="bullets">
+      <li>Dashboard con estadísticas e IA analítica</li>
+      <li>CRM básico — gestión de clientes y contactos</li>
+      <li>WhatsApp con IA — bot, conversaciones, respuestas sugeridas (Evolution API)</li>
+      <li>Agenda / Turnos inteligentes con predicción de demanda</li>
+      <li>Facturación y presupuestos con generación IA</li>
+      <li>Notificaciones y comunicaciones automatizadas</li>
+      <li>Estadísticas avanzadas con lenguaje natural</li>
+      <li>Mapas, geolocalización y seguimiento en tiempo real</li>
+    </ul>
+  </div>
+  <div class="subsection">
+    <div class="subsection-title">Módulos por rubro</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Rubro</th><th>Módulos específicos</th></tr></thead>
+      <tbody>
+        <tr><td>Profesionales</td><td>Expedientes, documentos, agenda, recordatorios de vencimientos, facturación electrónica</td></tr>
+        <tr><td>Salud</td><td>Turnos, historia clínica básica, recordatorios automáticos, stats de ocupación</td></tr>
+        <tr><td>Hotelería</td><td>Reservas, habitaciones, check-in/out, mapa de ocupación</td></tr>
+        <tr><td>Eventos</td><td>Configurar salón, proveedores, galería, presupuestos IA</td></tr>
+        <tr><td>Inmobiliaria</td><td>Propiedades con mapa, agenda de visitas, valuación IA, documentos</td></tr>
+        <tr><td>Restaurante</td><td>Menú digital, pedidos, reservas, caja, stats de ventas</td></tr>
+        <tr><td>Servicio técnico</td><td>Órdenes de trabajo, repuestos, tracking cliente, proveedores</td></tr>
+        <tr><td>GovTech</td><td>Reclamos con clasificación IA, turnos ciudadanos, panel público, mapa de incidencias</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="subsection">
+    <div class="subsection-title">Skills IA — sistema de niveles</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nivel</th><th>Descripción</th><th>Plan</th></tr></thead>
+      <tbody>
+        <tr><td>Nivel 1</td><td>Sugerencias básicas con pocos datos. 1/día como teaser de conversión</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td>Nivel 2</td><td>Sugerencias con datos históricos del negocio</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td>Nivel 3</td><td>Sugerencias reactivas en tiempo real + asistente completo</td><td><span class="badge badge-gold">Plan IA</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="section" id="planes">
+  <div class="section-header"><span class="section-num">05</span><h2 class="section-title">Planes y monetización</h2></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Plan</th><th>Incluye</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Starter</td><td>Módulos básicos limitados. 1 sugerencia IA/día. Sin integraciones completas</td><td><span class="badge badge-green">activo</span></td></tr>
+      <tr><td>Pro</td><td>Módulos completos del rubro. WhatsApp activo. Estadísticas avanzadas. Skills IA Nivel 2</td><td><span class="badge badge-amber">a implementar</span></td></tr>
+      <tr><td>Plan IA</td><td>Todo Pro + Skills IA completas + sugerencias reactivas + asistente IA avanzado</td><td><span class="badge badge-amber">a implementar</span></td></tr>
+      <tr><td>Enterprise</td><td>Multi-cuenta. White label. Módulos custom. Consultoría. API pública</td><td><span class="badge badge-gray">futuro</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>Suscripción mensual en pesos argentinos. Canales de pago a definir: App Store, Play Store, MercadoPago. El acceso se activa automáticamente — sin intervención manual.</p>
+</section>
+
+<!-- 06 -->
+<section class="section" id="ia">
+  <div class="section-header"><span class="section-num">06</span><h2 class="section-title">Inteligencia artificial</h2></div>
+  <p>La IA no es un módulo separado. Es una capa transversal en todo el sistema. <strong>Maia</strong> es el nombre del asistente IA — presente tanto en el admin como en el portal de cada tenant.</p>
+  <ul class="bullets">
+    <li>Asistente IA por tenant — responde sobre el negocio en lenguaje natural</li>
+    <li>Generación de presupuestos, respuestas, descripciones y contenido</li>
+    <li>Resumen automático de conversaciones de WhatsApp</li>
+    <li>Scoring de leads y detección de clientes en riesgo (admin)</li>
+    <li>Predicción de demanda en agenda y turnos</li>
+    <li>Análisis de estadísticas en lenguaje natural</li>
+    <li>Clasificación y priorización automática de reclamos (GovTech)</li>
+    <li>Bot de WhatsApp con memoria de cliente y contexto real</li>
+  </ul>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Componente</th><th>Tecnología</th></tr></thead>
+    <tbody>
+      <tr><td>Modelo principal</td><td><code>claude-sonnet-4-6</code> — Claude API (Anthropic)</td></tr>
+      <tr><td>Fallback</td><td>OpenAI GPT-4o</td></tr>
+      <tr><td>Orquestación de flujos</td><td>n8n</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 07 -->
+<section class="section" id="pilares">
+  <div class="section-header"><span class="section-num">07</span><h2 class="section-title">6 pilares fundamentales</h2></div>
+  <p>Antes de escribir una línea de código en cualquier app nueva, estos 6 pilares deben estar definidos y resueltos. Son no negociables.</p>
+  <div class="pilares-grid">
+    <div class="pilar-card"><div class="pilar-num">Pilar 01</div><div class="pilar-title">Arquitectura de carpetas</div><div class="pilar-desc">Cómo está organizado el código. Qué va en qué carpeta, dónde viven las rutas, los componentes y la lógica de negocio. Define si el proyecto es mantenible a escala.</div><div class="pilar-rule">Ver sección 08 →</div></div>
+    <div class="pilar-card"><div class="pilar-num">Pilar 02</div><div class="pilar-title">Autenticación y sesiones</div><div class="pilar-desc">Quién puede acceder y cómo se gestiona la sesión. NextAuth independiente por app. JWT en httpOnly cookies. Cada app su propio secret — nunca compartido.</div><div class="pilar-rule">Ver sección 10 →</div></div>
+    <div class="pilar-card"><div class="pilar-num">Pilar 03</div><div class="pilar-title">Autorización y roles (RBAC)</div><div class="pilar-desc">Auth dice "sos Pablo". RBAC dice "Pablo puede ver esto pero no aquello". Middleware en cada ruta. Roles diferenciados por app.</div><div class="pilar-rule">middleware.js + permisos_modulo</div></div>
+    <div class="pilar-card"><div class="pilar-num">Pilar 04</div><div class="pilar-title">Aislamiento multi-tenant</div><div class="pilar-desc">Ningún tenant puede ver datos de otro. Una DB por tenant. El dbName siempre viene del token de sesión — nunca del body o query string.</div><div class="pilar-rule">Ver sección 11 →</div></div>
+    <div class="pilar-card"><div class="pilar-num">Pilar 05</div><div class="pilar-title">Gestión de secretos</div><div class="pilar-desc">API keys, passwords, tokens. Nunca en el código ni en el repo. Siempre en variables de entorno del VPS en Easypanel. El .env nunca se commitea.</div><div class="pilar-rule">Easypanel → Entorno</div></div>
+    <div class="pilar-card"><div class="pilar-num">Pilar 06</div><div class="pilar-title">Observabilidad</div><div class="pilar-desc">Logs, auditoría, monitoreo. Saber qué pasó, cuándo y quién lo hizo. Winston para logs de app, tabla sesiones_log en DB, health checks en Easypanel.</div><div class="pilar-rule">sesiones_log + Winston + PM2</div></div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="section" id="arquitectura">
+  <div class="section-header"><span class="section-num">08</span><h2 class="section-title">Arquitectura de repos</h2></div>
+  <div class="callout callout-purple"><span class="callout-icon">◈</span><div class="callout-body"><div class="callout-label">Regla de separación de capas — aplica a ambos repos</div><code>app/api/</code> es el backend. <code>app/(pages)/</code> es el frontend. <code>lib/</code> es lógica compartida reutilizable. <code>components/</code> es UI pura sin lógica de negocio. Nunca mezclar capas.</div></div>
+
+  <div class="subsection" style="margin-top:1.5rem">
+    <div class="subsection-title">g360ia-admin — estructura actual <span class="badge badge-green">en producción</span></div>
+    <div class="tree"><div class="tree-title">AgenciaNLMD / g360ia-admin</div><span class="dir">g360ia-admin/</span>
+<span class="ti">├── </span><span class="dir">app/</span>
+<span class="ti">│   ├── </span><span class="dir">api/</span>                        <span class="cmt">→ backend dentro de Next.js</span>
+<span class="ti">│   │   ├── </span><span class="file">auth/[...nextauth]/</span>        <span class="cmt">→ NextAuth admin (Google OAuth)</span>
+<span class="ti">│   │   ├── </span><span class="file">tenants/</span>                  <span class="cmt">→ CRUD de clientes/tenants</span>
+<span class="ti">│   │   ├── </span><span class="file">usuarios/</span>                 <span class="cmt">→ gestión de usuarios internos</span>
+<span class="ti">│   │   ├── </span><span class="file">ventas/</span>                   <span class="cmt">→ leads, CRM, conversaciones</span>
+<span class="ti">│   │   ├── </span><span class="file">soporte/</span>                  <span class="cmt">→ tickets y mensajes</span>
+<span class="ti">│   │   ├── </span><span class="file">equipos/</span>                  <span class="cmt">→ áreas y personal interno</span>
+<span class="ti">│   │   ├── </span><span class="file">integraciones/</span>            <span class="cmt">→ WhatsApp, Google, Gmail, Calendar</span>
+<span class="ti">│   │   ├── </span><span class="file">maia/</span>                     <span class="cmt">→ alertas e IA interna</span>
+<span class="ti">│   │   ├── </span><span class="file">webhooks/</span>                 <span class="cmt">→ Evolution API — WhatsApp entrante</span>
+<span class="ti">│   │   ├── </span><span class="file">stats/</span>                    <span class="cmt">→ métricas del dashboard</span>
+<span class="ti">│   │   ├── </span><span class="file">auditoria/</span>                <span class="cmt">→ log de sesiones y accesos</span>
+<span class="ti">│   │   └── </span><span class="file">perfil/</span>                   <span class="cmt">→ sesiones del usuario logueado</span>
+<span class="ti">│   ├── </span><span class="dir">dashboard/</span>                    <span class="cmt">→ página principal del panel admin</span>
+<span class="ti">│   ├── </span><span class="dir">bienvenido/</span>                   <span class="cmt">→ redirect post-login</span>
+<span class="ti">│   ├── </span><span class="dir">pendiente/</span>                    <span class="cmt">→ usuario pendiente de aprobación</span>
+<span class="ti">│   └── </span><span class="warn">portal/</span>                       <span class="cmt">→ ⚠ MOVER AL REPO g360ia-portal</span>
+<span class="ti">├── </span><span class="dir">lib/</span>
+<span class="ti">│   ├── </span><span class="file">db.js</span>                         <span class="cmt">→ pool MySQL core (base g360ia)</span>
+<span class="ti">│   ├── </span><span class="file">auth.js</span>                       <span class="cmt">→ config NextAuth ADMIN — secret exclusivo</span>
+<span class="ti">│   ├── </span><span class="file">tenant-db.js</span>                  <span class="cmt">→ pool conexiones a DB por tenant</span>
+<span class="ti">│   ├── </span><span class="file">tenant-provisioner.js</span>         <span class="cmt">→ crea DB del tenant en onboarding</span>
+<span class="ti">│   └── </span><span class="warn">auth-portal.js</span>                <span class="cmt">→ ⚠ MOVER AL REPO PORTAL</span>
+<span class="ti">├── </span><span class="dir">database/</span>
+<span class="ti">│   ├── </span><span class="dir">schema/</span>                       <span class="cmt">→ tablas de la DB core</span>
+<span class="ti">│   ├── </span><span class="dir">tenant-migrations/</span>            <span class="cmt">→ módulos nuevos para tenants</span>
+<span class="ti">│   └── </span><span class="dir">migrations/</span>                   <span class="cmt">→ migraciones de la DB core</span>
+<span class="ti">├── </span><span class="dir">scripts/</span>
+<span class="ti">│   └── </span><span class="file">migrar-tenants.js</span>             <span class="cmt">→ propaga módulos a tenants activos</span>
+<span class="ti">├── </span><span class="file">middleware.js</span>                     <span class="cmt">→ protege rutas autenticadas</span>
+<span class="ti">├── </span><span class="file">next.config.js</span>
+<span class="ti">└── </span><span class="file">package.json</span>                      <span class="cmt">→ Next.js 14 + mysql2 + next-auth</span>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">g360ia-portal — estructura objetivo <span class="badge badge-amber">a construir</span></div>
+    <div class="tree"><div class="tree-title">AgenciaNLMD / g360ia-portal</div><span class="dir">g360ia-portal/</span>
+<span class="ti">├── </span><span class="dir">app/</span>
+<span class="ti">│   ├── </span><span class="dir">api/</span>                        <span class="cmt">→ backend dentro de Next.js</span>
+<span class="ti">│   │   ├── </span><span class="file">auth/[...nextauth]/</span>        <span class="cmt">→ NextAuth PORTAL — secret DIFERENTE al admin</span>
+<span class="ti">│   │   ├── </span><span class="file">onboarding/</span>               <span class="cmt">→ POST: crea tenant + provisiona DB</span>
+<span class="ti">│   │   └── </span><span class="dir">portal/</span>
+<span class="ti">│   │       ├── </span><span class="file">modulos/</span>              <span class="cmt">→ módulos activos del tenant según plan</span>
+<span class="ti">│   │       ├── </span><span class="file">clientes/</span>             <span class="cmt">→ CRM del tenant (DB propia)</span>
+<span class="ti">│   │       ├── </span><span class="file">conversaciones/</span>       <span class="cmt">→ conversaciones del tenant</span>
+<span class="ti">│   │       ├── </span><span class="file">agenda/</span>               <span class="cmt">→ turnos y agenda</span>
+<span class="ti">│   │       ├── </span><span class="file">whatsapp/</span>             <span class="cmt">→ bot WhatsApp del tenant</span>
+<span class="ti">│   │       ├── </span><span class="file">ia/</span>                   <span class="cmt">→ Skills IA del tenant</span>
+<span class="ti">│   │       └── </span><span class="file">configuracion/</span>        <span class="cmt">→ datos del negocio, logo, colores</span>
+<span class="ti">│   ├── </span><span class="dir">(auth)/login/</span>                 <span class="cmt">→ pantalla de login con Google</span>
+<span class="ti">│   ├── </span><span class="dir">onboarding/</span>                   <span class="cmt">→ flujo alta: nombre + logo + rubro + plan</span>
+<span class="ti">│   ├── </span><span class="dir">dashboard/</span>                    <span class="cmt">→ dashboard base del tenant</span>
+<span class="ti">│   ├── </span><span class="dir">[modulo]/</span>                     <span class="cmt">→ ruta dinámica — cada módulo habilitado</span>
+<span class="ti">│   ├── </span><span class="dir">portal/bienvenido/</span>            <span class="cmt">→ redirect post-login</span>
+<span class="ti">│   ├── </span><span class="dir">portal/inactivo/</span>              <span class="cmt">→ cuenta inactiva</span>
+<span class="ti">│   ├── </span><span class="file">layout.js</span>                     <span class="cmt">→ shell: sidebar + topbar del tenant</span>
+<span class="ti">│   └── </span><span class="file">page.js</span>                       <span class="cmt">→ redirect a login o dashboard</span>
+<span class="ti">├── </span><span class="dir">lib/</span>
+<span class="ti">│   ├── </span><span class="file">db.js</span>                         <span class="cmt">→ pool MySQL core — mismo servidor, base g360ia</span>
+<span class="ti">│   ├── </span><span class="file">auth-portal.js</span>                <span class="cmt">→ config NextAuth PORTAL — secret propio</span>
+<span class="ti">│   └── </span><span class="file">tenant-db.js</span>                  <span class="cmt">→ conexión a DB propia del tenant (desde token)</span>
+<span class="ti">├── </span><span class="dir">components/</span>
+<span class="ti">│   ├── </span><span class="dir">ui/</span>                           <span class="cmt">→ botones, inputs, badges, cards</span>
+<span class="ti">│   ├── </span><span class="dir">layout/</span>                       <span class="cmt">→ Sidebar, Topbar, Shell del dashboard</span>
+<span class="ti">│   ├── </span><span class="dir">modules/</span>                      <span class="cmt">→ un componente por módulo del sistema</span>
+<span class="ti">│   └── </span><span class="dir">onboarding/</span>                   <span class="cmt">→ pasos del flujo de alta</span>
+<span class="ti">├── </span><span class="dir">public/</span>
+<span class="ti">│   ├── </span><span class="file">manifest.json</span>                 <span class="cmt">→ PWA: nombre, íconos, color de tema</span>
+<span class="ti">│   ├── </span><span class="file">sw.js</span>                         <span class="cmt">→ Service Worker — offline básico</span>
+<span class="ti">│   └── </span><span class="dir">icons/</span>                        <span class="cmt">→ íconos PWA: 192x192, 512x512, maskable</span>
+<span class="ti">├── </span><span class="file">middleware.js</span>                     <span class="cmt">→ protege rutas, detecta tenant y onboarding</span>
+<span class="ti">├── </span><span class="file">next.config.js</span>                    <span class="cmt">→ PWA config (next-pwa) + redirects</span>
+<span class="ti">└── </span><span class="file">package.json</span>                      <span class="cmt">→ Next.js 14 + mysql2 + next-auth + next-pwa</span>
+    </div>
+  </div>
+
+  <div class="callout callout-red"><span class="callout-icon">⚠</span><div class="callout-body"><div class="callout-label">3 reglas de arquitectura — no negociables</div><strong>Regla 1:</strong> El tenant siempre viene del token de sesión — nunca del query string ni del body.<br><strong>Regla 2:</strong> Nunca conectar a la DB del tenant sin verificar que el dbName existe y está activo en la DB core.<br><strong>Regla 3:</strong> components/ es UI pura — sin fetch, sin lógica de negocio. Todo eso va en app/api/ o lib/.</div></div>
+</section>
+
+<!-- 09 -->
+<section class="section" id="infra">
+  <div class="section-header"><span class="section-num">09</span><h2 class="section-title">Infraestructura — Easypanel</h2></div>
+  <p>Todos los servicios viven dentro del proyecto <code>g360ia</code> en Easypanel (VPS Hostinger · IP: <code>187.77.233.49</code>).</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio</th><th>Tecnología</th><th>URL / Puerto</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>admin</td><td>Next.js 14</td><td><code>admin.g360ia.com.ar</code> :3000</td><td><span class="status status-ok">producción</span></td></tr>
+      <tr><td>g360ia-portal</td><td>Next.js 14</td><td><code>app.g360ia.com.ar</code> :3001</td><td><span class="status status-build">a construir</span></td></tr>
+      <tr><td>backend</td><td>Node.js / Express</td><td><code>api.g360ia.com.ar</code> :3001</td><td><span class="status status-off">inactivo — fase futura</span></td></tr>
+      <tr><td>mysql</td><td>MySQL 9</td><td>:3306 interno</td><td><span class="status status-ok">activo</span></td></tr>
+      <tr><td>redis</td><td>Redis 7</td><td>:6379 interno</td><td><span class="status status-ok">activo</span></td></tr>
+      <tr><td>g360ia-db</td><td>MariaDB 11</td><td>—</td><td><span class="status status-delete">eliminar — vacía</span></td></tr>
+      <tr><td>g360ia</td><td>WordPress</td><td>—</td><td><span class="status status-off">revisar — origen desconocido</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="subsection" style="margin-top:1.5rem">
+    <div class="subsection-title">Stack tecnológico completo</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Componente</th><th>Tecnología</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend admin</td><td>Next.js 14 (React 18)</td></tr>
+        <tr><td>Frontend portal</td><td>Next.js 14 (React 18) + next-pwa</td></tr>
+        <tr><td>App móvil fase 1</td><td>PWA — manifest.json + Service Worker</td></tr>
+        <tr><td>App móvil fase 2</td><td>React Native (futuro)</td></tr>
+        <tr><td>Base de datos</td><td>MySQL 9 — 1 DB core + 1 DB por tenant</td></tr>
+        <tr><td>Caché</td><td>Redis 7</td></tr>
+        <tr><td>Auth</td><td>NextAuth v4 + Google OAuth (independiente por app)</td></tr>
+        <tr><td>WhatsApp</td><td>Evolution API</td></tr>
+        <tr><td>Automatizaciones</td><td>n8n</td></tr>
+        <tr><td>IA principal</td><td>Claude API — claude-sonnet-4-6</td></tr>
+        <tr><td>IA fallback</td><td>OpenAI GPT-4o</td></tr>
+        <tr><td>Pagos</td><td>MercadoPago (a integrar)</td></tr>
+        <tr><td>Mapas</td><td>Google Maps API + Mapbox</td></tr>
+        <tr><td>Control de versiones</td><td>GitHub — org: AgenciaNLMD</td></tr>
+        <tr><td>CI/CD</td><td>GitHub Actions (a configurar)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="section" id="auth">
+  <div class="section-header"><span class="section-num">10</span><h2 class="section-title">Autenticación y roles</h2></div>
+  <div class="callout callout-red"><span class="callout-icon">⚠</span><div class="callout-body"><div class="callout-label">Regla crítica — nunca violar</div>Admin y portal usan NextAuth completamente independiente. Cada uno tiene su propio NEXTAUTH_SECRET y NEXTAUTH_URL. Las cookies no comparten dominio. Compartirlos causó el conflicto de sesiones anterior.</div></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>App</th><th>Variable</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">Admin</td><td><code>NEXTAUTH_URL</code></td><td><code>https://admin.g360ia.com.ar</code></td></tr>
+      <tr><td><code>NEXTAUTH_SECRET</code></td><td>Secreto exclusivo del admin — string largo aleatorio</td></tr>
+      <tr><td rowspan="2">Portal</td><td><code>NEXTAUTH_URL</code></td><td><code>https://app.g360ia.com.ar</code></td></tr>
+      <tr><td><code>NEXTAUTH_SECRET</code></td><td>Secreto DIFERENTE al del admin — nunca el mismo</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="subsection" style="margin-top:1.5rem">
+    <div class="subsection-title">Roles del sistema (RBAC)</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Rol</th><th>App</th><th>Acceso</th></tr></thead>
+      <tbody>
+        <tr><td><code>superadmin</code></td><td>Admin</td><td>Acceso total al panel admin</td></tr>
+        <tr><td><code>admin</code></td><td>Admin</td><td>Acceso a todo excepto configuración del sistema</td></tr>
+        <tr><td><code>vendedor</code></td><td>Admin</td><td>Solo CRM: leads, funnel y conversaciones asignadas</td></tr>
+        <tr><td><code>cm</code></td><td>Admin</td><td>Solo bandeja de RRSS y leads</td></tr>
+        <tr><td><code>soporte</code></td><td>Admin</td><td>Solo tickets y atención a tenants</td></tr>
+        <tr><td><code>viewer</code></td><td>Admin</td><td>Solo lectura — pendiente de aprobación</td></tr>
+        <tr><td><code>tenant</code></td><td>Portal</td><td>Su propio portal — solo ve su DB, módulos según plan</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="section" id="db">
+  <div class="section-header"><span class="section-num">11</span><h2 class="section-title">Base de datos y tablas</h2></div>
+  <p>Arquitectura multi-tenant con base de datos separada por cliente. Hay dos universos: la DB core del sistema y las DBs individuales de cada tenant.</p>
+  <div class="callout callout-slate"><span class="callout-icon">◈</span><div class="callout-body"><div class="callout-label">Regla de conexión</div>Toda API que necesite datos del tenant usa <code>lib/tenant-db.js</code> con el <code>dbName</code> que viene del token de sesión. Nunca se acepta <code>dbName</code> del body o query string. Nunca se conecta a la DB de otro tenant.</div></div>
+
+  <div class="db-group" style="margin-top:1.5rem">
+    <div class="db-group-header"><div class="db-icon dbi-core">◆</div>DB core: <strong style="color:#fff;margin-left:4px">g360ia</strong> &nbsp;— administración del sistema completo</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tabla</th><th>Descripción</th><th>Usada por</th></tr></thead>
+      <tbody>
+        <tr><td><code>tenants</code></td><td>Todos los clientes/negocios. id, nombre, rubro, plan, email, db_name, activo, trial_hasta, onboarding_completo</td><td>Admin + Portal</td></tr>
+        <tr><td><code>usuarios</code></td><td>Usuarios internos del equipo G360iA. rol: superadmin, admin, vendedor, cm, soporte, viewer. area, status, activo</td><td>Admin</td></tr>
+        <tr><td><code>sesiones_log</code></td><td>Log de accesos: usuario_id, IP, user_agent, dispositivo, ubicacion, fecha. Para auditoría</td><td>Admin</td></tr>
+        <tr><td><code>equipos</code></td><td>Áreas del equipo interno: comercial, contenido, atencion, administracion</td><td>Admin</td></tr>
+        <tr><td><code>permisos_modulo</code></td><td>RBAC: rol + area + modulo → puede_ver, puede_editar, puede_crear, puede_eliminar</td><td>Admin</td></tr>
+        <tr><td><code>integraciones</code></td><td>Catálogo de integraciones disponibles (whatsapp, instagram, gmail, web, etc.) con config JSON</td><td>Admin</td></tr>
+        <tr><td><code>integraciones_tokens</code></td><td>Tokens OAuth y credenciales por integración y tenant. access_token, refresh_token, token_expira_en, metadata</td><td>Admin</td></tr>
+        <tr><td><code>whatsapp_instancias</code></td><td>Instancias Evolution API activas. instance_key, estado, wsp_status, numero, wsp_qr por tenant</td><td>Admin</td></tr>
+        <tr><td><code>contactos</code></td><td>Contactos del CRM del portal tenant. nombre, email, telefono, whatsapp, empresa, fuente, score_ia</td><td>Admin + Portal</td></tr>
+        <tr><td><code>conversaciones</code></td><td>Conversaciones de contactos por canal (whatsapp, email, instagram, facebook, web)</td><td>Admin + Portal</td></tr>
+        <tr><td><code>mensajes</code></td><td>Mensajes dentro de cada conversación. direccion: entrante/saliente, sugerido_por_ia</td><td>Admin + Portal</td></tr>
+        <tr><td><code>leads</code></td><td>Leads del CRM del portal tenant. contacto_id, fuente, estado, probabilidad, asignado_a</td><td>Portal</td></tr>
+        <tr><td><code>oportunidades</code></td><td>Pipeline comercial del tenant. etapa, valor, probabilidad, fecha_cierre_est</td><td>Portal</td></tr>
+        <tr><td><code>ventas_leads</code></td><td>Leads del CRM interno del admin (prospectos de G360iA). nombre, empresa, rubro_interes, plan_interes, estado, fuente, asignado_a, sitio_web, instagram, fecha_ultimo_contacto, motivo_perdida</td><td>Admin</td></tr>
+        <tr><td><code>ventas_actividades</code></td><td>Actividades sobre leads internos. tipo: llamada/email/whatsapp/reunion/nota. proxima_accion, fecha</td><td>Admin</td></tr>
+        <tr><td><code>ventas_conversaciones</code></td><td>Conversaciones del equipo con leads internos. canal, contacto_telefono, asignado_a, ultimo_mensaje</td><td>Admin</td></tr>
+        <tr><td><code>ventas_mensajes</code></td><td>Mensajes dentro de conversaciones de ventas internas. wsp_message_id para deduplicar</td><td>Admin</td></tr>
+        <tr><td><code>ventas_metas</code></td><td>Metas mensuales por vendedor interno. meta_leads, meta_cierres, meta_mrr por mes/año</td><td>Admin</td></tr>
+        <tr><td><code>soporte_tickets</code></td><td>Tickets de soporte de tenants. prioridad: baja/media/alta/urgente. categoria, estado, tiempo_respuesta, satisfaccion</td><td>Admin</td></tr>
+        <tr><td><code>soporte_mensajes</code></td><td>Mensajes dentro de cada ticket. direccion: entrante/saliente, leido, enviado_por</td><td>Admin</td></tr>
+        <tr><td><code>soporte_stats</code></td><td>Estadísticas de performance por agente de soporte. tickets_resueltos, tiempo_respuesta_avg, satisfaccion_avg por mes</td><td>Admin</td></tr>
+        <tr><td><code>maia_alertas</code></td><td>Alertas generadas por Maia para el equipo. lead_id, tipo, titulo, accion, leida, descartada</td><td>Admin</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="db-group">
+    <div class="db-group-header"><div class="db-icon dbi-tenant">◆</div>DB por tenant: <strong style="color:#fff;margin-left:4px">t001_nombre</strong> &nbsp;— tablas base (todos los tenants)</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tabla</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td><code>tenant_migraciones</code></td><td>Registro de migraciones aplicadas a esta DB. Evita duplicados al correr migrar-tenants.js</td></tr>
+        <tr><td><code>clientes</code></td><td>Clientes del negocio del tenant. nombre, email, telefono, whatsapp, empresa, score_ia, activo</td></tr>
+        <tr><td><code>conversaciones</code></td><td>Conversaciones con clientes del tenant. canal, estado, ultimo_mensaje, ultimo_msg_at</td></tr>
+        <tr><td><code>mensajes</code></td><td>Mensajes dentro de cada conversación del tenant. direccion, sugerido_por_ia, leido</td></tr>
+        <tr><td><code>configuracion</code></td><td>Configuración del negocio en clave/valor. Ej: nombre, logo, rubro, plan, colores, contacto, web</td></tr>
+        <tr><td><code>modulos_activos</code></td><td>Módulos habilitados para este tenant. habilitado, config JSON. Se actualiza con migrar-tenants.js</td></tr>
+        <tr><td><code>ia_sugerencias</code></td><td>Sugerencias de Skills IA para este tenant. tipo, titulo, contenido, accion, estado, nivel</td></tr>
+        <tr><td><code>notificaciones</code></td><td>Notificaciones enviadas a clientes del tenant. canal: whatsapp/email/sms/push. estado: pendiente/enviada/fallida</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="db-group">
+    <div class="db-group-header"><div class="db-icon dbi-module">◆</div>DB por tenant — tablas de módulos adicionales (según rubro y plan)</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tabla</th><th>Módulo</th><th>Rubro</th><th>Plan mínimo</th></tr></thead>
+      <tbody>
+        <tr><td><code>tecnicos</code></td><td>Órdenes de trabajo</td><td>Servicio técnico</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>ots</code></td><td>Órdenes de trabajo</td><td>Servicio técnico</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>ot_estados_log</code></td><td>Órdenes de trabajo</td><td>Servicio técnico</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>repuestos</code></td><td>Gestión de stock</td><td>Servicio técnico</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>proveedores</code></td><td>Gestión proveedores</td><td>Servicio técnico</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>ordenes_compra</code></td><td>Órdenes de compra</td><td>Servicio técnico</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>turnos</code></td><td>Agenda / Turnos</td><td>Salud, profesionales</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>historia_clinica</code></td><td>Historia clínica</td><td>Salud</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>habitaciones</code></td><td>Gestión habitaciones</td><td>Hotelería</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>reservas</code></td><td>Reservas hotel</td><td>Hotelería</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>propiedades</code></td><td>Listado propiedades</td><td>Inmobiliaria</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>expedientes</code></td><td>Gestión expedientes</td><td>Profesionales</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>facturas</code></td><td>Facturación</td><td>Universal</td><td><span class="badge badge-slate">Pro</span></td></tr>
+        <tr><td><code>productos_menu</code></td><td>Menú digital</td><td>Restaurante</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>pedidos</code></td><td>Gestión pedidos</td><td>Restaurante</td><td><span class="badge badge-gray">Starter</span></td></tr>
+        <tr><td><code>reclamos</code></td><td>Reclamos ciudadanos</td><td>GovTech</td><td><span class="badge badge-gray">Starter</span></td></tr>
+      </tbody>
+    </table></div>
+    <p style="margin-top:.75rem">Cada módulo nuevo se agrega como un archivo <code>.sql</code> en <code>database/tenant-migrations/</code> con las anotaciones <code>-- @rubro:</code> y <code>-- @plan:</code>. El script <code>migrar-tenants.js</code> lo aplica solo a quien corresponde.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="section" id="estado">
+  <div class="section-header"><span class="section-num">12</span><h2 class="section-title">Estado actual del proyecto</h2></div>
+  <div class="subsection">
+    <div class="subsection-title">Lo que existe y funciona hoy</div>
+    <ul class="bullets">
+      <li>Panel admin en producción en admin.g360ia.com.ar con auth Google</li>
+      <li>CRM, leads, funnel, conversaciones WhatsApp, soporte, integraciones, equipo, auditoría</li>
+      <li>MySQL con schema completo — 22 tablas en DB core g360ia</li>
+      <li>Sistema de DB por tenant con provisioner y migrations funcionando</li>
+      <li>Evolution API integrada — WhatsApp activo con instancias por tenant</li>
+      <li>Redis activo</li>
+      <li>Repo g360ia-portal creado en Easypanel — listo para construir</li>
+    </ul>
+  </div>
+  <div class="subsection">
+    <div class="subsection-title">Próximas acciones prioritarias</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Prioridad</th><th>Tarea</th></tr></thead>
+      <tbody>
+        <tr><td>🔴 1</td><td>Construir g360ia-portal: Next.js + NextAuth independiente + PWA + onboarding + dashboard base del tenant</td></tr>
+        <tr><td>🟡 2</td><td>Eliminar servicio g360ia-db de Easypanel (MariaDB vacía, nadie la usa)</td></tr>
+        <tr><td>🟡 3</td><td>Definir y limpiar el servicio g360ia (WordPress) en Easypanel</td></tr>
+        <tr><td>🔵 4</td><td>Mover app/portal/ del repo admin al repo portal y limpiar lib/auth-portal.js</td></tr>
+        <tr><td>🔵 5</td><td>Reactivar backend Node.js migrando de PostgreSQL a MySQL cuando sea necesario</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="section" id="roadmap">
+  <div class="section-header"><span class="section-num">13</span><h2 class="section-title">Hoja de ruta</h2></div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-fase">Fase 1 — Mes 1 a 3</div><div class="tl-title">MVP del portal tenant</div><div class="tl-desc">Portal base + onboarding + 2 rubros completos (prof + medical) + WhatsApp IA + agenda + dashboard + PWA instalable</div></div>
+    <div class="tl-item"><div class="tl-fase">Fase 2 — Mes 4 a 6</div><div class="tl-title">Expansión de rubros e integraciones</div><div class="tl-desc">4 rubros más + módulo mapas + facturación + estadísticas IA + MercadoPago + PWA completa</div></div>
+    <div class="tl-item"><div class="tl-fase">Fase 3 — Mes 7 a 12</div><div class="tl-title">Escala y IA completa</div><div class="tl-desc">Todos los rubros + asistente IA por tenant + seguimiento en tiempo real + white label + API pública + GovTech</div></div>
+    <div class="tl-item"><div class="tl-fase">Fase 4 — Mes 12 a 24</div><div class="tl-title">Posicionamiento nacional</div><div class="tl-desc">App nativa React Native + marketplace de módulos + partners integradores + expansión regional + referencia IA en Argentina</div></div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="section" id="principios">
+  <div class="section-header"><span class="section-num">14</span><h2 class="section-title">Principios de trabajo</h2></div>
+  <ul class="bullets">
+    <li>Avanzamos paso a paso — un componente o módulo a la vez</li>
+    <li>Cada entrega debe ser funcional y desplegable</li>
+    <li>Velocidad de iteración sobre perfección inicial</li>
+    <li>Ante cada decisión técnica importante: opciones con pros y contras antes de implementar</li>
+    <li>Código limpio, comentado y escalable desde el día 1</li>
+    <li>Todo el código es generado por IA y subido via GitHub web o file manager de Ferozo</li>
+    <li>Despliegues semanales los miércoles</li>
+    <li>Las API keys y credenciales SIEMPRE en variables de entorno del VPS — nunca en el repo</li>
+    <li>Auth independiente por app — nunca compartir NEXTAUTH_SECRET entre admin y portal</li>
+    <li>DB separada por tenant desde el día 1 — no hay marcha atrás en esto</li>
+    <li>El tenant siempre viene del token — nunca del body o query string</li>
+    <li>Cuando algo no esté claro, se documenta antes de implementar</li>
+  </ul>
+</section>
+
+<!-- 15 -->
+<section class="section" id="design">
+  <div class="section-header"><span class="section-num">15</span><h2 class="section-title">Design system</h2></div>
+  <div class="subsection">
+    <div class="subsection-title">Panel admin y portal tenant</div>
+    <div class="tokens-grid">
+      <div class="token-card"><div class="token-swatch" style="background:#F0F4F0"></div><div class="token-info"><div class="token-name">Background</div><div class="token-val">#F0F4F0</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#1A7A4A"></div><div class="token-info"><div class="token-name">Primario</div><div class="token-val">#1A7A4A</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#E8F5EE;border:1px solid #E0DDD6"></div><div class="token-info"><div class="token-name">Activo bg</div><div class="token-val">#E8F5EE</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#1C3D2E"></div><div class="token-info"><div class="token-name">Panel IA</div><div class="token-val">#1C3D2E</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#FFFFFF;border:1px solid #E5E7EB"></div><div class="token-info"><div class="token-name">Cards / Topbar</div><div class="token-val">#FFFFFF</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#B08A55"></div><div class="token-info"><div class="token-name">Gold / Accent</div><div class="token-val">#B08A55</div></div></div>
+    </div>
+  </div>
+  <div class="subsection">
+    <div class="subsection-title">Sitio institucional</div>
+    <div class="tokens-grid">
+      <div class="token-card"><div class="token-swatch" style="background:#506886"></div><div class="token-info"><div class="token-name">Slate / Pizarra</div><div class="token-val">#506886</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#B08A55"></div><div class="token-info"><div class="token-name">Gold</div><div class="token-val">#B08A55</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background:#3A9E70"></div><div class="token-info"><div class="token-name">Emerald</div><div class="token-val">#3A9E70</div></div></div>
+    </div>
+    <p>Nav y footer en pizarra. Logo a colores naturales — sin filtro CSS. No usar rojo ni gold en el panel admin.</p>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Token</th><th>Valor</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td>Tipografía principal</td><td>DM Sans / Inter</td><td>Pesos 400 y 600 únicamente</td></tr>
+      <tr><td>Tipografía display</td><td>Fraunces (serif)</td><td>Títulos principales, marca</td></tr>
+      <tr><td>Tipografía mono</td><td>DM Mono</td><td>Código, badges, versiones, rutas</td></tr>
+      <tr><td>Modo</td><td>Light mode siempre</td><td>No hay dark mode en el producto</td></tr>
+      <tr><td>Border radius cards</td><td>11px</td><td>Cards, modales, contenedores</td></tr>
+      <tr><td>Border radius inputs</td><td>7px</td><td>Inputs, botones, badges</td></tr>
+      <tr><td>Sombra base</td><td>0 1px 3px rgba(0,0,0,.06)</td><td>Cards y superficies elevadas</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.sb-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navItems.forEach(item => {
+        item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+
+const sidebar = document.querySelector('.sidebar');
+const overlay = document.getElementById('sbOverlay');
+const toggle  = document.getElementById('sbToggle');
+
+function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');}
+function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');}
+
+toggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+overlay.addEventListener('click', closeSidebar);
+navItems.forEach(item => item.addEventListener('click', () => { if(window.innerWidth <= 768) closeSidebar(); }));
+</script>
+</body>
+</html>

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión 360 iA — PRD v2.0 & Architecture Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pr: #506886; --pr-d: #445A73; --pr-l: #6B86A0; --pr-pale: #EDF1F6;
+  --accent: #B08A55; --accent-pale: #F7F0E6;
+  --em: #3A9E70; --em-pale: #E8F7F1;
+  --bg: #F2F4F6; --white: #fff;
+  --text: #1F2937; --text2: #4B5563; --muted: #9CA3AF;
+  --border: #E5E7EB; --red: #D9534F; --red-bg: #FDF2F2;
+  --amber: #B08A55; --amber-bg: #FBF6EE;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); font-size:14px; line-height:1.6; }
+
+/* Layout */
+.sidebar { position:fixed; left:0; top:0; bottom:0; width:240px; background:var(--pr-d); overflow-y:auto; padding:0; z-index:10; }
+.main { margin-left:240px; padding:2rem 2.5rem; max-width:960px; }
+
+/* Sidebar nav */
+.sb-logo { padding:1.5rem 1.2rem 1rem; border-bottom:1px solid rgba(255,255,255,.1); }
+.sb-logo-title { font-size:0.95rem; font-weight:700; color:#fff; }
+.sb-logo-sub { font-size:0.65rem; color:rgba(255,255,255,.5); letter-spacing:.08em; text-transform:uppercase; margin-top:2px; }
+.sb-section { padding:1rem 1.2rem 0.3rem; font-size:0.6rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.4); }
+.sb-item { display:flex; align-items:center; gap:8px; padding:0.45rem 1.2rem; color:rgba(255,255,255,.7); font-size:0.8rem; cursor:pointer; transition:all .13s; }
+.sb-item:hover { background:rgba(255,255,255,.08); color:#fff; }
+.sb-item.active { background:rgba(255,255,255,.12); color:#fff; font-weight:500; border-left:3px solid var(--accent); }
+.sb-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+/* Content */
+.section { display:none; animation:fadeIn .2s ease; }
+.section.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+h1 { font-size:1.6rem; font-weight:700; color:var(--text); margin-bottom:0.3rem; }
+h2 { font-size:1.15rem; font-weight:600; color:var(--text); margin:1.5rem 0 0.6rem; }
+h3 { font-size:0.9rem; font-weight:600; color:var(--pr-d); margin:1rem 0 0.4rem; text-transform:uppercase; letter-spacing:.05em; }
+p  { color:var(--text2); margin-bottom:0.7rem; font-size:0.85rem; }
+
+.page-header { margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+.page-tag { display:inline-block; background:var(--pr-pale); color:var(--pr); font-size:0.65rem; font-weight:600; padding:3px 10px; border-radius:20px; letter-spacing:.06em; text-transform:uppercase; margin-bottom:0.5rem; }
+
+/* Cards */
+.card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.2rem; margin-bottom:0.9rem; }
+.card-accent { border-left:3px solid var(--pr); }
+.card-gold   { border-left:3px solid var(--accent); }
+.card-green  { border-left:3px solid var(--em); }
+.card-red    { border-left:3px solid var(--red); }
+
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; margin-bottom:0.9rem; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.9rem; margin-bottom:0.9rem; }
+
+/* Tags / badges */
+.tag { display:inline-block; padding:2px 9px; border-radius:12px; font-size:0.68rem; font-weight:600; margin:2px; }
+.tag-pr    { background:var(--pr-pale); color:var(--pr-d); }
+.tag-gold  { background:var(--accent-pale); color:#7A5800; }
+.tag-green { background:var(--em-pale); color:#1E6040; }
+.tag-red   { background:var(--red-bg); color:var(--red); }
+.tag-gray  { background:#F3F4F6; color:#6B7280; }
+
+/* Layer pills */
+.layer { display:flex; align-items:flex-start; gap:0.8rem; padding:0.8rem; background:var(--bg); border-radius:8px; margin-bottom:0.6rem; }
+.layer-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:#fff; flex-shrink:0; margin-top:2px; }
+.layer-title { font-size:0.85rem; font-weight:600; color:var(--text); }
+.layer-sub   { font-size:0.78rem; color:var(--text2); margin-top:2px; }
+.layer-when  { font-size:0.68rem; color:var(--muted); margin-top:4px; }
+
+/* Timeline */
+.tl { position:relative; padding-left:1.5rem; }
+.tl::before { content:''; position:absolute; left:7px; top:4px; bottom:4px; width:2px; background:var(--border); border-radius:1px; }
+.tl-item { position:relative; margin-bottom:1.1rem; }
+.tl-item::before { content:''; position:absolute; left:-1.3rem; top:5px; width:10px; height:10px; border-radius:50%; background:var(--pr); border:2px solid var(--white); box-shadow:0 0 0 2px var(--pr); }
+.tl-item.gold::before { background:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+.tl-item.green::before { background:var(--em); box-shadow:0 0 0 2px var(--em); }
+.tl-phase { font-size:0.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+.tl-title { font-size:0.88rem; font-weight:600; color:var(--text); }
+.tl-desc  { font-size:0.78rem; color:var(--text2); margin-top:3px; }
+
+/* Table */
+table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+th { text-align:left; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); padding:0.5rem 0.8rem; border-bottom:1px solid var(--border); background:var(--bg); }
+td { padding:0.6rem 0.8rem; border-bottom:1px solid var(--border); color:var(--text2); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--pr-pale); }
+
+/* Schema boxes */
+.schema { background:#1F2937; border-radius:10px; padding:1.2rem; font-family:monospace; font-size:0.75rem; color:#9CA3AF; overflow-x:auto; margin-bottom:0.9rem; }
+.schema .k { color:#7DD3FC; }
+.schema .v { color:#86EFAC; }
+.schema .c { color:#FCA5A5; }
+.schema .s { color:#FCD34D; }
+
+/* AI skill card */
+.skill-card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:1rem; margin-bottom:0.6rem; display:flex; gap:0.8rem; align-items:flex-start; }
+.skill-ico { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.skill-title { font-size:0.85rem; font-weight:600; color:var(--text); }
+.skill-desc  { font-size:0.77rem; color:var(--text2); margin-top:2px; }
+.skill-meta  { font-size:0.68rem; color:var(--muted); margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-title">Gestión 360 iA</div>
+    <div class="sb-logo-sub">PRD v2.0 & Architecture Map</div>
+  </div>
+
+  <div class="sb-section">Producto</div>
+  <div class="sb-item active" onclick="show('vision')"><span class="sb-dot" style="background:#B08A55"></span>Visión y rumbo</div>
+  <div class="sb-item" onclick="show('planes')"><span class="sb-dot" style="background:#506886"></span>Planes dinámicos</div>
+  <div class="sb-item" onclick="show('tenants')"><span class="sb-dot" style="background:#3A9E70"></span>Multi-tenant & App</div>
+
+  <div class="sb-section">Arquitectura</div>
+  <div class="sb-item" onclick="show('datos')"><span class="sb-dot" style="background:#506886"></span>Modelo de datos</div>
+  <div class="sb-item" onclick="show('eventos')"><span class="sb-dot" style="background:#B08A55"></span>Event Layer</div>
+  <div class="sb-item" onclick="show('metricas')"><span class="sb-dot" style="background:#3A9E70"></span>Métricas SaaS</div>
+
+  <div class="sb-section">Inteligencia</div>
+  <div class="sb-item" onclick="show('maia')"><span class="sb-dot" style="background:#B08A55"></span>Maia — Sistema IA</div>
+  <div class="sb-item" onclick="show('maia-wsp')"><span class="sb-dot" style="background:#3A9E70"></span>Maia — WhatsApp</div>
+  <div class="sb-item" onclick="show('maia-costos')"><span class="sb-dot" style="background:#506886"></span>Maia — Costos IA</div>
+  <div class="sb-item" onclick="show('ia-skills')"><span class="sb-dot" style="background:#B08A55"></span>IA Skills — 3 capas</div>
+  <div class="sb-item" onclick="show('ia-skills-rubro')"><span class="sb-dot" style="background:#B08A55"></span>Skills por rubro</div>
+  <div class="sb-item" onclick="show('ia-admin')"><span class="sb-dot" style="background:#506886"></span>IA para vos (admin)</div>
+  <div class="sb-item" onclick="show('ia-tenant')"><span class="sb-dot" style="background:#3A9E70"></span>IA para tus clientes</div>
+
+  <div class="sb-section">Construcción</div>
+  <div class="sb-item" onclick="show('roadmap')"><span class="sb-dot" style="background:#506886"></span>Hoja de ruta</div>
+  <div class="sb-item" onclick="show('dashboard-spec')"><span class="sb-dot" style="background:#B08A55"></span>Dashboard spec</div>
+  <div class="sb-item" onclick="show('stack')"><span class="sb-dot" style="background:#3A9E70"></span>Stack técnico</div>
+
+  <div class="sb-section">Módulos del sistema</div>
+  <div class="sb-item" onclick="show('modulos-admin')"><span class="sb-dot" style="background:#506886"></span>Panel admin</div>
+  <div class="sb-item" onclick="show('modulos-universales')"><span class="sb-dot" style="background:#3A9E70"></span>Módulos universales</div>
+  <div class="sb-item" onclick="show('modulos-rubros')"><span class="sb-dot" style="background:#B08A55"></span>Módulos por rubro</div>
+  <div class="sb-item" onclick="show('modulo-mkt')"><span class="sb-dot" style="background:#B08A55"></span>Módulo RRSS / Marketing</div>
+  <div class="sb-item" onclick="show('modulo-reclamos')"><span class="sb-dot" style="background:#506886"></span>Módulo Reclamos</div>
+  <div class="sb-item" onclick="show('modulo-reputacion')"><span class="sb-dot" style="background:#3A9E70"></span>Módulo Reputación Online</div>
+</nav>
+
+<main class="main">
+
+  <!-- ═══ VISIÓN ═══ -->
+  <div id="s-vision" class="section active">
+    <div class="page-header">
+      <div class="page-tag">Visión de producto</div>
+      <h1>Qué es Gestión 360 iA</h1>
+      <p>Es una plataforma de gestión modular con IA integrada. Un cliente tuyo — hotel, clínica, salón, inmobiliaria — entra al portal el día 1 y tiene herramientas concretas para administrar su negocio, con un asistente IA que lo guía, le genera documentos, responde por WhatsApp y le dice cómo va su negocio en lenguaje simple.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>La propuesta de valor real</h3>
+      <p>Cada cliente tiene su propio asistente IA desde el día 1. No necesita saber de tecnología — simplemente usa la plataforma y la IA trabaja en segundo plano: sugiere acciones, genera contenido, alerta sobre problemas y ayuda a crecer. Vos como dueño del SaaS ves todo desde tu panel: quién usa qué, quién necesita ayuda, cuánto facturás y cómo crecer.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card card-accent">
+        <h3>Para vos (panel admin)</h3>
+        <p>Tu panel es tu cockpit de negocio. La IA te dice qué clientes retener, cuáles están listos para upgrade, qué rubros crecen más, dónde está el dinero y qué decisiones tomar. Incluye gestión de vendedores, finanzas, métricas SaaS y proyecciones.</p>
+      </div>
+      <div class="card card-green">
+        <h3>Para tus clientes (portal tenant)</h3>
+        <p>Cada cliente tiene su propio asistente IA que conoce su negocio. Le sugiere acciones, genera documentos, responde por WhatsApp, analiza sus números y le dice cómo crecer. El cliente siente que tiene un consultor disponible 24/7.</p>
+      </div>
+    </div>
+
+    <h2>Tres dimensiones de escala</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3>Escala horizontal</h3>
+        <p>Más clientes, más rubros, más países. La arquitectura multi-tenant permite crecer sin fricción. Cada nuevo rubro es un paquete de módulos que se activa.</p>
+        <div><span class="tag tag-pr">Multi-tenant</span><span class="tag tag-pr">Schema por tenant</span></div>
+      </div>
+      <div class="card">
+        <h3>Escala vertical</h3>
+        <p>Cada cliente puede crecer dentro de la plataforma — de Starter a Pro a Enterprise. Los planes son dinámicos y configurables. El upgrade genera más MRR sin adquirir nuevos clientes.</p>
+        <div><span class="tag tag-gold">Planes dinámicos</span><span class="tag tag-gold">Upgrade automático</span></div>
+      </div>
+      <div class="card">
+        <h3>Escala inteligente</h3>
+        <p>La IA mejora con cada interacción. Los modelos aprenden de los datos de todos los tenants (anonimizados) para mejorar predicciones de churn, demanda y crecimiento.</p>
+        <div><span class="tag tag-green">Efecto red</span><span class="tag tag-green">IA predictiva</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PLANES ═══ -->
+  <div id="s-planes" class="section">
+    <div class="page-header">
+      <div class="page-tag">Modelo de negocio</div>
+      <h1>Planes dinámicos y configurables</h1>
+      <p>Los planes no son fijos. Son configuraciones de módulos, límites y precios que podés crear, modificar y versionar desde el panel admin sin tocar código.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Principio clave</h3>
+      <p>Un plan es simplemente un conjunto de reglas: qué módulos están habilitados, cuántos usuarios, cuánto storage, qué integraciones, a qué precio. Podés tener 3 planes o 30. Podés hacer planes por rubro, por región, por temporada o custom para un cliente Enterprise.</p>
+    </div>
+
+    <h2>Estructura de un plan</h2>
+    <div class="schema">
+<span class="k">plan</span> {<br>
+&nbsp;&nbsp;<span class="k">id</span>: <span class="v">"pro-salud-arg"</span>,<br>
+&nbsp;&nbsp;<span class="k">nombre</span>: <span class="v">"Pro Salud Argentina"</span>,<br>
+&nbsp;&nbsp;<span class="k">precio_base</span>: <span class="s">15000</span>, <span class="c">// ARS, puede ser USD también</span><br>
+&nbsp;&nbsp;<span class="k">moneda</span>: <span class="v">"ARS"</span>,<br>
+&nbsp;&nbsp;<span class="k">ciclo</span>: <span class="v">"mensual"</span>, <span class="c">// o "anual", "trimestral"</span><br>
+&nbsp;&nbsp;<span class="k">modulos_incluidos</span>: [<span class="v">"turnos"</span>, <span class="v">"crm"</span>, <span class="v">"whatsapp"</span>, <span class="v">"facturacion"</span>],<br>
+&nbsp;&nbsp;<span class="k">limites</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">usuarios</span>: <span class="s">5</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">clientes_crm</span>: <span class="s">500</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">mensajes_whatsapp</span>: <span class="s">1000</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">storage_gb</span>: <span class="s">10</span><br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;<span class="k">ia_habilitada</span>: <span class="v">true</span>,<br>
+&nbsp;&nbsp;<span class="k">ia_nivel</span>: <span class="v">"completo"</span>, <span class="c">// "basico" | "completo" | "avanzado"</span><br>
+&nbsp;&nbsp;<span class="k">white_label</span>: <span class="v">false</span>,<br>
+&nbsp;&nbsp;<span class="k">rubros_aplicables</span>: [<span class="v">"clinica"</span>, <span class="v">"spa"</span>, <span class="v">"consultorio"</span>],<br>
+&nbsp;&nbsp;<span class="k">vigente</span>: <span class="v">true</span>,<br>
+&nbsp;&nbsp;<span class="k">version</span>: <span class="s">3</span><br>
+}
+    </div>
+
+    <h2>Tipos de planes posibles</h2>
+    <table>
+      <thead><tr><th>Tipo</th><th>Ejemplo</th><th>Cuándo usarlo</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-gray">Base</span></td><td>Starter, Pro, Plan IA, Enterprise</td><td>La oferta estándar para todos</td></tr>
+        <tr><td><span class="tag tag-pr">Por rubro</span></td><td>Pro Salud, Pro Hotel</td><td>Módulos específicos del rubro pre-cargados</td></tr>
+        <tr><td><span class="tag tag-gold">Custom</span></td><td>Plan Municipio San Martín</td><td>Enterprise con módulos a medida</td></tr>
+        <tr><td><span class="tag tag-green">Trial</span></td><td>Demo 14 días</td><td>Adquisición desde app / landing</td></tr>
+        <tr><td><span class="tag tag-gray">Freemium</span></td><td>Gratis limitado</td><td>Entrada desde appstore, genera base</td></tr>
+        <tr><td><span class="tag tag-gold">Agencia</span></td><td>Multi-cuenta white label</td><td>Partners que revenden la plataforma</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Upgrade automático con IA</h2>
+    <div class="card card-green">
+      <p>Cuando un tenant usa más del 85% de los límites de su plan durante 2 semanas consecutivas, la IA detecta el patrón y activa una sugerencia de upgrade personalizada — tanto en el portal del cliente como en tu panel admin. El mensaje lo genera Claude basado en el historial del cliente. No es spam genérico, es una recomendación contextual.</p>
+    </div>
+  </div>
+
+  <!-- ═══ MULTI-TENANT & APP ═══ -->
+  <div id="s-tenants" class="section">
+    <div class="page-header">
+      <div class="page-tag">Arquitectura de escala</div>
+      <h1>Multi-tenant y crecimiento desde la app</h1>
+      <p>Cada cliente es un tenant aislado. Cuando llegan desde la appstore, el sistema los onboardea solo — sin intervención manual tuya.</p>
+    </div>
+
+    <h2>Flujo de alta de un nuevo tenant</h2>
+    <div class="tl">
+      <div class="tl-item">
+        <div class="tl-phase">Paso 1</div>
+        <div class="tl-title">Registro (web / app / appstore)</div>
+        <div class="tl-desc">El cliente crea su cuenta. Elige rubro. El sistema crea automáticamente: schema en PostgreSQL, subdominio, configuración base de módulos según plan seleccionado.</div>
+      </div>
+      <div class="tl-item gold">
+        <div class="tl-phase">Paso 2</div>
+        <div class="tl-title">Onboarding guiado por IA</div>
+        <div class="tl-desc">La IA guía al cliente con 5 pasos simples: cargar logo, agregar primer cliente, conectar WhatsApp, activar primer módulo, hacer primer acción. Gamificado con progreso visible.</div>
+      </div>
+      <div class="tl-item green">
+        <div class="tl-phase">Paso 3</div>
+        <div class="tl-title">Activación automática de módulos demo</div>
+        <div class="tl-desc">Según el rubro, se cargan datos de ejemplo para que el cliente vea la plataforma "llena" desde el día 1. Esto reduce el abandono en las primeras 48 horas.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase">Paso 4</div>
+        <div class="tl-title">Primer evento → IA activa</div>
+        <div class="tl-desc">Cuando el cliente realiza su primera acción real (agrega un cliente, carga un turno, etc.), la IA comienza a aprender y a generar sugerencias personalizadas.</div>
+      </div>
+      <div class="tl-item gold">
+        <div class="tl-phase">Paso 5</div>
+        <div class="tl-title">Notificación a tu panel admin</div>
+        <div class="tl-desc">Tu dashboard recibe: nuevo tenant registrado, rubro, plan elegido, estado de onboarding. Si el cliente está en riesgo de abandono (no completó onboarding en 48hs), la IA te alerta.</div>
+      </div>
+    </div>
+
+    <h2>Self-service completo desde app</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Lo que el cliente hace solo</h3>
+        <p>Registrarse, elegir plan, pagar (MercadoPago), activar módulos, conectar WhatsApp, invitar usuarios, personalizar su portal, hacer upgrade o downgrade, cancelar.</p>
+        <div><span class="tag tag-green">Sin intervención manual</span></div>
+      </div>
+      <div class="card">
+        <h3>Lo que requiere tu atención</h3>
+        <p>Planes Enterprise custom, integraciones especiales, resolución de disputas de pago, clientes con necesidades fuera del estándar, white label setup.</p>
+        <div><span class="tag tag-gold">High-touch selectivo</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODELO DE DATOS ═══ -->
+  <div id="s-datos" class="section">
+    <div class="page-header">
+      <div class="page-tag">Arquitectura técnica</div>
+      <h1>Modelo de datos central</h1>
+      <p>PostgreSQL con schema-per-tenant. El schema público contiene las tablas del sistema. Cada tenant tiene su propio schema con sus datos completamente aislados.</p>
+    </div>
+
+    <h2>Schema público (sistema)</h2>
+    <div class="schema">
+<span class="c">-- Tenants (clientes del SaaS)</span><br>
+<span class="k">tenants</span>: id, nombre, rubro, subdominio, plan_id, estado, fecha_alta, metadata<br><br>
+<span class="c">-- Planes (dinámicos, versionados)</span><br>
+<span class="k">planes</span>: id, nombre, precio, moneda, ciclo, modulos[], limites{}, ia_nivel, version, vigente<br><br>
+<span class="c">-- Módulos del sistema</span><br>
+<span class="k">modulos</span>: id, nombre, rubro, descripcion, dependencias[], version<br><br>
+<span class="c">-- Asignación plan ↔ módulos</span><br>
+<span class="k">plan_modulos</span>: plan_id, modulo_id, config{}<br><br>
+<span class="c">-- Usuarios admin</span><br>
+<span class="k">usuarios_admin</span>: id, nombre, email, rol, permisos[], tenant_asignado<br><br>
+<span class="c">-- Vendedores</span><br>
+<span class="k">vendedores</span>: id, nombre, email, comision_%, tenants_asignados[], metas{}<br><br>
+<span class="c">-- Pagos y suscripciones</span><br>
+<span class="k">suscripciones</span>: id, tenant_id, plan_id, estado, fecha_inicio, fecha_vencimiento, mp_subscription_id<br><br>
+<span class="c">-- Event log (alimenta la IA)</span><br>
+<span class="k">eventos</span>: id, tenant_id, tipo, payload{}, timestamp, procesado_ia<br><br>
+<span class="c">-- Log de auditoría</span><br>
+<span class="k">logs_auditoria</span>: id, usuario_id, accion, entidad, ip, timestamp<br><br>
+<span class="c">-- Skills IA por rubro</span><br>
+<span class="k">skills_ia</span>: id, rubro, nombre, descripcion, nivel_minimo, version, activa<br><br>
+<span class="c">-- Score de madurez de datos por tenant</span><br>
+<span class="k">tenant_data_scores</span>: tenant_id, score, nivel_actual, registros_count, modulos_activos, ultima_actualizacion<br><br>
+<span class="c">-- Pool de datos anonimizados por rubro (benchmarking)</span><br>
+<span class="k">rubro_benchmarks</span>: rubro, metrica, valor_promedio, percentil_75, muestra_size, fecha
+    </div>
+
+    <h2>Schema por tenant (ejemplo: hotel_alvear)</h2>
+    <div class="schema">
+<span class="c">-- Datos propios del negocio</span><br>
+<span class="k">clientes</span>: id, nombre, email, telefono, historial[], score_ia<br>
+<span class="k">reservas</span>: id, cliente_id, unidad_id, checkin, checkout, estado, total<br>
+<span class="k">facturas</span>: id, cliente_id, items[], total, estado_pago<br>
+<span class="k">mensajes_whatsapp</span>: id, cliente_id, contenido, direccion, respuesta_ia, timestamp<br><br>
+<span class="c">-- Configuración del tenant</span><br>
+<span class="k">configuracion</span>: clave, valor, tipo<br>
+<span class="k">modulos_activos</span>: modulo_id, habilitado, config{}, fecha_activacion<br><br>
+<span class="c">-- IA del tenant</span><br>
+<span class="k">ia_contexto</span>: tipo, contenido, embedding, fecha_actualizacion<br>
+<span class="k">ia_sugerencias</span>: id, tipo, contenido, accion, estado, fecha<br>
+<span class="k">ia_skills_estado</span>: skill_id, nivel_actual, sugerencias_aceptadas, sugerencias_rechazadas, ultima_generada
+    </div>
+  </div>
+
+  <!-- ═══ EVENT LAYER ═══ -->
+  <div id="s-eventos" class="section">
+    <div class="page-header">
+      <div class="page-tag">IA Infrastructure</div>
+      <h1>Event Layer — el sistema nervioso de la IA</h1>
+      <p>Cada acción en la plataforma genera un evento. Los eventos son el alimento de la IA. Sin eventos, la IA es ciega. Con eventos bien estructurados, la IA puede predecir, recomendar y alertar.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Principio fundamental</h3>
+      <p>No es suficiente guardar datos — hay que registrar <strong>qué pasó, cuándo, quién lo hizo y qué contexto tenía</strong>. Un evento no es solo "se creó una reserva". Es: quién la creó, desde qué canal, cuánto tiempo tardó el cliente en confirmar, si fue la primera o décima vez, y qué módulos estaba usando ese día.</p>
+    </div>
+
+    <h2>Tipos de eventos críticos</h2>
+    <table>
+      <thead><tr><th>Evento</th><th>Qué dispara</th><th>IA aprende</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-pr">tenant.login</span></td><td>Cada vez que el cliente entra al portal</td><td>Frecuencia de uso, horarios, riesgo de churn</td></tr>
+        <tr><td><span class="tag tag-pr">modulo.activado</span></td><td>Al activar un módulo nuevo</td><td>Velocidad de adopción, candidatos a upgrade</td></tr>
+        <tr><td><span class="tag tag-gold">pago.recibido</span></td><td>Confirmación de pago MercadoPago</td><td>MRR, LTV, patrones de pago</td></tr>
+        <tr><td><span class="tag tag-red">pago.fallido</span></td><td>Pago rechazado o vencido</td><td>Riesgo de churn financiero</td></tr>
+        <tr><td><span class="tag tag-gold">whatsapp.mensaje</span></td><td>Cada mensaje entrante/saliente</td><td>Engagement, temas recurrentes, satisfacción</td></tr>
+        <tr><td><span class="tag tag-green">ia.sugerencia.aceptada</span></td><td>Cliente acepta sugerencia de IA</td><td>Qué recomendaciones funcionan por rubro</td></tr>
+        <tr><td><span class="tag tag-red">tenant.inactivo</span></td><td>Sin login en N días</td><td>Trigger de alerta de churn</td></tr>
+        <tr><td><span class="tag tag-pr">plan.upgrade</span></td><td>Cambio de plan a superior</td><td>Qué lleva a upgrades, timing ideal</td></tr>
+        <tr><td><span class="tag tag-green">onboarding.paso</span></td><td>Cada paso del onboarding completado</td><td>Fricción, abandono, tiempo de activación</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ MÉTRICAS SAAS ═══ -->
+  <div id="s-metricas" class="section">
+    <div class="page-header">
+      <div class="page-tag">Finanzas SaaS</div>
+      <h1>Métricas que importan para crecer</h1>
+      <p>Estas son las métricas que los inversores miran, que los fundadores necesitan y que la IA va a calcular automáticamente para mostrarte en tu dashboard.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card card-accent">
+        <h3>MRR — Monthly Recurring Revenue</h3>
+        <p>Ingresos recurrentes mensuales. La métrica más importante de un SaaS. Suma de todos los planes activos en el mes. Desagregado por plan, rubro y origen.</p>
+        <div><span class="tag tag-gold">Crítico</span><span class="tag tag-gray">Tiempo real</span></div>
+      </div>
+      <div class="card">
+        <h3>ARR — Annual Recurring Revenue</h3>
+        <p>MRR × 12. Representa el valor anualizado del negocio. Es el número que se usa para valorar la empresa si buscás inversión.</p>
+        <div><span class="tag tag-pr">Estratégico</span></div>
+      </div>
+      <div class="card">
+        <h3>Churn Rate</h3>
+        <p>Porcentaje de clientes que se van cada mes. Un churn del 5% mensual destruye el negocio. La IA predice churn antes de que ocurra para que puedas actuar.</p>
+        <div><span class="tag tag-red">Crítico</span><span class="tag tag-gray">IA predictivo</span></div>
+      </div>
+      <div class="card">
+        <h3>LTV — Lifetime Value</h3>
+        <p>Cuánto vale un cliente durante toda su relación con vos. LTV = ARPU / Churn Rate. Define cuánto podés gastar para adquirir un cliente nuevo.</p>
+        <div><span class="tag tag-pr">Estratégico</span></div>
+      </div>
+      <div class="card card-green">
+        <h3>NRR — Net Revenue Retention</h3>
+        <p>Si los upgrades compensan el churn. NRR &gt; 100% significa que el negocio crece solo con los clientes existentes. Es el indicador de salud SaaS más importante.</p>
+        <div><span class="tag tag-green">Élite SaaS</span></div>
+      </div>
+      <div class="card">
+        <h3>CAC — Customer Acquisition Cost</h3>
+        <p>Cuánto cuesta conseguir un cliente nuevo. Incluye marketing, vendedores, comisiones. La IA calcula CAC por canal para que sepas dónde invertir.</p>
+        <div><span class="tag tag-gold">Vendedores</span></div>
+      </div>
+    </div>
+
+    <h2>Gestión de vendedores</h2>
+    <div class="card card-accent">
+      <p>Cada vendedor tiene su propio dashboard dentro de tu panel admin. La IA calcula automáticamente: clientes asignados, MRR generado, tasa de conversión, comisiones del mes y proyección. Podés comparar rendimiento entre vendedores, detectar cuál cierra más upgrades y cuál tiene mayor churn en su cartera. Las metas se definen en el panel y el sistema alerta cuando un vendedor está por debajo del objetivo.</p>
+      <div style="margin-top:0.6rem"><span class="tag tag-gold">MRR por vendedor</span><span class="tag tag-gold">Comisiones automáticas</span><span class="tag tag-gold">Ranking en tiempo real</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIA — SISTEMA IA ═══ -->
+  <div id="s-maia" class="section">
+    <div class="page-header">
+      <div class="page-tag">Inteligencia artificial — Diseño de sistema</div>
+      <h1>Maia — La IA de Gestión 360 iA</h1>
+      <p>Maia no es un chatbot. Es la inteligencia transversal que vive dentro del portal de cada tenant, presente en todos los módulos, en todos los planes. Su nivel de capacidad crece con el plan contratado — generando deseo de upgrade desde el primer día.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Principio de diseño</h3>
+      <p>El tenant en plan Starter ve a Maia presente en todos lados pero con candado dorado. Ve la sugerencia de respuesta en WhatsApp pero borrosa. Ve el botón "Maia detectó algo" en el dashboard pero no puede abrirlo. Eso genera deseo. La IA es la mejor herramienta de conversión del producto.</p>
+    </div>
+
+    <h2>Las 3 capas de Maia</h2>
+
+    <div class="layer">
+      <div class="layer-num" style="background:#9CA3AF">1</div>
+      <div>
+        <div class="layer-title">Maia Starter — presente pero limitada</div>
+        <div class="layer-sub">Chat flotante en el portal que responde preguntas sobre cómo usar el sistema. No tiene acceso a los datos del negocio. En WhatsApp sugiere respuestas de cortesía genéricas — útiles pero claramente básicas. En cada módulo aparece con indicadores mínimos. Al final de cada sugerencia básica aparece el mensaje: <em>"Activá Plan Pro para respuestas inteligentes basadas en tu negocio."</em></div>
+        <div class="layer-when">Plan: Starter · Costo tokens: mínimo (~50 input / 30 output por interacción)</div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num" style="background:#506886">2</div>
+      <div>
+        <div class="layer-title">Maia Pro — conoce el negocio</div>
+        <div class="layer-sub">Maia tiene acceso a los datos reales del tenant: rubro, servicios, precios, clientes, historial de conversaciones. En WhatsApp genera sugerencias contextuales e inteligentes — sabe la disponibilidad, los precios, el historial del contacto. En el Dashboard genera alertas proactivas basadas en datos reales. En cada módulo aparece con insights específicos del negocio.</div>
+        <div class="layer-when">Plan: Pro · Costo tokens: moderado (~300–500 input / 100 output por interacción)</div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num" style="background:#B08A55">3</div>
+      <div>
+        <div class="layer-title">Maia Plan IA — proactiva y estratégica</div>
+        <div class="layer-sub">Todo lo de Pro más sugerencias proactivas no pedidas en cada módulo. Maia detecta patrones y actúa antes de que el tenant lo pida: <em>"Tenés 3 cabañas libres este fin de semana largo, ¿genero una campaña?"</em>. Genera contenido — presupuestos, respuestas, descripciones, posts. Reportes en lenguaje natural. Skills IA específicas del rubro con sugerencias accionables avanzadas.</div>
+        <div class="layer-when">Plan: Plan IA · Costo tokens: alto (~800–1500 input / output por interacción)</div>
+      </div>
+    </div>
+
+    <h2>Bot de WhatsApp — producto separado</h2>
+    <div class="card card-accent">
+      <h3>Decisión estratégica</h3>
+      <p>El bot de WhatsApp completamente automatizado (respuestas sin intervención humana) es un producto independiente, no una capa de Maia. Se ofrece como add-on o como servicio separado de la consultora. Tiene su propio precio. Usa el mismo stack (n8n + Evolution API + Claude) pero se vende por separado — lo que permite dos modelos de monetización distintos y evita canibalizar el valor de Maia dentro de la plataforma.</p>
+      <div style="margin-top:0.5rem"><span class="tag tag-gold">Servicio separado</span><span class="tag tag-pr">Add-on opcional</span><span class="tag tag-gray">n8n + Evolution API + Claude</span></div>
+    </div>
+
+    <h2>Presencia de Maia por módulo</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Starter</th><th>Pro</th><th>Plan IA</th></tr></thead>
+      <tbody>
+        <tr><td>Dashboard</td><td>Indicadores básicos, candado visible</td><td>Alertas proactivas con datos reales</td><td>Sugerencias del día, análisis de patrones</td></tr>
+        <tr><td>WhatsApp</td><td>Respuestas de cortesía genéricas</td><td>Sugerencias contextuales inteligentes</td><td>Todo Pro + análisis de conversaciones</td></tr>
+        <tr><td>CRM</td><td>Candado visible</td><td>Scoring de clientes, reactivación</td><td>Predicción de comportamiento</td></tr>
+        <tr><td>Agenda / Turnos</td><td>Candado visible</td><td>Predicción de demanda</td><td>Optimización proactiva de agenda</td></tr>
+        <tr><td>Facturación</td><td>Candado visible</td><td>Generación de presupuestos</td><td>Análisis de rentabilidad por servicio</td></tr>
+        <tr><td>Stats</td><td>Números básicos</td><td>Lenguaje natural básico</td><td>Reportes completos, preguntas libres</td></tr>
+        <tr><td>Módulos del rubro</td><td>Funcionalidad básica</td><td>Skills IA Nivel 2</td><td>Skills IA Nivel 3 completas</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ MAIA — WHATSAPP ═══ -->
+  <div id="s-maia-wsp" class="section">
+    <div class="page-header">
+      <div class="page-tag">Maia — Módulo WhatsApp</div>
+      <h1>Conversaciones con IA por capas</h1>
+      <p>El módulo de WhatsApp es donde Maia es más visible y más vendedora. El tenant convive con la IA, la ve trabajar, y entiende qué se pierde si no tiene el plan superior.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Decisión de diseño clave</h3>
+      <p>Vos como superadmin no intervenís en las conversaciones entre el tenant y sus clientes. Cada tenant gestiona su propio inbox. Tu panel admin muestra métricas globales de uso del módulo, pero no el contenido de las conversaciones.</p>
+    </div>
+
+    <h2>Comportamiento de Maia por plan en WhatsApp</h2>
+
+    <div class="layer">
+      <div class="layer-num" style="background:#9CA3AF">1</div>
+      <div>
+        <div class="layer-title">Starter — cortesía inteligente</div>
+        <div class="layer-sub">
+          Maia sugiere 1 respuesta por mensaje, pero es genérica — no sabe nada del negocio.<br><br>
+          Ejemplos de respuestas Starter:<br>
+          • <em>"Hola, gracias por contactarnos. En breve te respondemos."</em><br>
+          • <em>"Claro, con gusto te ayudamos. ¿Podés darnos más detalle?"</em><br>
+          • <em>"Recibimos tu consulta, te respondemos a la brevedad."</em><br><br>
+          Al pie de la sugerencia aparece: <em>"🔒 Activá Plan Pro para respuestas basadas en tu negocio real."</em>
+        </div>
+        <div class="layer-when">Prompt: ~50 tokens · Modelo: Claude Haiku · Costo: casi $0</div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num" style="background:#506886">2</div>
+      <div>
+        <div class="layer-title">Pro — sugerencias contextuales</div>
+        <div class="layer-sub">
+          Maia conoce el negocio. El prompt incluye: rubro, servicios, precios, disponibilidad actual, historial del contacto. La sugerencia es específica, útil y lista para enviar con un click.<br><br>
+          Ejemplo para hotel:<br>
+          <em>"¡Hola Ignacio! Tenemos disponibilidad del 5 al 12 de julio. Cabaña Pino (2+1, $38.000/noche) o Cabaña Mayor ($52.000/noche, jacuzzi). ¿Te envío fotos?"</em><br><br>
+          El tenant puede aceptar la sugerencia, editarla o ignorarla. Un click para enviar.
+        </div>
+        <div class="layer-when">Prompt: ~300–500 tokens · Modelo: Claude Haiku · Costo: ~$0.001 por sugerencia</div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-num" style="background:#B08A55">3</div>
+      <div>
+        <div class="layer-title">Plan IA — sugerencias + análisis</div>
+        <div class="layer-sub">
+          Todo lo de Pro más: análisis de sentimiento de la conversación, detección de leads calientes, sugerencias de seguimiento post-conversación, resumen automático de conversaciones largas. Maia puede decir: <em>"Este contacto preguntó 3 veces sobre precios — es un lead caliente. Sugiero hacer un descuento del 10% para cerrar."</em>
+        </div>
+        <div class="layer-when">Prompt: ~800–1500 tokens · Modelo: Claude Sonnet · Costo: ~$0.005 por análisis</div>
+      </div>
+    </div>
+
+    <h2>Stack técnico del módulo WhatsApp</h2>
+    <table>
+      <thead><tr><th>Componente</th><th>Tecnología</th><th>Función</th></tr></thead>
+      <tbody>
+        <tr><td>Recepción de mensajes</td><td>Evolution API (webhook)</td><td>Recibe mensajes entrantes por tenant</td></tr>
+        <tr><td>Orquestación</td><td>n8n</td><td>Recibe webhook → determina plan → llama a Claude → devuelve sugerencia</td></tr>
+        <tr><td>Generación IA</td><td>Claude API (Haiku / Sonnet)</td><td>Genera la sugerencia de respuesta según nivel del plan</td></tr>
+        <tr><td>Contexto del negocio</td><td>DB tenant (rubro, servicios, precios)</td><td>Inyectado en el prompt para respuestas Pro/Plan IA</td></tr>
+        <tr><td>Historial</td><td>mensajes_whatsapp (schema tenant)</td><td>Últimos N mensajes del contacto para contexto</td></tr>
+        <tr><td>Envío</td><td>Evolution API</td><td>El tenant aprueba y Maia envía, o el tenant envía manualmente</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Skill: Respuestas WhatsApp</h2>
+    <div class="card card-green">
+      <h3>Un skill, dos niveles internos</h3>
+      <p>La lógica de generación de respuestas vive en un único skill llamado <strong>"skill_wsp_respuesta"</strong> con dos comportamientos según el plan del tenant:</p>
+      <p style="margin-top:0.5rem"><strong>nivel_basico</strong> (Starter): prompt minimalista, sin contexto del negocio, respuesta de cortesía genérica.<br>
+      <strong>nivel_pro</strong> (Pro / Plan IA): prompt enriquecido con contexto completo — rubro, servicios, precios, historial del contacto, disponibilidad actual.</p>
+      <p style="margin-top:0.5rem">El código llama siempre al mismo skill. El nivel se determina automáticamente según el plan del tenant. Esto mantiene el código limpio y la lógica centralizada.</p>
+      <div style="margin-top:0.5rem"><span class="tag tag-green">Código limpio</span><span class="tag tag-pr">Lógica centralizada</span><span class="tag tag-gold">Escalable por plan</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIA — COSTOS IA ═══ -->
+  <div id="s-maia-costos" class="section">
+    <div class="page-header">
+      <div class="page-tag">Maia — Modelo de costos</div>
+      <h1>Costos de IA por plan</h1>
+      <p>Los costos de tokens están absorbidos en el precio de cada plan. El tenant nunca ve ni paga por tokens — tiene una experiencia de IA incluida. El margen es positivo desde el día 1.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Principio de pricing</h3>
+      <p>No cobrar por tokens al tenant — eso es complejo de explicar y genera fricción. En cambio, el costo de IA está incluido en el precio del plan como infraestructura invisible. Igual que el hosting o la base de datos — el tenant no paga por servidor, paga por el producto.</p>
+    </div>
+
+    <h2>Consumo de tokens por capa</h2>
+    <table>
+      <thead><tr><th>Capa</th><th>Tokens entrada</th><th>Tokens salida</th><th>Modelo</th><th>Costo aprox/interacción</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-gray">Starter</span></td><td>~50</td><td>~30</td><td>Claude Haiku</td><td>~$0.00003 USD</td></tr>
+        <tr><td><span class="tag tag-pr">Pro</span></td><td>~300–500</td><td>~100</td><td>Claude Haiku</td><td>~$0.001 USD</td></tr>
+        <tr><td><span class="tag tag-gold">Plan IA</span></td><td>~800–1500</td><td>~300</td><td>Claude Sonnet</td><td>~$0.005 USD</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Tokens incluidos por plan (estimación mensual)</h2>
+    <table>
+      <thead><tr><th>Plan</th><th>Tokens/mes incluidos</th><th>Costo real IA</th><th>Margen sobre precio plan</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-gray">Starter</span></td><td>~50.000</td><td>~$0.15 USD</td><td>Alta — prácticamente gratis</td></tr>
+        <tr><td><span class="tag tag-pr">Pro</span></td><td>~500.000</td><td>~$1.50 USD</td><td>Muy alta con Claude Haiku</td></tr>
+        <tr><td><span class="tag tag-gold">Plan IA</span></td><td>~2.000.000</td><td>~$6 USD</td><td>Alta con Sonnet a precios actuales</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card card-green">
+      <h3>Conclusión de costos</h3>
+      <p>El costo de IA para un tenant típico es completamente absorbible. La Capa Starter prácticamente no tiene costo — es la mejor herramienta de conversión del producto sin impacto en el margen. Con Claude Haiku para el 80% de las interacciones y Sonnet solo para análisis complejos, el costo total de IA por tenant se mantiene muy por debajo del precio del plan.</p>
+      <div style="margin-top:0.5rem"><span class="tag tag-green">Starter: herramienta de conversión gratuita</span><span class="tag tag-pr">Pro / Plan IA: margen saludable</span></div>
+    </div>
+
+    <h2>Modelo de selección de modelo por tarea</h2>
+    <table>
+      <thead><tr><th>Tarea</th><th>Modelo</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Sugerencias WhatsApp Starter</td><td>Claude Haiku</td><td>Alta frecuencia, respuesta simple, costo mínimo</td></tr>
+        <tr><td>Sugerencias WhatsApp Pro</td><td>Claude Haiku</td><td>Contexto moderado, sigue siendo frecuente</td></tr>
+        <tr><td>Análisis de conversaciones Plan IA</td><td>Claude Sonnet</td><td>Razonamiento complejo, baja frecuencia</td></tr>
+        <tr><td>Reportes en lenguaje natural</td><td>Claude Sonnet</td><td>On demand, alta calidad requerida</td></tr>
+        <tr><td>Generación de documentos</td><td>Claude Sonnet</td><td>Calidad de escritura crítica</td></tr>
+        <tr><td>Clasificación y scoring</td><td>Claude Haiku</td><td>Alta frecuencia, lógica simple</td></tr>
+        <tr><td>Skills IA Nivel 3</td><td>Claude Sonnet</td><td>Análisis estratégico del negocio</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ IA SKILLS ═══ -->
+  <div id="s-ia-skills" class="section">
+    <div class="page-header">
+      <div class="page-tag">Inteligencia artificial</div>
+      <h1>IA Skills — 3 capas de inteligencia</h1>
+      <p>La IA no es un chatbot. Es una capa transversal que observa, aprende y actúa. Se implementa en 3 fases alineadas con el crecimiento del negocio.</p>
+    </div>
+
+    <h2>Capa 1 — Operativa (Mes 1–3)</h2>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--pr-pale)">🔔</div>
+      <div><div class="skill-title">Detección de churn</div><div class="skill-desc">Monitorea frecuencia de login, uso de módulos y engagement. Alerta cuando un cliente lleva N días sin actividad.</div><div class="skill-meta"><span class="tag tag-pr">Claude Haiku</span><span class="tag tag-gray">Tiempo real</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--em-pale)">💬</div>
+      <div><div class="skill-title">Respuestas WhatsApp</div><div class="skill-desc">Sugiere y envía respuestas automáticas a mensajes entrantes. Clasifica intención, detecta urgencias y escala a humano si necesario.</div><div class="skill-meta"><span class="tag tag-pr">Claude Haiku</span><span class="tag tag-gray">Alta frecuencia</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--accent-pale)">📊</div>
+      <div><div class="skill-title">Reportes en lenguaje natural</div><div class="skill-desc">"¿Cómo me fue este mes?" → Claude analiza los datos del tenant y genera un resumen ejecutivo con insights y recomendaciones.</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">On demand</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--pr-pale)">📝</div>
+      <div><div class="skill-title">Generación de documentos</div><div class="skill-desc">Presupuestos, contratos, cartas de bienvenida, facturas descriptivas. Genera contenido contextual basado en los datos reales del negocio.</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">On demand</span></div></div>
+    </div>
+
+    <h2>Capa 2 — Negocio (Mes 3–6)</h2>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--accent-pale)">📈</div>
+      <div><div class="skill-title">Marketing inteligente</div><div class="skill-desc">Detecta segmentos listos para upgrade, genera mensajes de reactivación personalizados, sugiere campañas por rubro y estacionalidad.</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">Proactivo</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--em-pale)">💰</div>
+      <div><div class="skill-title">Finanzas predictivas</div><div class="skill-desc">Proyecta MRR para los próximos 3 meses, detecta patrones de impago, calcula LTV por rubro y recomienda ajustes de precios.</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">Semanal</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--pr-pale)">🎯</div>
+      <div><div class="skill-title">Scoring de retención</div><div class="skill-desc">Asigna score 0–100 a cada cliente basado en engagement, pagos y uso. Los clientes con score bajo reciben atención prioritaria automática.</div><div class="skill-meta"><span class="tag tag-pr">Claude Haiku</span><span class="tag tag-gray">Diario</span></div></div>
+    </div>
+
+    <h2>Capa 3 — Estratégica (a futuro, cuando haya base de clientes)</h2>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--accent-pale)">🧠</div>
+      <div><div class="skill-title">Consejero de crecimiento (para vos)</div><div class="skill-desc">Analiza el portfolio completo de clientes y te dice: qué rubros tienen más potencial, qué módulos convendría desarrollar, dónde está el dinero que no estás captando. Tu socio estratégico IA.</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">Mensual / On demand</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--em-pale)">🔬</div>
+      <div><div class="skill-title">Benchmarking entre tenants</div><div class="skill-desc">Compara métricas anonimizadas entre negocios del mismo rubro. "Tu hotel tiene 65% de ocupación promedio — los mejores del sistema tienen 82%. Aquí está la diferencia."</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">Semanal</span></div></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-ico" style="background:var(--pr-pale)">🗺️</div>
+      <div><div class="skill-title">Expansión de mercado</div><div class="skill-desc">Detecta patrones geográficos, rubros emergentes y oportunidades de expansión. "Hay 3 municipios con perfil GovTech en Buenos Aires que no tienen solución digital."</div><div class="skill-meta"><span class="tag tag-gold">Claude Sonnet</span><span class="tag tag-gray">Mensual</span></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ IA ADMIN ═══ -->
+  <div id="s-ia-admin" class="section">
+    <div class="page-header">
+      <div class="page-tag">IA para el dueño del SaaS</div>
+      <h1>Tu copiloto de negocio</h1>
+      <p>La IA en tu panel admin no responde preguntas — te guía para crecer. Es proactiva, contextual y habla en términos de negocio, no de tecnología.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Lo que la IA te dice cada lunes a las 9am</h3>
+      <p>"Esta semana tenés 2 clientes en riesgo alto de churn que representan $28.000 ARS/mes de MRR. Hay 3 clientes listos para upgrade que podrían sumar $45.000. Tu vendedor más efectivo cerró 2 deals esta semana. El rubro Salud creció 18% en engagement. Aquí están las 5 acciones que te recomiendo para esta semana."</p>
+    </div>
+
+    <h2>Dashboard financiero con IA</h2>
+    <div class="grid3">
+      <div class="card"><h3>MRR en tiempo real</h3><p>Desglosado por plan, rubro, canal y vendedor. Con proyección a 30, 60 y 90 días basada en tendencia actual y pipeline.</p></div>
+      <div class="card"><h3>Análisis de vendedores</h3><p>MRR generado, tasa de conversión, comisiones del mes, clientes en riesgo en su cartera y comparativo con el equipo.</p></div>
+      <div class="card"><h3>P&L simplificado</h3><p>Ingresos vs costos de infraestructura vs costos de IA. Margen neto en tiempo real. La IA alerta si el costo de API supera el umbral configurado.</p></div>
+    </div>
+
+    <h2>Preguntas que podés hacerle a tu IA</h2>
+    <div class="card" style="background:var(--bg)">
+      <p style="font-family:monospace;font-size:0.8rem;color:var(--pr-d)">
+        "¿Cuál es mi rubro más rentable este trimestre?"<br>
+        "¿Qué clientes tienen más probabilidad de irse este mes?"<br>
+        "Si subo el precio del plan Pro 15%, ¿cuántos clientes perdería?"<br>
+        "¿Cuánto MRR necesito para cubrir los costos del próximo mes?"<br>
+        "¿Qué módulo debería desarrollar primero para el rubro restaurante?"<br>
+        "Comparame el rendimiento de mis 3 vendedores este mes."<br>
+        "¿Cuándo voy a llegar a $1M ARS de MRR a este ritmo?"
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ IA TENANT ═══ -->
+  <div id="s-ia-tenant" class="section">
+    <div class="page-header">
+      <div class="page-tag">IA para los clientes</div>
+      <h1>El consultor IA de cada negocio</h1>
+      <p>Cada tenant tiene su propio asistente IA que conoce su negocio, sus clientes, sus números y su rubro. No es genérico — es contextual y personalizado.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card card-green">
+        <h3>Memoria del negocio</h3>
+        <p>La IA del tenant recuerda el historial completo: clientes frecuentes, temporadas de alta demanda, módulos más usados, conversaciones de WhatsApp pasadas. Cada respuesta está anclada en datos reales del negocio.</p>
+      </div>
+      <div class="card card-accent">
+        <h3>Acciones proactivas</h3>
+        <p>No espera que le pregunten. Detecta que hay 3 turnos libres mañana y sugiere enviar recordatorio a clientes. Detecta que una póliza vence en 7 días y genera el mensaje. Detecta stock bajo y genera la orden de compra.</p>
+      </div>
+    </div>
+
+    <h2>Skills específicas por rubro</h2>
+    <table>
+      <thead><tr><th>Rubro</th><th>Skills únicas de IA</th></tr></thead>
+      <tbody>
+        <tr><td>Hotel / Cabañas</td><td>Tarificación dinámica, predicción de ocupación, carta de bienvenida personalizada, upgrade sugerido al check-in</td></tr>
+        <tr><td>Salud / Clínica</td><td>Resumen de historia clínica pre-consulta, predicción de ausentismo, reactivación de pacientes perdidos</td></tr>
+        <tr><td>Inmobiliaria</td><td>Matching propiedades-clientes, valuación estimada por zona, generación de descripciones de propiedades</td></tr>
+        <tr><td>Salón de Eventos</td><td>Presupuesto automático por tipo de evento, predicción de demanda estacional, gestión de proveedores IA</td></tr>
+        <tr><td>Restaurante</td><td>Predicción de demanda por plato/hora, sugerencia de menú según stock, overbooking inteligente</td></tr>
+        <tr><td>Contador/Abogado</td><td>Vencimientos AFIP automáticos, resumen de expediente, generación de documentos legales/contables</td></tr>
+        <tr><td>GovTech</td><td>Clasificación de reclamos, asignación automática por área, generación de informes de gestión narrativos</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ ROADMAP ═══ -->
+  <div id="s-roadmap" class="section">
+    <div class="page-header">
+      <div class="page-tag">Hoja de ruta</div>
+      <h1>Del shell visual al producto completo</h1>
+      <p>Cada fase tiene entregables concretos. No avanzamos a la siguiente sin que la anterior funcione en producción.</p>
+    </div>
+
+    <div class="tl">
+      <div class="tl-item gold">
+        <div class="tl-phase">Ahora mismo — completado</div>
+        <div class="tl-title">Shell visual del panel admin</div>
+        <div class="tl-desc">Sidebar colapsable, design system, dashboard con KPIs, vistas de clientes, módulos, planes, comunicaciones, alertas IA, configuración. Base visual sólida.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase">Fase 1 — Próximas 2 semanas</div>
+        <div class="tl-title">Backend base + autenticación</div>
+        <div class="tl-desc">Node.js/Express en Easypanel, PostgreSQL schema público, JWT + refresh tokens, endpoints de autenticación, tablas: tenants, planes, módulos, usuarios_admin, vendedores. <strong>✅ Backend ya desplegado.</strong> Skills IA Nivel 1 activadas.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase">Fase 2 — Semana 3–4</div>
+        <div class="tl-title">API de clientes + panel conectado</div>
+        <div class="tl-desc">CRUD de tenants, asignación de planes dinámicos, creación automática de schema por tenant, panel admin conectado a datos reales (no mock), métricas básicas en dashboard.</div>
+      </div>
+      <div class="tl-item gold">
+        <div class="tl-phase">Fase 3 — Mes 2</div>
+        <div class="tl-title">Event Layer + IA Capa 1</div>
+        <div class="tl-desc">Sistema de eventos, detección de churn, alertas proactivas en dashboard, primer integración Claude API para reportes en lenguaje natural y sugerencias en panel.</div>
+      </div>
+      <div class="tl-item green">
+        <div class="tl-phase">Fase 4 — Mes 2–3</div>
+        <div class="tl-title">Portal tenant base + WhatsApp</div>
+        <div class="tl-desc">Portal del cliente funcional con 2 rubros (hotel + salud), Evolution API conectada, bot de WhatsApp con IA, módulos básicos operativos, MercadoPago integrado.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase">Fase 5 — Mes 3–4</div>
+        <div class="tl-title">Dashboard financiero + vendedores</div>
+        <div class="tl-desc">MRR, ARR, churn rate, LTV en tiempo real. Panel de vendedores con comisiones automáticas. IA Capa 2: proyecciones financieras y scoring de retención.</div>
+      </div>
+      <div class="tl-item gold">
+        <div class="tl-phase">Fase 6 — Mes 4–6</div>
+        <div class="tl-title">App PWA + self-service onboarding</div>
+        <div class="tl-desc">PWA instalable, registro self-service, onboarding guiado por IA, todos los rubros disponibles, MercadoPago self-service, upgrade/downgrade automático.</div>
+      </div>
+      <div class="tl-item green">
+        <div class="tl-phase">Fase 7 — Mes 6–12</div>
+        <div class="tl-title">IA Capa 3 + escala</div>
+        <div class="tl-desc">Consejero estratégico, benchmarking entre tenants, expansión de mercado, white label, API pública, React Native, marketplace de módulos.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD SPEC ═══ -->
+  <div id="s-dashboard-spec" class="section">
+    <div class="page-header">
+      <div class="page-tag">Especificación de producto</div>
+      <h1>Dashboard — especificación completa</h1>
+      <p>Lo que debe mostrar el dashboard principal cuando esté conectado a datos reales.</p>
+    </div>
+
+    <h2>Zona 1 — KPIs (fila superior)</h2>
+    <table>
+      <thead><tr><th>KPI</th><th>Cálculo</th><th>Alerta IA</th></tr></thead>
+      <tbody>
+        <tr><td>Clientes activos</td><td>Tenants con estado = activo</td><td>Si baja vs mes anterior</td></tr>
+        <tr><td>MRR</td><td>Suma de planes activos del mes</td><td>Si crece &lt;5% vs mes anterior</td></tr>
+        <tr><td>Churn rate</td><td>Bajas del mes / total inicio mes × 100</td><td>Si supera 3%</td></tr>
+        <tr><td>Clientes en riesgo</td><td>Score IA &lt; 40</td><td>Siempre visible si &gt; 0</td></tr>
+        <tr><td>NRR</td><td>(MRR inicio + upgrades - downgrades - churn) / MRR inicio</td><td>Si &lt; 100%</td></tr>
+        <tr><td>Nuevos este mes</td><td>Tenants creados en el mes corriente</td><td>Si &lt; meta del mes</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Zona 2 — Panel IA (siempre visible)</h2>
+    <div class="card card-gold">
+      <p>El panel IA no es estático. Se regenera cada mañana con Claude Sonnet analizando los eventos de las últimas 24hs. Máximo 3 bloques: alerta crítica, oportunidad y proyección. Cada bloque tiene una acción directa ejecutable desde el panel.</p>
+    </div>
+
+    <h2>Zona 3 — Actividad + Riesgo</h2>
+    <p>Feed de últimas 24hs de actividad del sistema (logins, activaciones, pagos, alertas). Panel de clientes en riesgo con score IA y acción sugerida. Click en cualquier cliente → detalle directo.</p>
+
+    <h2>Zona 4 — Gráficos</h2>
+    <p>Línea: MRR de los últimos 8 meses con proyección punteada a 3 meses. Barras: nuevos clientes por mes con distribución por rubro. Ambos en colores del design system (#506886 y #B08A55).</p>
+  </div>
+
+  <!-- ═══ STACK ═══ -->
+  <div id="s-stack" class="section">
+    <div class="page-header">
+      <div class="page-tag">Stack técnico</div>
+      <h1>Tecnología y decisiones de arquitectura</h1>
+      <p>Cada decisión está tomada pensando en escalar a 500+ tenants sin reescribir.</p>
+    </div>
+
+    <table>
+      <thead><tr><th>Capa</th><th>Tecnología</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend admin</td><td>HTML/CSS/JS (actual) → Next.js</td><td>Migración gradual. El shell actual es la base.</td></tr>
+        <tr><td>Frontend portal tenant</td><td>Next.js (React)</td><td>SSR para SEO, rutas dinámicas por subdominio</td></tr>
+        <tr><td>Backend API</td><td>Node.js + Express</td><td>Ya corriendo en Easypanel. Escalable.</td></tr>
+        <tr><td>Base de datos</td><td>PostgreSQL + schema-per-tenant</td><td>Aislamiento total, queries eficientes, pg_cron para jobs</td></tr>
+        <tr><td>Caché</td><td>Redis</td><td>Sesiones, rate limiting, datos frecuentes</td></tr>
+        <tr><td>IA principal</td><td>Claude API (Anthropic)</td><td>Mejor razonamiento, contexto largo</td></tr>
+        <tr><td>IA fallback / volumen</td><td>GPT-4o mini / Haiku</td><td>Tareas simples de alta frecuencia → costo bajo</td></tr>
+        <tr><td>Automatizaciones</td><td>n8n</td><td>Flujos sin código, conecta todo</td></tr>
+        <tr><td>WhatsApp</td><td>Evolution API</td><td>Multi-instancia, una por tenant</td></tr>
+        <tr><td>Pagos</td><td>MercadoPago API</td><td>Suscripciones recurrentes en ARS</td></tr>
+        <tr><td>Mapas</td><td>Google Maps API</td><td>Geolocalización, heatmaps, rutas</td></tr>
+        <tr><td>Infra</td><td>Hostinger VPS + Easypanel + Docker</td><td>Ya configurado, control total</td></tr>
+        <tr><td>CI/CD</td><td>GitHub Actions</td><td>Deploy automático por rama</td></tr>
+        <tr><td>Mobile</td><td>PWA → React Native</td><td>PWA primero, nativo cuando haya base</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card card-accent" style="margin-top:1rem">
+      <h3>Decisión crítica: modelo de IA por tarea</h3>
+      <p><strong>Claude Haiku</strong> — clasificar mensajes WhatsApp, detectar intención, calcular scores, alertas simples. Alta frecuencia, bajo costo.</p>
+      <p style="margin-top:0.4rem"><strong>Claude Sonnet</strong> — reportes en lenguaje natural, generación de documentos, análisis estratégico, benchmarking. Baja frecuencia, alta calidad.</p>
+      <p style="margin-top:0.4rem">Con esta separación, el costo de IA para un tenant típico es <strong>$15–30 USD/mes</strong> — completamente absorbible en el precio del plan.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ MÓDULOS ADMIN ═══ -->
+  <div id="s-modulos-admin" class="section">
+    <div class="page-header">
+      <div class="page-tag">Panel de administración</div>
+      <h1>Módulos del panel admin</h1>
+      <p>Lo que vos ves como dueño del SaaS. Tu cockpit de negocio.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card card-accent">
+        <h3>Dashboard principal</h3>
+        <p>KPIs del negocio en tiempo real: clientes activos, MRR, módulos activos, clientes en riesgo. Actividad reciente, gráficos de crecimiento y panel IA con sugerencias del día.</p>
+        <div><span class="tag tag-pr">Fase 1</span><span class="tag tag-green">IA integrada</span></div>
+      </div>
+      <div class="card card-accent">
+        <h3>Gestión de clientes</h3>
+        <p>Lista paginada de todos los tenants con búsqueda y filtros por rubro, plan y estado. Detalle de cada cliente: módulos activos, uso, historial de pagos, score IA, acciones directas.</p>
+        <div><span class="tag tag-pr">Fase 1</span></div>
+      </div>
+      <div class="card">
+        <h3>Módulos y planes</h3>
+        <p>Catálogo de módulos del sistema. Activar o desactivar módulos por cliente. Crear y editar planes dinámicos: nombre, precio, módulos incluidos, límites. Sin tocar código.</p>
+        <div><span class="tag tag-pr">Fase 1</span></div>
+      </div>
+      <div class="card">
+        <h3>Comunicaciones</h3>
+        <p>Chat directo con cada cliente desde el panel. Historial de conversaciones. Respuestas sugeridas por IA. Notificaciones masivas por segmento (rubro, plan, estado).</p>
+        <div><span class="tag tag-pr">Fase 1</span><span class="tag tag-green">IA respuestas</span></div>
+      </div>
+      <div class="card">
+        <h3>Vendedores</h3>
+        <p>Alta y gestión de vendedores. Asignación de clientes. MRR generado por vendedor. Comisiones calculadas automáticamente. Metas mensuales y ranking del equipo.</p>
+        <div><span class="tag tag-gold">Fase 2</span><span class="tag tag-green">IA scoring</span></div>
+      </div>
+      <div class="card">
+        <h3>Finanzas</h3>
+        <p>MRR, ARR, churn rate, LTV por rubro. Ingresos vs costos de infraestructura e IA. P&L simplificado. Proyecciones a 30/60/90 días. Alertas de impago y suscripciones vencidas.</p>
+        <div><span class="tag tag-gold">Fase 2</span><span class="tag tag-green">IA predictivo</span></div>
+      </div>
+      <div class="card">
+        <h3>Alertas IA</h3>
+        <p>Centro de alertas generadas por la IA: clientes en riesgo de churn, oportunidades de upgrade, pagos pendientes, clientes sin actividad, onboardings incompletos.</p>
+        <div><span class="tag tag-pr">Fase 1</span><span class="tag tag-green">IA proactivo</span></div>
+      </div>
+      <div class="card">
+        <h3>Integraciones del sistema</h3>
+        <p>Estado de todas las integraciones activas: WhatsApp (Evolution API), MercadoPago, Google Maps, AFIP, n8n. Logs de errores y reconexión con un clic.</p>
+        <div><span class="tag tag-pr">Fase 1</span></div>
+      </div>
+      <div class="card">
+        <h3>Auditoría</h3>
+        <p>Log completo de acciones del sistema: quién hizo qué, cuándo, desde qué IP. Filtrable por usuario, acción y fecha. Exportable para cumplimiento.</p>
+        <div><span class="tag tag-pr">Fase 1</span></div>
+      </div>
+      <div class="card">
+        <h3>Configuración</h3>
+        <p>Datos de la empresa, colores del sistema, modelo de IA activo, límites de tokens, seguridad (JWT, HTTPS, rate limiting), apariencia general del panel.</p>
+        <div><span class="tag tag-pr">Fase 1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MÓDULOS UNIVERSALES ═══ -->
+  <div id="s-modulos-universales" class="section">
+    <div class="page-header">
+      <div class="page-tag">Portal del cliente — todos los rubros</div>
+      <h1>Módulos universales</h1>
+      <p>Disponibles para cualquier rubro. Son la base de todo tenant desde el día 1.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card card-green">
+        <h3>Dashboard del negocio</h3>
+        <p>Resumen del día: clientes activos, ingresos, tareas pendientes, alertas. El panel IA sugiere las 3 acciones más importantes para hoy. Todo en lenguaje simple, sin jerga técnica.</p>
+        <div><span class="tag tag-green">IA integrada</span><span class="tag tag-gray">Starter</span></div>
+      </div>
+      <div class="card card-green">
+        <h3>CRM — Gestión de clientes</h3>
+        <p>Base de contactos del negocio. Ficha de cada cliente con historial completo. La IA sugiere a quién contactar hoy, detecta clientes que no vienen hace tiempo y genera mensajes de reactivación.</p>
+        <div><span class="tag tag-green">IA reactivación</span><span class="tag tag-gray">Starter</span></div>
+      </div>
+      <div class="card">
+        <h3>WhatsApp con IA</h3>
+        <p>Conexión del número de WhatsApp del negocio. Bot que responde automáticamente consultas frecuentes. Respuestas sugeridas por IA para el operador. Historial de conversaciones por cliente.</p>
+        <div><span class="tag tag-green">IA bot + sugerencias</span><span class="tag tag-pr">Pro</span></div>
+      </div>
+      <div class="card">
+        <h3>Agenda / Turnos</h3>
+        <p>Calendario de turnos, reservas o citas. Recordatorios automáticos por WhatsApp. La IA detecta baches de agenda y sugiere cómo llenarlos. Confirmación con un clic desde el mensaje.</p>
+        <div><span class="tag tag-green">IA predicción</span><span class="tag tag-gray">Starter</span></div>
+      </div>
+      <div class="card">
+        <h3>Facturación y presupuestos</h3>
+        <p>Generación de presupuestos y facturas. La IA completa las descripciones automáticamente basándose en el servicio prestado. Seguimiento de pagos pendientes. Integración con AFIP (futuro).</p>
+        <div><span class="tag tag-green">IA generación</span><span class="tag tag-pr">Pro</span></div>
+      </div>
+      <div class="card">
+        <h3>Estadísticas en lenguaje natural</h3>
+        <p>El cliente puede preguntar: "¿Cómo me fue este mes?", "¿Cuál es mi servicio más vendido?", "¿Qué días tengo más demanda?". La IA responde con datos reales del negocio.</p>
+        <div><span class="tag tag-green">IA conversacional</span><span class="tag tag-pr">Pro</span></div>
+      </div>
+      <div class="card">
+        <h3>Notificaciones automáticas</h3>
+        <p>Envío automático de recordatorios, confirmaciones, cobros y promociones. Por WhatsApp, email o SMS. El cliente define las reglas, la IA genera el texto personalizado para cada destinatario.</p>
+        <div><span class="tag tag-green">IA personalización</span><span class="tag tag-pr">Pro</span></div>
+      </div>
+      <div class="card card-gold">
+        <h3>Marketing y RRSS</h3>
+        <p>Generación de contenido para redes sociales, WhatsApp masivo y email. La IA crea posts, historias y campañas basadas en el negocio real: servicios, precios, temporadas, eventos. <em>Ver sección completa →</em></p>
+        <div><span class="tag tag-green">IA contenido</span><span class="tag tag-pr">Pro</span><span class="tag tag-gold">En desarrollo</span></div>
+      </div>
+      <div class="card">
+        <h3>Mapas y geolocalización</h3>
+        <p>Mapa de clientes, propiedades o incidencias. Seguimiento en tiempo real de técnicos o delivery. Filtros por zona y radio. Heatmaps de demanda geográfica.</p>
+        <div><span class="tag tag-gray">Enterprise</span><span class="tag tag-gold">Fase 2</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MÓDULOS POR RUBRO ═══ -->
+  <div id="s-modulos-rubros" class="section">
+    <div class="page-header">
+      <div class="page-tag">Portal del cliente — específicos</div>
+      <h1>Módulos por rubro</h1>
+      <p>Cada rubro tiene módulos específicos que se suman a los universales. Se activan automáticamente al dar de alta el tenant según el rubro elegido.</p>
+    </div>
+
+    <h2>🏨 Hotel / Cabañas / Alojamiento</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Reservas</td><td>Motor de reservas, tarifas dinámicas, calendar de ocupación</td><td>Sugiere tarifas según demanda y eventos locales</td></tr>
+        <tr><td>Habitaciones / Unidades</td><td>Mapa de estado: libre, ocupada, limpieza, mantenimiento</td><td>Asigna unidad ideal según perfil del huésped</td></tr>
+        <tr><td>Check-in / Check-out</td><td>Registro digital, pre check-in online, factura automática</td><td>Genera carta de bienvenida personalizada</td></tr>
+        <tr><td>WhatsApp Concierge</td><td>Bot 24/7 para consultas durante la estadía</td><td>Responde sobre servicios, horarios, solicitudes</td></tr>
+        <tr><td>Mapa de ocupación</td><td>Heatmap histórico y proyectado de ocupación</td><td>Detecta patrones y alerta oportunidades de tarifa</td></tr>
+        <tr><td>Proveedores</td><td>Gestión de proveedores y órdenes de compra</td><td>Genera OC automática cuando stock baja del umbral</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🏥 Consultorio / Clínica / Spa</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Turnos médicos</td><td>Agenda por profesional, turnos online, recordatorios</td><td>Predice ausentismo y rellena turnos liberados</td></tr>
+        <tr><td>Historia clínica básica</td><td>Fichas digitales, evoluciones, adjunto de estudios</td><td>Resume historial antes de cada consulta</td></tr>
+        <tr><td>Pacientes</td><td>Base de pacientes con historial completo</td><td>Detecta pacientes sin turno hace 90+ días</td></tr>
+        <tr><td>Recordatorios automáticos</td><td>WhatsApp 24hs antes con confirmación o cancelación</td><td>Gestiona confirmaciones y reagenda automáticamente</td></tr>
+        <tr><td>Estadísticas de ocupación</td><td>Dashboard de ocupación por profesional y horario</td><td>"¿Cuál es mi turno más productivo del día?"</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🏢 Inmobiliaria</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Propiedades</td><td>Fichas con fotos, características, precio, estado</td><td>Genera descripción de publicación automáticamente</td></tr>
+        <tr><td>Mapa de propiedades</td><td>Google Maps con todas las propiedades del portfolio</td><td>Valuación estimada por zona y características</td></tr>
+        <tr><td>Pipeline de ventas</td><td>Seguimiento de leads desde consulta hasta cierre</td><td>Matching automático cliente-propiedad por perfil</td></tr>
+        <tr><td>Agenda de visitas</td><td>Calendario con asignación a asesores</td><td>Optimiza ruta del día para visitas consecutivas</td></tr>
+        <tr><td>Documentos</td><td>Generador de contratos, reservas, recibos</td><td>Pre-completa datos de la operación automáticamente</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🎉 Salón de Eventos</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Configuración del salón</td><td>Espacios, capacidades, equipamiento disponible</td><td>Sugiere configuración según tipo de evento</td></tr>
+        <tr><td>Presupuestos</td><td>Generador de presupuestos por tipo de evento</td><td>Genera presupuesto completo desde una descripción</td></tr>
+        <tr><td>Agenda de eventos</td><td>Calendario de reservas con vista timeline</td><td>Detecta oportunidades de doble turno</td></tr>
+        <tr><td>Proveedores</td><td>Base de proveedores con scoring y cotizaciones</td><td>Recomienda proveedor según evento y presupuesto</td></tr>
+        <tr><td>Galería</td><td>Portfolio de eventos realizados con fotos</td><td>Sugiere fotos relevantes para presupuestos</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🍽️ Restaurante / Gastronomía</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Menú digital</td><td>Carta con QR dinámico, precios por período</td><td>Genera descripciones de platos y sugiere ajuste de precios</td></tr>
+        <tr><td>Reservas de mesa</td><td>Calendario con distribución por grupos</td><td>Detecta no-show histórico y aplica overbooking inteligente</td></tr>
+        <tr><td>Pedidos</td><td>Pedidos en mesa y delivery con estado en tiempo real</td><td>Predice platos más pedidos por hora y día</td></tr>
+        <tr><td>Caja y estadísticas</td><td>Cierre de caja, ticket promedio, comparativos</td><td>"¿Cuál fue mi plato más rentable esta semana?"</td></tr>
+        <tr><td>Proveedores e insumos</td><td>Stock básico y órdenes de compra</td><td>Alerta cuando insumos pueden faltar según demanda proyectada</td></tr>
+      </tbody>
+    </table>
+
+    <h2>⚖️ Contador / Abogado / Profesional</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Expedientes / Asuntos</td><td>Gestión de casos con etapas, estados y documentos</td><td>Resume estado del expediente y sugiere próximos pasos</td></tr>
+        <tr><td>Agenda profesional</td><td>Reuniones y vencimientos fiscales / legales</td><td>Carga automáticamente vencimientos AFIP del calendario fiscal</td></tr>
+        <tr><td>Documentos</td><td>Generador de cartas, informes y escritos</td><td>"Redactá carta de intimación para el cliente García"</td></tr>
+        <tr><td>Honorarios</td><td>Facturación por tiempo o por caso</td><td>Sugiere honorarios según complejidad y mercado</td></tr>
+        <tr><td>Estadísticas del estudio</td><td>Rentabilidad por cliente, tiempo por caso</td><td>"¿Cuáles son mis clientes más rentables este trimestre?"</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🛡️ Gestor de Seguros</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Pólizas</td><td>Registro por ramo: auto, hogar, vida, ART</td><td>Detecta vencimientos y genera mensajes de renovación</td></tr>
+        <tr><td>Pipeline de renovaciones</td><td>Seguimiento de vencimientos próximos</td><td>Prioriza gestiones por probabilidad de renovación</td></tr>
+        <tr><td>Siniestros</td><td>Registro y seguimiento de siniestros</td><td>Pre-completa formulario de denuncia según tipo</td></tr>
+        <tr><td>Estadísticas de cartera</td><td>Pólizas activas, primas, tasa de retención</td><td>"¿En qué ramo tengo mayor tasa de renovación?"</td></tr>
+        <tr><td>Cross-selling IA</td><td>Detecta oportunidades de nuevas pólizas</td><td>"Este cliente tiene auto pero no tiene hogar"</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🏛️ GovTech / Municipios</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Reclamos ciudadanos</td><td>Portal de reclamos con categorización y seguimiento</td><td>Clasifica reclamo, asigna área y estima tiempo de resolución</td></tr>
+        <tr><td>Turnos ciudadanos</td><td>Reserva online por dependencia y trámite</td><td>Predice demanda y redistribuye capacidad entre áreas</td></tr>
+        <tr><td>Mapa de incidencias</td><td>Heatmap geográfico de reclamos por zona</td><td>Identifica zonas con reclamos recurrentes</td></tr>
+        <tr><td>Notificaciones masivas</td><td>WhatsApp, email y SMS segmentado por zona</td><td>Genera comunicados en lenguaje claro y accesible</td></tr>
+        <tr><td>Reportes de gestión</td><td>KPIs de resolución por área y período</td><td>Genera informe narrativo mensual automáticamente</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🚚 Distribuidora / Logística</h2>
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué hace</th><th>IA</th></tr></thead>
+      <tbody>
+        <tr><td>Clientes y pedidos</td><td>Base de clientes con historial de pedidos y cobranzas</td><td>Detecta clientes en riesgo de abandono por frecuencia de compra</td></tr>
+        <tr><td>Rutas inteligentes</td><td>Planificación de rutas de reparto por zona y prioridad</td><td>Optimiza el orden de visitas para minimizar tiempo y combustible</td></tr>
+        <tr><td>Stock e inventario</td><td>Control de stock en tiempo real por producto</td><td>Alerta de reposición y predice demanda por zona y temporada</td></tr>
+        <tr><td>Seguimiento en tiempo real</td><td>GPS de repartidores y estado de cada entrega</td><td>Detecta demoras y recalcula ruta automáticamente</td></tr>
+        <tr><td>Cobranzas</td><td>Estado de cuenta por cliente, pagos pendientes, mora</td><td>Prioriza gestión de cobranza por probabilidad de recupero</td></tr>
+        <tr><td>Stats de reparto</td><td>Eficiencia de rutas, tiempos de entrega, devoluciones</td><td>"¿Cuál es mi repartidor más eficiente este mes?"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ SKILLS IA POR RUBRO ═══ -->
+  <div id="s-ia-skills-rubro" class="section">
+    <div class="page-header">
+      <div class="page-tag">Sistema de Skills IA — Sección 4 PRD</div>
+      <h1>Skills IA por rubro — inteligencia accionable</h1>
+      <p>Las Skills IA son habilidades especializadas por rubro que analizan los datos reales de cada cliente y generan sugerencias accionables. No son un módulo separado: son una capa transversal que se activa sobre todos los módulos del rubro adquirido.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Principio fundacional</h3>
+      <p>A mayor cantidad de clientes por rubro, mayor precisión y valor de las sugerencias. Este activo de datos sectorial es una ventaja competitiva acumulativa — mejora sola con el tiempo. Los datos se recopilan de forma agregada y anonimizada; los datos identificatorios nunca se comparten entre clientes.</p>
+    </div>
+
+    <h2>Niveles de madurez de datos</h2>
+    <table>
+      <thead><tr><th>Nivel</th><th>Condición</th><th>Tipo de sugerencia</th><th>Ejemplo (Distribuidora)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-gray">Nivel 1 — Onboarding</span></td>
+          <td>Pocos datos cargados. Cliente nuevo.</td>
+          <td>Genéricas por rubro. Mejores prácticas del sector. Guía al cliente a cargar más información.</td>
+          <td><em>"Las distribuidoras que cargan su historial de rutas reciben sugerencias 3× más precisas."</em></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-pr">Nivel 2 — Crecimiento</span></td>
+          <td>Datos básicos disponibles. Patrones simples detectables.</td>
+          <td>Basadas en datos reales del cliente. Correlaciones básicas. Media precisión.</td>
+          <td><em>"Tus entregas del martes tienen 23% más demoras. Distribuidoras similares ajustan el orden de visitas ese día."</em></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-gold">Nivel 3 — Plan IA</span></td>
+          <td>Datos ricos. Modelo entrenado con datos propios + rubro.</td>
+          <td>Alto impacto. Accionables. Cruzan datos propios + benchmarks del rubro.</td>
+          <td><em>"Reorganizá esta ruta: A (9h) → C (10:30h) → B (12h). Ahorro estimado: 18% combustible."</em></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Niveles de acceso según plan</h2>
+    <div class="grid2">
+      <div class="card card-accent">
+        <h3>Plan Free / Básico</h3>
+        <p>El cliente ve el <strong>titular de la sugerencia</strong> — la promesa del valor — pero el detalle está bloqueado. Frecuencia: 1 sugerencia por día. Objetivo: conversión hacia el Plan IA.</p>
+        <div style="background:var(--bg);border-radius:8px;padding:0.8rem;margin-top:0.6rem;font-size:0.8rem;color:var(--pr-d);font-style:italic">
+          🤖 Tu IA detectó una oportunidad en tus rutas del martes.<br>
+          <strong>[Activá el Plan IA para ver el detalle →]</strong>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <h3>Plan IA (Premium)</h3>
+        <p>Sugerencia completa, accionable, con datos concretos y pasos a seguir. <strong>Reactiva:</strong> se generan cuando hay datos nuevos o el cliente acepta y actúa sobre una sugerencia anterior.</p>
+        <div style="background:var(--bg);border-radius:8px;padding:0.8rem;margin-top:0.6rem;font-size:0.8rem;color:var(--text2)">
+          Ruta optimizada: A → C → B · Ahorro: 18% combustible · $X adicionales/mes<br>
+          <span class="tag tag-green" style="margin-top:4px;display:inline-block">✓ Aplicar sugerencia</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Score de madurez de datos</h2>
+    <div class="card card-green">
+      <p>Cada cliente tiene un score calculado automáticamente que determina en qué nivel de skill opera. El score evalúa: <strong>cantidad de registros cargados, frecuencia de uso, variedad de módulos activos y antigüedad de datos</strong>. Cuando el score sube de nivel, el sistema notifica al cliente y desbloquea sugerencias más precisas. También es un indicador interno para el Panel Admin.</p>
+    </div>
+
+    <h2>Lógica de sugerencias reactivas (Plan IA)</h2>
+    <div class="layer">
+      <div class="layer-num" style="background:var(--pr)">1</div>
+      <div><div class="layer-title">Sugerencia generada</div><div class="layer-sub">La IA detecta un patrón o anomalía en los datos del cliente y genera una sugerencia accionable.</div></div>
+    </div>
+    <div class="layer">
+      <div class="layer-num" style="background:var(--accent)">2</div>
+      <div><div class="layer-title">Cliente acepta y aplica</div><div class="layer-sub">El cliente ejecuta la acción recomendada desde el panel con un clic.</div></div>
+    </div>
+    <div class="layer">
+      <div class="layer-num" style="background:var(--em)">3</div>
+      <div><div class="layer-title">IA genera sugerencia relacionada</div><div class="layer-sub">El cambio realizado genera nuevos datos que alimentan la siguiente sugerencia encadenada. El ciclo se adapta al ritmo de adopción — sin saturar con notificaciones.</div></div>
+    </div>
+
+    <h2>Skills por rubro — ejemplos representativos</h2>
+    <table>
+      <thead><tr><th>Rubro</th><th>Skills IA únicas</th><th>Nivel mínimo</th></tr></thead>
+      <tbody>
+        <tr><td>Hotel / Cabañas</td><td>Tarificación dinámica, predicción de ocupación, carta de bienvenida personalizada, upgrade sugerido al check-in</td><td><span class="tag tag-pr">Nivel 2</span></td></tr>
+        <tr><td>Salud / Clínica</td><td>Resumen de historia clínica pre-consulta, predicción de ausentismo, reactivación de pacientes perdidos</td><td><span class="tag tag-pr">Nivel 2</span></td></tr>
+        <tr><td>Inmobiliaria</td><td>Matching propiedades-clientes, valuación estimada por zona, generación de descripciones</td><td><span class="tag tag-pr">Nivel 2</span></td></tr>
+        <tr><td>Salón de Eventos</td><td>Presupuesto automático por tipo de evento, predicción de demanda estacional, gestión de proveedores IA</td><td><span class="tag tag-pr">Nivel 2</span></td></tr>
+        <tr><td>Restaurante</td><td>Predicción de demanda por plato/hora, sugerencia de menú según stock, overbooking inteligente</td><td><span class="tag tag-pr">Nivel 2</span></td></tr>
+        <tr><td>Distribuidora</td><td>Optimización de rutas de reparto, predicción de demanda por zona, detección de clientes en riesgo de abandono</td><td><span class="tag tag-gold">Nivel 3</span></td></tr>
+        <tr><td>Contador / Abogado</td><td>Vencimientos AFIP automáticos, resumen de expediente, generación de documentos legales/contables</td><td><span class="tag tag-pr">Nivel 2</span></td></tr>
+        <tr><td>Gestor de Seguros</td><td>Predicción de renovaciones, cross-selling de pólizas, detección de siniestros recurrentes por zona</td><td><span class="tag tag-gold">Nivel 3</span></td></tr>
+        <tr><td>GovTech</td><td>Clasificación de reclamos, asignación automática por área, informes de gestión narrativos, heatmap predictivo de incidencias</td><td><span class="tag tag-gold">Nivel 3</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Recolección de datos para mejora continua</h2>
+    <div class="card card-accent">
+      <p>Los datos de clientes del mismo rubro se agregan de forma <strong>anonimizada</strong>. Este pool alimenta el entrenamiento y calibración de las skills del rubro. A mayor base de clientes por rubro, mayor precisión y diferenciación competitiva. Los datos personales e identificatorios <strong>nunca</strong> se comparten entre clientes.</p>
+      <div style="margin-top:0.6rem"><span class="tag tag-green">Efecto red</span><span class="tag tag-pr">Anonimizado</span><span class="tag tag-gold">Ventaja acumulativa</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ MÓDULO RRSS / MARKETING ═══ -->
+  <div id="s-modulo-mkt" class="section">
+    <div class="page-header">
+      <div class="page-tag">Módulo en desarrollo</div>
+      <h1>Módulo Marketing y RRSS</h1>
+      <p>La IA crea contenido de marketing real basado en el negocio del cliente. No es contenido genérico — conoce el rubro, los servicios, los precios y el tono del negocio.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>La propuesta de valor</h3>
+      <p>Un dueño de salón de belleza no sabe escribir posts de Instagram. Un contador no sabe hacer una campaña de WhatsApp. Con este módulo, escriben en lenguaje natural lo que quieren comunicar y la IA genera el contenido listo para publicar — adaptado al canal, al tono y a su negocio específico.</p>
+    </div>
+
+    <h2>Herramientas del módulo</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Generador de posts</h3>
+        <p>El cliente describe la idea: "Quiero promocionar mis turnos libres de esta semana con 20% de descuento". La IA genera el post completo con texto, hashtags sugeridos y llamado a la acción. Adaptado para Instagram, Facebook o WhatsApp.</p>
+        <div><span class="tag tag-green">IA Claude Sonnet</span></div>
+      </div>
+      <div class="card">
+        <h3>Campaña de WhatsApp masivo</h3>
+        <p>Selección de segmento de clientes (todos, por zona, por último servicio, por fecha). La IA genera el mensaje personalizado para cada destinatario usando su nombre y datos reales. Envío masivo vía Evolution API.</p>
+        <div><span class="tag tag-green">IA personalización</span><span class="tag tag-pr">Evolution API</span></div>
+      </div>
+      <div class="card">
+        <h3>Calendario editorial</h3>
+        <p>La IA propone un calendario de publicaciones para el mes basado en el rubro, temporadas y eventos relevantes. El cliente aprueba, edita o genera cada pieza con un clic.</p>
+        <div><span class="tag tag-green">IA planificación</span></div>
+      </div>
+      <div class="card">
+        <h3>Respuestas a comentarios</h3>
+        <p>Sugerencias de respuesta a comentarios y mensajes en redes. La IA mantiene el tono del negocio y sugiere respuestas para comentarios positivos, negativos y consultas frecuentes.</p>
+        <div><span class="tag tag-green">IA tono del negocio</span></div>
+      </div>
+      <div class="card">
+        <h3>Análisis de rendimiento</h3>
+        <p>Métricas de las campañas enviadas: apertura, respuestas, clics. La IA identifica qué tipo de mensaje genera más respuesta en ese rubro y ajusta las sugerencias futuras.</p>
+        <div><span class="tag tag-green">IA aprendizaje</span></div>
+      </div>
+      <div class="card">
+        <h3>Banco de contenido</h3>
+        <p>Historial de todo el contenido generado y publicado. Reutilizable, editable. La IA evita repetir contenido similar en períodos cortos.</p>
+        <div><span class="tag tag-gray">Todos los planes</span></div>
+      </div>
+    </div>
+
+    <h2>Ejemplos por rubro</h2>
+    <table>
+      <thead><tr><th>Rubro</th><th>El cliente dice...</th><th>La IA genera...</th></tr></thead>
+      <tbody>
+        <tr><td>Hotel</td><td>"Tengo 3 cabañas libres este finde"</td><td>Post Instagram + story + mensaje WhatsApp masivo a lista de clientes anteriores</td></tr>
+        <tr><td>Clínica</td><td>"Quiero recordarle a mis pacientes que pueden sacar turno online"</td><td>Mensaje WhatsApp personalizado para cada paciente con su nombre y link directo</td></tr>
+        <tr><td>Salón de eventos</td><td>"Tenemos fecha libre en diciembre para casamientos"</td><td>Post con foto sugerida del galería, texto emotivo, hashtags de bodas y llamado a consultar</td></tr>
+        <tr><td>Restaurante</td><td>"Lanzamos menú de invierno"</td><td>Descripción de los platos, post visual, historia y campaña de WhatsApp para clientes frecuentes</td></tr>
+        <tr><td>Contador</td><td>"Vencimiento de IVA la semana que viene"</td><td>Mensaje recordatorio para todos los clientes con IVA, personalizado con nombre y fecha exacta</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Hoja de ruta del módulo</h2>
+    <div class="card card-accent">
+      <p><strong>Fase 1 (disponible en Pro):</strong> Generador de posts para WhatsApp e Instagram. Campaña de WhatsApp masivo. Banco de contenido básico.</p>
+      <p style="margin-top:0.5rem"><strong>Fase 2:</strong> Calendario editorial mensual. Análisis de rendimiento. Respuestas sugeridas a comentarios.</p>
+      <p style="margin-top:0.5rem"><strong>Fase 3:</strong> Integración directa con Instagram y Facebook (publicación automática). Sugerencia de imágenes con generación por IA (DALL-E / Stable Diffusion).</p>
+    </div>
+  </div>
+
+  <!-- ═══ MÓDULO RECLAMOS ═══ -->
+  <div id="s-modulo-reclamos" class="section">
+    <div class="page-header">
+      <div class="page-tag">Módulo — todos los rubros</div>
+      <h1>Reclamos y mantenimiento</h1>
+      <p>Registro de problemas internos del negocio. Para hoteles: fallas en habitaciones. Para clínicas: equipamiento. Para restaurantes: cocina y salón. La IA clasifica, prioriza y alerta.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card card-accent">
+        <h3>Qué registra</h3>
+        <p>Unidad o área afectada, tipo de problema, descripción, foto adjunta, prioridad (urgente / normal / baja), responsable asignado y estado (abierto / en proceso / resuelto).</p>
+      </div>
+      <div class="card card-green">
+        <h3>IA integrada</h3>
+        <p>Clasifica el tipo de problema automáticamente al crearlo. Detecta habitaciones con reclamos recurrentes y sugiere mantenimiento preventivo. Alerta si un reclamo lleva más de X horas sin resolver antes de un check-in.</p>
+        <div><span class="tag tag-green">IA clasificación</span><span class="tag tag-green">IA alertas</span></div>
+      </div>
+    </div>
+
+    <h2>Flujo del reclamo</h2>
+    <div class="tl">
+      <div class="tl-item">
+        <div class="tl-title">Staff registra el problema</div>
+        <div class="tl-desc">Desde el portal o desde la app móvil. Puede adjuntar foto. La IA clasifica automáticamente: plomería, electricidad, limpieza, mobiliario, etc.</div>
+      </div>
+      <div class="tl-item gold">
+        <div class="tl-title">IA asigna prioridad y responsable</div>
+        <div class="tl-desc">Basado en el tipo de problema y el calendario de reservas. Si la habitación tiene check-in en menos de 4 horas, el reclamo se marca como urgente automáticamente.</div>
+      </div>
+      <div class="tl-item green">
+        <div class="tl-title">Notificación al responsable</div>
+        <div class="tl-desc">WhatsApp o notificación push al técnico o encargado asignado. Con descripción, foto y urgencia.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-title">Cierre y registro histórico</div>
+        <div class="tl-desc">Al resolver, se registra el tiempo de resolución. La IA acumula el historial por unidad para detectar patrones y recomendar mantenimiento preventivo.</div>
+      </div>
+    </div>
+
+    <div class="card card-gold">
+      <h3>Valor diferencial</h3>
+      <p>Con el tiempo, la IA puede decirle al dueño del hotel: <em>"La Cabaña 3 tuvo 8 reclamos de plomería en 6 meses. Te recomiendo una revisión integral antes de la temporada alta."</em> Eso no lo hace ningún sistema de gestión básico.</p>
+    </div>
+  </div>
+
+  <!-- ═══ MÓDULO REPUTACIÓN ONLINE ═══ -->
+  <div id="s-modulo-reputacion" class="section">
+    <div class="page-header">
+      <div class="page-tag">Módulo — todos los rubros</div>
+      <h1>Reputación online</h1>
+      <p>La gente habla de tu negocio en internet. Este módulo centraliza todo lo que se dice — reseñas, comentarios, menciones — y la IA lo analiza para darte insights accionables.</p>
+    </div>
+
+    <div class="card card-gold">
+      <h3>La propuesta de valor</h3>
+      <p>El cliente no tiene que entrar a Google, Meta, TripAdvisor y Booking por separado para ver qué dicen de él. Todo llega a un solo panel. La IA resume el sentimiento, detecta temas recurrentes y sugiere respuestas. Es como tener un community manager con IA disponible 24/7.</p>
+    </div>
+
+    <h2>Fuentes de datos</h2>
+    <table>
+      <thead><tr><th>Fuente</th><th>Cómo se obtiene</th><th>Costo</th><th>Disponibilidad</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Google Maps</strong></td><td>Google Places API — reseñas públicas del negocio</td><td>Gratis hasta 5.000 req/mes</td><td><span class="tag tag-green">Desde Fase 2</span></td></tr>
+        <tr><td><strong>Instagram</strong></td><td>Meta Graph API — comentarios y menciones en posts de la página</td><td>Gratis con app aprobada</td><td><span class="tag tag-green">Si conecta Meta</span></td></tr>
+        <tr><td><strong>Facebook</strong></td><td>Meta Graph API — reseñas y comentarios de la página</td><td>Gratis con app aprobada</td><td><span class="tag tag-green">Si conecta Meta</span></td></tr>
+        <tr><td><strong>TripAdvisor</strong></td><td>API oficial para propietarios registrados</td><td>Gratis</td><td><span class="tag tag-gold">Fase 3</span></td></tr>
+        <tr><td><strong>Booking / Airbnb / Despegar</strong></td><td>No tienen API pública. Carga manual o copy-paste del cliente</td><td>$0</td><td><span class="tag tag-gray">Manual</span></td></tr>
+        <tr><td><strong>WhatsApp</strong></td><td>Análisis de conversaciones internas — sentimiento de los huéspedes</td><td>$0 — datos propios</td><td><span class="tag tag-green">Desde Fase 1</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Lo que ve el cliente en el panel</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Feed unificado</h3>
+        <p>Todas las reseñas y menciones en orden cronológico. Filtrable por fuente, por puntuación y por sentimiento (positivo / negativo / neutro). Con un clic puede responder directamente desde el panel.</p>
+        <div><span class="tag tag-green">IA respuesta sugerida</span></div>
+      </div>
+      <div class="card">
+        <h3>Score de reputación</h3>
+        <p>Un número único del 0 al 100 que resume cómo está la reputación online del negocio. Calculado por la IA ponderando fuentes, cantidad de reseñas y evolución temporal.</p>
+        <div><span class="tag tag-green">IA score</span></div>
+      </div>
+      <div class="card">
+        <h3>Temas recurrentes</h3>
+        <p>La IA detecta qué se menciona más en las reseñas. <em>"El desayuno aparece 34 veces con sentimiento positivo. El ruido aparece 12 veces con sentimiento negativo."</em> Sin leer reseña por reseña.</p>
+        <div><span class="tag tag-green">IA análisis semántico</span></div>
+      </div>
+      <div class="card">
+        <h3>Alertas de reseña negativa</h3>
+        <p>Cuando llega una reseña de 1 o 2 estrellas, la IA notifica de inmediato por WhatsApp al dueño con el texto y una respuesta sugerida. Tiempo de reacción: minutos.</p>
+        <div><span class="tag tag-red">Alerta urgente</span><span class="tag tag-green">IA respuesta</span></div>
+      </div>
+    </div>
+
+    <h2>Lo que dice la IA al cliente</h2>
+    <div class="card" style="background:var(--bg)">
+      <p style="font-family:monospace;font-size:0.8rem;color:var(--pr-d);line-height:1.8">
+        "Esta semana recibiste <strong>8 nuevas reseñas</strong>: 6 positivas, 1 neutra, 1 negativa."<br>
+        "Tu puntuación en Google subió de 4.6 a 4.7 ⭐"<br>
+        "Los huéspedes mencionan mucho el jacuzzi y el desayuno como puntos fuertes."<br>
+        "La reseña negativa de Booking menciona ruido nocturno — mismo tema que en febrero."<br>
+        "Te sugiero responder la reseña negativa antes de las 24hs. Ya tengo un borrador listo."
+      </p>
+    </div>
+
+    <h2>Respuestas con IA</h2>
+    <div class="card card-green">
+      <p>Para cada reseña, la IA genera una respuesta personalizada que mantiene el tono del negocio. No es una respuesta genérica — menciona detalles específicos de la reseña, agradece lo positivo y responde lo negativo con empatía y solución concreta. El dueño aprueba y publica con un clic.</p>
+    </div>
+
+    <h2>Hoja de ruta</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Qué incluye</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-green">Fase 2</span></td><td>Google Maps API + Meta API + feed unificado + score de reputación + respuestas con IA</td></tr>
+        <tr><td><span class="tag tag-gold">Fase 3</span></td><td>TripAdvisor + análisis de temas recurrentes + alertas de reseña negativa + reporte mensual automático</td></tr>
+        <tr><td><span class="tag tag-gray">Fase 4</span></td><td>Benchmarking de reputación entre tenants del mismo rubro — "Tu score es 78, el promedio de hoteles similares es 82"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</main>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

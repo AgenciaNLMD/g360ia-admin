@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="/assets/gestion360ia.ico" />
+  <link rel="stylesheet" href="../assets/global.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metodología de Trabajo | Gestión 360 iA — Implementación IA en 4 Etapas</title>
+  <meta name="description" content="Conocé la metodología de trabajo de Gestión 360 iA. Un proceso claro, ágil y transparente para implementar Inteligencia Artificial en tu empresa con resultados reales." />
+  <meta name="keywords" content="metodología consultoría ia, proceso implementación inteligencia artificial, cómo trabajamos, gestión 360 ia proceso" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://g360ia.com.ar/proceso.php" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://g360ia.com.ar/proceso.php" />
+  <meta property="og:title"       content="Metodología de Trabajo | Gestión 360 iA — Implementación IA en 4 Etapas" />
+  <meta property="og:description" content="Conocé la metodología de trabajo de Gestión 360 iA. Un proceso claro, ágil y transparente para implementar Inteligencia Artificial en tu empresa con resultados reales." />
+  <meta property="og:image"       content="https://g360ia.com.ar/og-image.jpg" />
+  <meta property="og:locale"      content="es_AR" />
+  <meta property="og:site_name"   content="Gestión 360 iA" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Metodología de Trabajo | Gestión 360 iA — Implementación IA en 4 Etapas" />
+  <meta name="twitter:description" content="Conocé la metodología de trabajo de Gestión 360 iA. Un proceso claro, ágil y transparente para implementar Inteligencia Artificial en tu empresa con resultados reales." />
+  <meta name="twitter:image"       content="https://g360ia.com.ar/og-image.jpg" />
+
+  <!-- Schema: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Cómo implementamos Inteligencia Artificial en tu empresa",
+    "description": "Metodología de trabajo de Gestión 360 iA para implementar soluciones de IA con resultados medibles en 4 etapas claras.",
+    "totalTime": "P4W",
+    "provider": { "@id": "https://g360ia.com.ar/#business" },
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Diagnóstico y Estrategia",
+        "text": "Analizamos tu empresa, procesos y objetivos. Identificamos los puntos de mayor impacto y diseñamos la hoja de ruta de implementación de IA.",
+        "url": "https://g360ia.com.ar/proceso.php#diagnostico"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Diseño y Prototipado",
+        "text": "Prototipamos la solución y la validamos con el cliente antes de escribir una línea de código. Wireframes, arquitectura técnica y flujos de conversación.",
+        "url": "https://g360ia.com.ar/proceso.php#diseno"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Implementación Ágil",
+        "text": "Construimos en sprints semanales con entregas parciales y visibilidad total. Iteramos con feedback en tiempo real.",
+        "url": "https://g360ia.com.ar/proceso.php#implementacion"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Lanzamiento y Optimización",
+        "text": "Activamos, medimos y optimizamos continuamente. Reportes mensuales, monitoreo de KPIs y mejoras basadas en datos reales.",
+        "url": "https://g360ia.com.ar/proceso.php#optimizacion"
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+      --pr:         #506886;
+      --pr-d:       #445A73;
+      --pr-l:       #6B86A0;
+      --pr-pale:    #EDF1F6;
+      --pr-mid:     #C2CFD9;
+      --accent:     #B08A55;
+      --accent-pale:#F7F0E6;
+      --em:         #3A9E70;
+      --em-pale:    #E8F7F1;
+      --bg:         #F2F4F6;
+      --white:      #FFFFFF;
+      --text:       #1F2937;
+      --text2:      #4B5563;
+      --sub:        #6B7280;
+      --muted:      #9CA3AF;
+      --border:     #E5E7EB;
+      --border2:    #D1D5DB;
+      --grad:       linear-gradient(135deg, var(--pr) 0%, var(--em) 100%);
+      --grad-soft:  linear-gradient(135deg, #EDF1F6 0%, #E8F7F1 100%);
+      --sh-sm:      0 1px 3px rgba(30,50,80,.06), 0 4px 14px rgba(30,50,80,.05);
+      --sh-md:      0 4px 24px rgba(30,50,80,.10);
+      --sh-lg:      0 12px 48px rgba(30,50,80,.14);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--white);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+        /* nav styles → global.css */
+    /* nav link styles → global.css */
+
+    /* nav → global.css */
+
+    /* ─── PAGE HERO ─── */
+    .page-hero {
+      padding: 9rem 6vw 6rem;
+      position: relative; overflow: hidden;
+      background: var(--text);
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80&auto=format&fit=crop');
+      background-size: cover; background-position: center;
+      opacity: 0.06; filter: saturate(0.2);
+    }
+    .page-hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 75% 40%, rgba(80,104,134,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse at 10% 85%, rgba(58,158,112,0.08) 0%, transparent 45%);
+    }
+    .hero-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+      background-size: 34px 34px; pointer-events: none;
+    }
+    .page-hero-inner { position: relative; z-index: 2; max-width: 760px; }
+    .breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .breadcrumb a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--pr-l); }
+    .breadcrumb span { color: var(--pr-l); }
+    .breadcrumb svg { width: 12px; height: 12px; opacity: 0.4; }
+
+    .page-hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -0.03em; color: white;
+      margin-bottom: 1.4rem;
+      opacity: 1;
+    }
+    .page-hero h1 .grad { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .page-hero p { font-size: 1.1rem; color: rgba(255,255,255,0.6); max-width: 560px; font-weight: 300; line-height: 1.8; opacity: 1; }
+
+    /* Hero stats strip inside hero */
+    .hero-stats {
+      display: flex; gap: 3rem; flex-wrap: wrap;
+      margin-top: 3.5rem;
+      padding-top: 3rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative; z-index: 2;
+      opacity: 1;
+    }
+    .hero-stat { display: flex; flex-direction: column; gap: 0.2rem; }
+    .hero-stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+    .hero-stat-lbl { font-size: 0.8rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* ─── SECTION COMMON ─── */
+    .section-label { font-size: 0.73rem; color: var(--pr-d); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.7rem; font-weight: 500; }
+    .section-label::before { content: ''; width: 20px; height: 2px; background: var(--grad); border-radius: 2px; }
+    h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.9rem, 3vw, 2.7rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: var(--text); margin-bottom: 1rem; }
+    .btn-primary { padding: 0.88rem 2.2rem; background: var(--grad); color: white; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.9rem; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; box-shadow: var(--sh-md); transition: opacity 0.2s, transform 0.2s; display: inline-block; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn-outline { padding: 0.88rem 2rem; background: transparent; color: var(--text2); font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 0.9rem; border: 1.5px solid var(--pr-mid); border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: border-color 0.2s, color 0.2s; }
+    .btn-outline:hover { border-color: var(--pr); color: var(--pr-d); }
+
+    /* ─── OVERVIEW STRIP ─── */
+    .overview {
+      padding: 5rem 6vw;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--pr-mid);
+      border: 1px solid var(--pr-mid);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .overview-item {
+      background: white;
+      padding: 2.2rem 1.8rem;
+      display: flex; flex-direction: column; gap: 0.8rem;
+      position: relative;
+      transition: background 0.3s;
+      cursor: default;
+    }
+    .overview-item:hover { background: var(--bg); }
+    .ov-step { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pr); }
+    .ov-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); }
+    .ov-desc { font-size: 0.84rem; color: var(--sub); line-height: 1.6; }
+    .ov-arrow {
+      position: absolute; top: 50%; right: -1px;
+      width: 20px; height: 20px;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2; transform: translateY(-50%);
+    }
+    .ov-arrow svg { width: 12px; height: 12px; color: var(--pr); }
+    .overview-item:last-child .ov-arrow { display: none; }
+
+    /* ─── MAIN PROCESS STEPS ─── */
+    .process-section { padding: 7rem 6vw; }
+
+    .process-step {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 5rem;
+      align-items: start;
+      padding: 5rem 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .process-step:last-of-type { border-bottom: none; }
+
+    /* vertical line connecting steps */
+    .process-step::before {
+      content: '';
+      position: absolute;
+      left: 139px; /* center of left col */
+      top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--pr-mid) 10%, var(--pr-mid) 90%, transparent);
+    }
+    .process-step:first-of-type::before { top: 80px; }
+    .process-step:last-of-type::before { bottom: 80px; }
+
+    .step-left {
+      display: flex; flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+      position: relative;
+    }
+    .step-circle {
+      width: 80px; height: 80px;
+      background: var(--pr);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 2;
+      box-shadow: 0 0 0 8px rgba(80,104,134,0.08), var(--sh-md);
+    }
+    .step-circle svg { width: 32px; height: 32px; color: white; stroke-width: 1.4; }
+    .step-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--sub);
+    }
+    .step-duration {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.9rem;
+      background: var(--pr-pale);
+      border-radius: 100px;
+      font-size: 0.75rem; font-weight: 500;
+      color: var(--pr-d);
+    }
+    .step-duration svg { width: 12px; height: 12px; }
+
+    .step-right { }
+    .step-right h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 700; letter-spacing: -0.02em;
+      color: var(--text); margin-bottom: 0.8rem;
+    }
+    .step-right .lead {
+      font-size: 1rem; color: var(--text2);
+      line-height: 1.8; margin-bottom: 2rem;
+      max-width: 560px;
+    }
+
+    /* Step tasks grid */
+    .step-tasks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+    }
+    .task {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      padding: 1rem 1.1rem;
+      background: var(--bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem; color: var(--text2);
+      transition: border-color 0.2s;
+    }
+    .task:hover { border-color: rgba(80,104,134,0.25); }
+    .task-ico {
+      width: 28px; height: 28px; flex-shrink: 0;
+      background: var(--pr-pale);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .task-ico svg { width: 14px; height: 14px; color: var(--pr-d); }
+
+    /* Step output */
+    .step-output {
+      display: flex; align-items: flex-start; gap: 0.8rem;
+      padding: 1.2rem 1.4rem;
+      background: var(--pr-pale);
+      border-radius: 10px;
+      border-left: 3px solid var(--pr-d);
+      font-size: 0.88rem; color: var(--text);
+    }
+    .step-output svg { width: 16px; height: 16px; color: var(--pr-d); flex-shrink: 0; margin-top: 2px; }
+    .step-output strong { font-weight: 500; }
+
+    /* ─── TOOLS USED ─── */
+    .tools-section {
+      padding: 6rem 6vw;
+      background: var(--bg);
+    }
+    .tools-cols {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+    .tool-col { }
+    .tool-col-title {
+      font-family: 'Syne', sans-serif; font-size: 0.78rem;
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--sub);
+      margin-bottom: 1rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .tool-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tool-tag {
+      padding: 0.38rem 0.85rem;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.78rem; color: var(--text2);
+      transition: border-color 0.2s, color 0.2s;
+      cursor: default;
+    }
+    .tool-tag:hover { border-color: var(--pr); color: var(--pr-d); }
+
+    /* ─── GUARANTEES ─── */
+    .guarantees-section {
+      padding: 7rem 6vw;
+      background: white;
+    }
+    .guarantees-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+    .guarantee-card {
+      padding: 2.2rem 2rem;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .guarantee-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--grad); border-radius: 14px 14px 0 0; transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+    .guarantee-card:hover { border-color: rgba(80,104,134,0.25); box-shadow: var(--sh-md); transform: translateY(-4px); }
+    .guarantee-card:hover::before { transform: scaleX(1); }
+    .g-icon { width: 50px; height: 50px; background: var(--pr-pale); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.4rem; }
+    .g-icon svg { width: 24px; height: 24px; color: var(--pr-d); stroke-width: 1.5; }
+    .g-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 0.6rem; }
+    .g-desc { font-size: 0.87rem; color: var(--sub); line-height: 1.65; }
+
+    /* ─── TIMELINE IMAGE BREAK ─── */
+    .img-break {
+      height: 400px; position: relative; overflow: hidden;
+    }
+    .img-break img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: saturate(0.75); display: block; }
+    .img-break-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(28,43,58,0.9) 0%, rgba(28,43,58,0.5) 55%, rgba(80,104,134,0.12) 100%);
+      display: flex; align-items: center; padding: 0 6vw;
+    }
+    .img-break-text { max-width: 540px; }
+    .img-break-text .section-label { color: var(--pr-l); }
+    .img-break-text .section-label::before { background: linear-gradient(135deg, var(--pr-l), var(--em)); }
+    .img-break-text h2 { color: white; font-size: clamp(1.8rem, 3vw, 2.6rem); margin-bottom: 1rem; }
+    .img-break-text p { color: rgba(255,255,255,0.68); font-size: 1rem; max-width: 440px; }
+
+    /* ─── CTA STRIP ─── */
+    .cta-strip {
+      padding: 5rem 6vw;
+      background: var(--grad-soft);
+      border-top: 1px solid rgba(80,104,134,0.15);
+      border-bottom: 1px solid rgba(80,104,134,0.15);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 2rem; flex-wrap: wrap;
+    }
+    .cta-strip-text h3 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    .cta-strip-text p { color: var(--sub); font-size: 0.95rem; }
+    .cta-strip-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    /* ─── FOOTER ─── */
+    footer { padding: 2.6rem 6vw; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+    .footer-copy { font-size: 0.81rem; color: var(--sub); }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.81rem; color: var(--sub); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--pr-d); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s, transform 0.7s; }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) {
+      .overview-grid { grid-template-columns: 1fr 1fr; }
+      .ov-arrow { display: none; }
+      .tools-cols { grid-template-columns: 1fr 1fr; }
+      .guarantees-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: block; }
+      .process-step { grid-template-columns: 1fr; gap: 2rem; }
+      .process-step::before { display: none; }
+      .step-left { flex-direction: row; text-align: left; align-items: center; }
+      .step-tasks { grid-template-columns: 1fr; }
+      .cta-strip { flex-direction: column; text-align: center; }
+      .cta-strip-actions { justify-content: center; }
+      .img-break { height: 280px; }
+      .img-break-text p { display: none; }
+    }
+    @media (max-width: 600px) {
+      .nav-cta { display: none; }
+      .page-hero { padding: 7rem 5vw 4rem; }
+      .page-hero h1 { font-size: clamp(2rem, 10vw, 2.8rem); }
+      .hero-stats { gap: 2rem; }
+      .overview-grid { grid-template-columns: 1fr; border-radius: 10px; }
+      .process-section { padding: 4rem 5vw; }
+      .process-step { padding: 3.5rem 0; }
+      .tools-cols { grid-template-columns: 1fr; gap: 0.8rem; }
+      .tool-tag { font-size: 0.76rem; padding: 0.32rem 0.7rem; }
+      .guarantees-grid { grid-template-columns: 1fr; }
+      .tools-section, .guarantees-section { padding: 4.5rem 5vw; }
+      footer { flex-direction: column; align-items: center; text-align: center; }
+      .footer-links { justify-content: center; flex-wrap: wrap; gap: 1rem; }
+    }
+    @media (max-width: 400px) {
+      .hero-stats { flex-direction: column; gap: 1.2rem; padding-top: 2rem; }
+      .hero-stat-num { font-size: 1.5rem; }
+      .step-duration { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+<?php include '../nav.php'; ?>
+
+<!-- PAGE HERO -->
+  <section class="page-hero">
+    <div class="hero-dots"></div>
+    <div class="page-hero-inner">
+      <div class="breadcrumb">
+        <a href="/">Inicio</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        <span>Proceso</span>
+      </div>
+      <h1>Cómo trabajamos<br/>para que obtengas<br/><span class="grad">resultados reales</span></h1>
+      <p>Un proceso probado, transparente y sin sorpresas. Sabés exactamente qué pasa en cada etapa, quién hace qué y cuándo vas a ver resultados.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">4</span>
+        <span class="hero-stat-lbl">Etapas claras</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">1–2 sem.</span>
+        <span class="hero-stat-lbl">Primer entregable</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">100%</span>
+        <span class="hero-stat-lbl">Transparencia total</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">0</span>
+        <span class="hero-stat-lbl">Sorpresas en el camino</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW STRIP -->
+  <section class="overview">
+    <div class="overview-grid reveal">
+      <div class="overview-item">
+        <div class="ov-step">Etapa 01</div>
+        <div class="ov-title">Diagnóstico</div>
+        <div class="ov-desc">Entendemos tu negocio, procesos y objetivos antes de proponer cualquier solución.</div>
+        <div class="ov-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="overview-item">
+        <div class="ov-step">Etapa 02</div>
+        <div class="ov-title">Diseño</div>
+        <div class="ov-desc">Prototipamos la solución y la validamos con vos antes de escribir una línea de código.</div>
+        <div class="ov-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="overview-item">
+        <div class="ov-step">Etapa 03</div>
+        <div class="ov-title">Implementación</div>
+        <div class="ov-desc">Construimos en ciclos cortos con entregas parciales y visibilidad total del avance.</div>
+        <div class="ov-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="overview-item">
+        <div class="ov-step">Etapa 04</div>
+        <div class="ov-title">Optimización</div>
+        <div class="ov-desc">Lanzamos, medimos y mejoramos continuamente. El trabajo no termina en la entrega.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN STEPS -->
+  <section class="process-section">
+    <h2 class="sr-only">Las 4 etapas de nuestro proceso de implementación</h2>
+
+    <!-- STEP 01 -->
+    <div class="process-step reveal">
+      <div class="step-left">
+        <div class="step-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        <div class="step-number">Etapa 01</div>
+        <div class="step-duration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          3–5 días
+        </div>
+      </div>
+      <div class="step-right">
+        <div class="section-label">Primera etapa</div>
+        <h3>Diagnóstico &<br/>Estrategia</h3>
+        <p class="lead">Antes de proponer cualquier solución, necesitamos entender profundamente tu negocio. Estudiamos tus procesos, tus datos, tu equipo y tus objetivos para identificar exactamente dónde la IA puede generar mayor impacto.</p>
+        <div class="step-tasks">
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <span>Entrevistas con stakeholders clave del negocio</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M7 8h5M7 11h3"/></svg></div>
+            <span>Relevamiento de sistemas, herramientas y flujos actuales</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div>
+            <span>Análisis de oportunidades y puntos de fricción</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <span>Benchmarking competitivo y referencias del sector</span>
+          </div>
+        </div>
+        <div class="step-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          <div><strong>Entregable:</strong> Reporte de diagnóstico con mapa de oportunidades priorizadas por impacto y factibilidad, más propuesta de solución detallada.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 02 -->
+    <div class="process-step reveal">
+      <div class="step-left">
+        <div class="step-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div class="step-number">Etapa 02</div>
+        <div class="step-duration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          1–2 semanas
+        </div>
+      </div>
+      <div class="step-right">
+        <div class="section-label">Segunda etapa</div>
+        <h3>Diseño &<br/>Prototipado</h3>
+        <p class="lead">Con el diagnóstico validado, diseñamos la arquitectura de la solución. Creamos prototipos, wireframes y flujos de conversación que podés revisar y aprobar antes de pasar al desarrollo. Nada se construye sin tu conformidad.</p>
+        <div class="step-tasks">
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+            <span>Diseño de arquitectura técnica y flujos de datos</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <span>Prototipado de flujos conversacionales (chatbot / WSP)</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg></div>
+            <span>Wireframes de interfaces y experiencia de usuario</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg></div>
+            <span>Revisión y aprobación con el equipo del cliente</span>
+          </div>
+        </div>
+        <div class="step-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          <div><strong>Entregable:</strong> Prototipo funcional o mockup aprobado, documento de arquitectura técnica y plan de sprint de implementación con tiempos y responsables.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 03 -->
+    <div class="process-step reveal">
+      <div class="step-left">
+        <div class="step-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <div class="step-number">Etapa 03</div>
+        <div class="step-duration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          2–6 semanas
+        </div>
+      </div>
+      <div class="step-right">
+        <div class="section-label">Tercera etapa</div>
+        <h3>Implementación<br/>Ágil</h3>
+        <p class="lead">Trabajamos en sprints cortos de 1 semana con entregas parciales. Cada semana tenés algo funcionando para revisar. Iteramos rápido, incorporamos tu feedback en tiempo real y mantenemos visibilidad total del avance.</p>
+        <div class="step-tasks">
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><path d="M13 13h4v4M17 13v4h-4"/></svg></div>
+            <span>Sprints semanales con demo y revisión de avance</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/></svg></div>
+            <span>Canal de comunicación directo (WhatsApp o Slack)</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div>
+            <span>Testing continuo y corrección de errores en tiempo real</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <span>Capacitación del equipo interno en paralelo al desarrollo</span>
+          </div>
+        </div>
+        <div class="step-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          <div><strong>Entregable:</strong> Solución completamente funcional, documentación técnica, manual de uso para el equipo interno y accesos configurados.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 04 -->
+    <div class="process-step reveal">
+      <div class="step-left">
+        <div class="step-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+        </div>
+        <div class="step-number">Etapa 04</div>
+        <div class="step-duration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Continuo
+        </div>
+      </div>
+      <div class="step-right">
+        <div class="section-label">Cuarta etapa</div>
+        <h3>Lanzamiento &<br/>Optimización</h3>
+        <p class="lead">El lanzamiento no es el final, es el comienzo. Monitoreamos el rendimiento desde el día uno, analizamos datos reales de uso y optimizamos continuamente para maximizar el impacto en tu negocio.</p>
+        <div class="step-tasks">
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <span>Monitoreo de métricas clave y KPIs definidos</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg></div>
+            <span>Iteraciones de mejora basadas en datos de uso real</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <span>Reportes mensuales con análisis y recomendaciones</span>
+          </div>
+          <div class="task">
+            <div class="task-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <span>Soporte continuo y respuesta ante incidencias</span>
+          </div>
+        </div>
+        <div class="step-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          <div><strong>Entregable continuo:</strong> Dashboard de métricas en tiempo real, reportes mensuales de rendimiento y plan de mejoras para el siguiente ciclo.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- IMAGE BREAK -->
+  <div class="img-break reveal">
+    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1800&q=80&auto=format&fit=crop" alt="Equipo trabajando en implementación de IA" loading="lazy" />
+    <div class="img-break-overlay">
+      <div class="img-break-text">
+        <div class="section-label">Nuestra filosofía</div>
+        <h2>Entregas reales<br/>desde la primera semana.</h2>
+        <p>No esperamos al final del proyecto para mostrarte algo. Cada sprint tiene un entregable concreto que podés usar, revisar y validar.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLS USED PER PHASE -->
+  <section class="tools-section">
+    <div class="section-label reveal">Herramientas</div>
+    <h2 class="reveal">Tecnología que usamos<br/>en cada etapa</h2>
+    <div class="tools-cols reveal">
+      <div class="tool-col">
+        <div class="tool-col-title">Diagnóstico</div>
+        <div class="tool-tags">
+          <span class="tool-tag">Notion</span>
+          <span class="tool-tag">Miro</span>
+          <span class="tool-tag">Google Meet</span>
+          <span class="tool-tag">Loom</span>
+          <span class="tool-tag">Typeform</span>
+        </div>
+      </div>
+      <div class="tool-col">
+        <div class="tool-col-title">Diseño</div>
+        <div class="tool-tags">
+          <span class="tool-tag">Figma</span>
+          <span class="tool-tag">Whimsical</span>
+          <span class="tool-tag">Lucidchart</span>
+          <span class="tool-tag">Protopie</span>
+        </div>
+      </div>
+      <div class="tool-col">
+        <div class="tool-col-title">Implementación</div>
+        <div class="tool-tags">
+          <span class="tool-tag">n8n</span>
+          <span class="tool-tag">OpenAI</span>
+          <span class="tool-tag">React</span>
+          <span class="tool-tag">Node.js</span>
+          <span class="tool-tag">Supabase</span>
+          <span class="tool-tag">Vercel</span>
+          <span class="tool-tag">WhatsApp API</span>
+        </div>
+      </div>
+      <div class="tool-col">
+        <div class="tool-col-title">Optimización</div>
+        <div class="tool-tags">
+          <span class="tool-tag">GA4</span>
+          <span class="tool-tag">Looker Studio</span>
+          <span class="tool-tag">Hotjar</span>
+          <span class="tool-tag">Mixpanel</span>
+          <span class="tool-tag">Sentry</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUARANTEES -->
+  <section class="guarantees-section">
+    <div class="section-label reveal">Compromisos</div>
+    <h2 class="reveal">Lo que garantizamos<br/>en cada proyecto</h2>
+    <div class="guarantees-grid">
+      <div class="guarantee-card reveal">
+        <div class="g-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="g-title">Transparencia total</div>
+        <div class="g-desc">Acceso en tiempo real al estado del proyecto, métricas y cualquier decisión técnica. Sin cajas negras, sin sorpresas.</div>
+      </div>
+      <div class="guarantee-card reveal">
+        <div class="g-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="g-title">Tiempos cumplidos</div>
+        <div class="g-desc">Entregamos en los plazos acordados. Si algo cambia, lo comunicamos antes — no después. Los cronogramas son compromisos, no estimaciones.</div>
+      </div>
+      <div class="guarantee-card reveal">
+        <div class="g-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="g-title">Resultados medibles</div>
+        <div class="g-desc">Definimos KPIs concretos desde el inicio. El éxito del proyecto se mide con datos, no con opiniones.</div>
+      </div>
+      <div class="guarantee-card reveal">
+        <div class="g-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="g-title">Equipo dedicado</div>
+        <div class="g-desc">Tenés un equipo asignado a tu proyecto, no un freelancer solo. Cada proyecto tiene un lead técnico, un estratega y soporte continuo.</div>
+      </div>
+      <div class="guarantee-card reveal">
+        <div class="g-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <div class="g-title">Código y datos tuyos</div>
+        <div class="g-desc">Todo lo que construimos te pertenece. El código, los flujos, los datos y las integraciones son propiedad tuya desde el primer día.</div>
+      </div>
+      <div class="guarantee-card reveal">
+        <div class="g-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="g-title">Soporte post-entrega</div>
+        <div class="g-desc">Todos los proyectos incluyen soporte post-lanzamiento. No desaparecemos cuando entregamos — estamos para asegurar que funcione.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA STRIP -->
+  <div class="cta-strip" id="contacto">
+    <div class="cta-strip-text">
+      <h3>¿Listo para empezar?</h3>
+      <p>Primera consulta gratuita — te contamos cómo aplicaríamos este proceso a tu caso específico.</p>
+    </div>
+    <div class="cta-strip-actions">
+      <a href="mailto:contacto@g360ia.com.ar" class="btn-primary">Agendar diagnóstico gratuito</a>
+      <a href="#" onclick="if(window.g360OpenWidget){g360OpenWidget();}return false;" class="btn-outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/><path d="M2 3.35a2 2 0 0 1 2-2h3a2 2 0 0 1 2 1.72 12.8 12.8 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/></svg>
+        WhatsApp directo
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+
+<?php include '../footer.php'; ?>
+
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 40); });
+
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+    });
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (!nav.contains(e.target) && !mobileMenu.contains(e.target)) {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+      }
+    });
+
+    // Scroll reveal
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), 60);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    document.body.classList.add('js-ready');
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  </script>
+
+
+<?php
+if (file_exists('../gestion360ia_chat_widget.html')) {
+    include '../gestion360ia_chat_widget.html';
+}
+?>
+
+</body>
+</html>

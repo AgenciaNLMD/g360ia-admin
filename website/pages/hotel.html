@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serranías del Bosque — Portal de Gestión</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #F2F4F6;
+  --white:      #FFFFFF;
+  --pr:         #506886;
+  --pr-d:       #445A73;
+  --pr-l:       #6B86A0;
+  --pr-pale:    #EDF1F6;
+  --pr-mid:     #C2CFD9;
+  --accent:     #B08A55;
+  --accent-pale:#F7F0E6;
+  --accent-bg:  rgba(176,138,85,.15);
+  --sb-bg:      #506886;
+  --sb-brd:     #3E5270;
+  --sb-active:  #445A73;
+  --em:         #3A9E70;
+  --em-pale:    #E8F7F1;
+  --border:     #E5E7EB;
+  --border2:    #D1D5DB;
+  --text:       #1F2937;
+  --text2:      #4B5563;
+  --sub:        #6B7280;
+  --muted:      #9CA3AF;
+  --red:        #D9534F;
+  --red-bg:     #FDF2F2;
+  --amber:      #B08A55;
+  --amber-bg:   #FBF6EE;
+  --green:      #3A9E70;
+  --green-bg:   rgba(58,158,112,.12);
+  --ia-bg:      #445A73;
+  --sh:         0 1px 3px rgba(30,50,80,.06), 0 4px 14px rgba(30,50,80,.05);
+  --r:          10px;
+  --r-sm:       7px;
+  --trans:      0.22s cubic-bezier(0.4,0,0.2,1);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); display:flex; height:100vh; overflow:hidden; font-size:14px; font-family:'Inter',sans-serif; }
+
+/* SIDEBAR */
+#sidebar {
+  width: 230px;
+  min-width: 230px;
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-brd);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width var(--trans), min-width var(--trans);
+  position: relative;
+  z-index: 20;
+}
+#sidebar.collapsed { width: 52px; min-width: 52px; }
+#sidebar.collapsed .sb-text   { opacity:0; max-width:0; overflow:hidden; }
+#sidebar.collapsed .sb-badge  { opacity:0; width:0; padding:0; overflow:hidden; }
+#sidebar.collapsed .sb-label  { opacity:0; height:0; padding:0; overflow:hidden; }
+#sidebar.collapsed .sb-logo-text { opacity:0; max-width:0; overflow:hidden; }
+#sidebar.collapsed .sb-user-texts { opacity:0; max-width:0; overflow:hidden; }
+#sidebar.collapsed .sb-item   { justify-content:center; padding:.44rem 0; margin:2px 8px; }
+#sidebar.collapsed .sb-foot   { padding:8px 0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+#sidebar.collapsed .sb-user   { justify-content:center; padding:6px 0; }
+#sidebar.collapsed .sb-foot > div:last-child { display:none; }
+
+.sb-logo {
+  height: 52px;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--sb-brd);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0; overflow: hidden;
+}
+.sb-logo-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--pr), var(--pr-l));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(80,104,134,.3);
+  flex-shrink: 0;
+}
+.sb-logo-icon svg { display: block; }
+.sb-logo-text { overflow: hidden; white-space: nowrap; transition: opacity var(--trans), max-width var(--trans); max-width: 180px; }
+#sidebar.collapsed .sb-logo-text { opacity: 0; max-width: 0; }
+.sb-logo-name { font-size: 0.9rem; font-weight: 600; color: #fff; line-height: 1.2; }
+.sb-logo-sub  { font-size: 0.6rem; color: rgba(255,255,255,.5); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+
+.sb-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 6px 0; }
+.sb-scroll::-webkit-scrollbar { width: 3px; }
+.sb-scroll::-webkit-scrollbar-thumb { background: var(--sb-brd); border-radius: 2px; }
+
+.sb-section { padding: 0; }
+.sb-label {
+  padding: 10px 14px 3px;
+  font-size: 0.57rem; font-weight: 700;
+  letter-spacing: .13em; text-transform: uppercase;
+  color: rgba(255,255,255,.4); white-space: nowrap; overflow: hidden;
+  transition: opacity var(--trans), height var(--trans), padding var(--trans);
+}
+#sidebar.collapsed .sb-label { opacity:0; height:0; padding:0; overflow:hidden; }
+
+.sb-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.44rem 0.75rem;
+  margin: 1px 6px;
+  border-radius: var(--r-sm);
+  color: rgba(255,255,255,.85); cursor: pointer;
+  font-size: 0.8rem; font-weight: 500;
+  transition: background var(--trans), color var(--trans);
+  white-space: nowrap; overflow: hidden; position: relative;
+}
+.sb-item:hover { background: rgba(255,255,255,.1); color: #fff; }
+.sb-item.active { background: var(--sb-active); color: #fff; font-weight: 600; }
+.sb-icon { font-size: 0.95rem; width: 20px; text-align: center; flex-shrink: 0; }
+.sb-text { flex: 1; transition: opacity var(--trans), max-width var(--trans); max-width: 160px; }
+#sidebar.collapsed .sb-text { opacity: 0; max-width: 0; }
+#sidebar.collapsed .sb-item { justify-content: center; padding: 0.44rem 0; margin: 2px 8px; }
+
+.sb-badge {
+  background: var(--accent); color: #fff;
+  font-size: 0.57rem; font-weight: 700;
+  padding: .1rem .42rem; border-radius: 9px; flex-shrink: 0;
+  transition: opacity var(--trans);
+}
+#sidebar.collapsed .sb-badge { opacity:0; width:0; padding:0; overflow:hidden; }
+
+#sidebar.collapsed .sb-item[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; left: calc(100% + 10px);
+  top: 50%; transform: translateY(-50%);
+  background: #1F2937; color: #fff;
+  font-size: 0.72rem; font-family: 'Inter', sans-serif;
+  padding: 4px 10px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none; z-index: 300;
+  box-shadow: 0 3px 12px rgba(0,0,0,.2);
+}
+
+.sb-divider { height:1px; background:rgba(255,255,255,.1); margin:4px 12px; }
+#sidebar.collapsed .sb-divider { margin:4px 8px; }
+
+.sb-foot {
+  border-top: 1px solid var(--sb-brd);
+  padding: 8px 6px; flex-shrink: 0; overflow: hidden;
+}
+.sb-user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: var(--r-sm);
+  cursor: pointer; white-space: nowrap;
+  transition: background var(--trans);
+}
+.sb-user:hover { background: rgba(255,255,255,.08); }
+.sb-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.sb-uname { font-size: 0.78rem; font-weight: 600; color: #fff; }
+.sb-urole  { font-size: 0.6rem; color: rgba(255,255,255,.5); }
+.sb-user-texts { overflow:hidden; white-space:nowrap; transition:opacity var(--trans),max-width var(--trans); max-width:180px; flex:1; }
+#sidebar.collapsed .sb-user-texts { opacity:0; max-width:0; }
+
+/* Collapsed state */
+#sidebar.collapsed .sb-foot { padding:8px 0; display:flex; justify-content:center; }
+#sidebar.collapsed .sb-user { justify-content:center; padding:6px 0; }
+
+/* MAIN */
+
+#main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+.topbar {
+  height:56px; background:var(--white); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 24px; gap:16px; flex-shrink:0;
+}
+.topbar-title { font-family:'Cormorant Garamond',serif; font-size:20px; color:var(--accent); font-weight:300; }
+.topbar-sub { font-size:12px; color:var(--muted); margin-left:4px; }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.topbar-date { font-size:12px; color:var(--muted); }
+.topbar-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); }
+
+#content { flex:1; overflow-y:auto; padding:24px; }
+
+/* VIEWS */
+.view { display:none; animation:fadeIn 0.2s ease; }
+.view.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* CARDS GRID */
+.section-header { display:flex; align-items:baseline; gap:12px; margin-bottom:20px; }
+.section-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--accent); }
+.section-sub { font-size:12px; color:var(--muted); }
+
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; margin-bottom:24px; }
+.kpi {
+  background:var(--white); border:1px solid var(--border); border-radius:10px;
+  padding:16px; position:relative; overflow:hidden;
+}
+.kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); opacity:0.4; }
+.kpi-label { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.kpi-value { font-size:24px; font-family:'Cormorant Garamond',serif; color:var(--accent); font-weight:300; }
+.kpi-sub { font-size:11px; color:var(--muted); margin-top:4px; }
+.kpi-up { color:var(--green); }
+.kpi-down { color:var(--red); }
+
+.card {
+  background:var(--white); border:1px solid var(--border); border-radius:12px;
+  padding:20px; margin-bottom:16px;
+}
+.card-title { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--accent); margin-bottom:14px; font-weight:300; display:flex; align-items:center; gap:8px; }
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; }
+th { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:left; padding:8px 12px; border-bottom:1px solid var(--border); }
+td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04); font-size:13px; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--pr-pale); }
+
+/* STATUS BADGES */
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500; }
+.badge-green { background:var(--em-pale); color:var(--em); border:1px solid rgba(58,158,112,.3); }
+.badge-red { background:var(--red-bg); color:var(--red); border:1px solid rgba(217,83,79,.3); }
+.badge-gold { background:var(--pr-pale); color:var(--accent); border:1px solid var(--border); }
+.badge-blue { background:var(--pr-pale); color:var(--pr); border:1px solid var(--pr-mid); }
+.badge-gray { background:rgba(255,255,255,0.06); color:var(--text2); border:1px solid var(--border); }
+
+/* ROOM MAP */
+.room-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; }
+.room-card {
+  background:var(--bg); border:1px solid var(--border); border-radius:10px;
+  padding:14px; cursor:pointer; transition:all 0.15s; position:relative;
+}
+.room-card:hover { border-color:var(--border2); transform:translateY(-1px); }
+.room-card.ocupada { border-color:rgba(217,83,79,.4); background:rgba(138,74,74,0.08); }
+.room-card.libre { border-color:rgba(58,158,112,.4); background:rgba(90,138,74,0.06); }
+.room-card.limpieza { border-color:rgba(176,138,85,.4); background:rgba(201,168,76,0.06); }
+.room-card.mantenimiento { border-color:rgba(80,104,134,.4); background:rgba(74,106,138,0.08); }
+.room-num { font-family:'Inter',sans-serif; font-size:20px; font-weight:600; color:var(--accent); }
+.room-type { font-size:11px; color:var(--muted); margin-top:2px; }
+.room-guest { font-size:11px; color:var(--text2); margin-top:6px; }
+.room-nights { font-size:10px; color:var(--muted); }
+
+/* IA PANEL */
+.ia-panel {
+  background:var(--ia-bg);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  padding:16px 20px;
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+}
+.ia-panel::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.ia-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.ia-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.ia-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.7); font-weight:500; letter-spacing:1.5px; }
+.ia-text { font-size:13px; color:rgba(255,255,255,.88); line-height:1.6; }
+.ia-text strong { color:#ffffff; font-weight:500; }
+.ia-suggestions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.ia-chip {
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  border-radius:20px; padding:4px 12px; font-size:11px; color:#ffffff;
+  cursor:pointer; transition:background 0.15s;
+}
+.ia-chip:hover { background:rgba(201,168,76,0.25); }
+
+/* FORM ELEMENTS */
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-label { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+.form-input {
+  background:var(--bg); border:1px solid var(--border); border-radius:8px;
+  padding:9px 12px; color:var(--text); font-size:13px; font-family:'Inter',sans-serif;
+  outline:none; transition:border-color 0.15s;
+}
+.form-input:focus { border-color:var(--border2); }
+.form-select { appearance:none; }
+.btn {
+  padding:9px 20px; border-radius:8px; font-size:13px; font-family:'Inter',sans-serif;
+  cursor:pointer; font-weight:500; transition:all 0.15s; border:none;
+}
+.btn-gold { background:var(--pr); color:#fff; }
+.btn-gold:hover { background:var(--pr-l); }
+.btn-outline { background:transparent; color:var(--pr); border:1px solid var(--pr-mid); }
+.btn-outline:hover { background:var(--pr-pale); }
+.btn-sm { padding:5px 14px; font-size:12px; }
+
+/* WHATSAPP */
+.chat-bubble { max-width:75%; padding:10px 14px; border-radius:12px; margin-bottom:8px; font-size:13px; line-height:1.5; }
+.chat-in { background:var(--bg); border:1px solid var(--border); border-radius:12px 12px 12px 2px; color:var(--text2); }
+.chat-out { background:rgba(90,138,74,0.2); border:1px solid rgba(90,138,74,0.3); border-radius:12px 12px 2px 12px; color:var(--text); margin-left:auto; }
+.chat-meta { font-size:10px; color:var(--muted); margin-top:3px; }
+.chat-area { display:flex; flex-direction:column; }
+
+/* OCCUPANCY BAR */
+.occ-bar { background:var(--bg); border-radius:4px; height:8px; overflow:hidden; margin:4px 0; }
+.occ-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, var(--green), #7ec26a); transition:width 0.6s ease; }
+.occ-fill.high { background:linear-gradient(90deg, #c26a6a, #e07a7a); }
+.occ-fill.mid { background:linear-gradient(90deg, var(--gold), var(--gold2)); }
+
+/* TABS */
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.tab { padding:8px 16px; font-size:13px; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.15s; margin-bottom:-1px; }
+.tab:hover { color:var(--text2); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* TIMELINE */
+.timeline { position:relative; }
+.tl-item { display:flex; gap:12px; margin-bottom:14px; }
+.tl-dot { width:10px; height:10px; border-radius:50%; background:var(--gold); flex-shrink:0; margin-top:4px; }
+.tl-line { position:absolute; left:4px; top:14px; bottom:0; width:1px; background:var(--border); }
+.tl-content { flex:1; }
+.tl-title { font-size:13px; color:var(--text); font-weight:500; }
+.tl-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* INVOICE */
+.invoice-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.invoice-total { display:flex; justify-content:space-between; padding:12px 0; font-size:16px; font-family:'Cormorant Garamond',serif; color:var(--accent); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--white); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* COLS */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+@media(max-width:900px) { .two-col,.three-col { grid-template-columns:1fr; } .form-row { grid-template-columns:1fr; } }
+
+.tag { display:inline-block; background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:11px; color:var(--muted); margin:2px; }
+
+.progress-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:3px; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon" onclick="toggleSidebar()" title="Mostrar / ocultar menú">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="18" height="18">
+        <rect x="0"  y="10" width="6" height="6" rx="1.5" fill="white" opacity=".3"/>
+        <rect x="0"  y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+        <rect x="0"  y="0"  width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="8"  y="0"  width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="8"  y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+        <rect x="16" y="0"  width="6" height="6" rx="1.5" fill="#B08A55"/>
+      </svg>
+    </div>
+    <div class="sb-logo-text">
+      <div class="sb-logo-name">Serranías del Bosque</div>
+      <div class="sb-logo-sub">Hotel & Cabañas · G360 iA</div>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Principal</div>
+    <div class="sb-item active" data-view="dashboard" data-tip="Dashboard" onclick="nav(this)">
+      <i class="bi bi-grid-1x2 sb-icon"></i><span class="sb-text">Dashboard</span>
+    </div>
+    <div class="sb-item" data-view="reservas" data-tip="Reservas" onclick="nav(this)">
+      <i class="bi bi-calendar-check sb-icon"></i><span class="sb-text">Reservas</span>
+      <span class="sb-badge">3</span>
+    </div>
+    <div class="sb-item" data-view="habitaciones" data-tip="Habitaciones" onclick="nav(this)">
+      <i class="bi bi-house-door sb-icon"></i><span class="sb-text">Habitaciones</span>
+    </div>
+    <div class="sb-item" data-view="checkin" data-tip="Check-in / Check-out" onclick="nav(this)">
+      <i class="bi bi-key sb-icon"></i><span class="sb-text">Check-in / Out</span>
+      <span class="sb-badge">2</span>
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Operaciones</div>
+    <div class="sb-item" data-view="whatsapp" data-tip="WhatsApp Concierge" onclick="nav(this)">
+      <i class="bi bi-whatsapp sb-icon"></i><span class="sb-text">WhatsApp</span>
+      <span class="sb-badge">5</span>
+    </div>
+    <div class="sb-item" data-view="proveedores" data-tip="Proveedores" onclick="nav(this)">
+      <i class="bi bi-box-seam sb-icon"></i><span class="sb-text">Proveedores</span>
+    </div>
+    <div class="sb-item" data-view="facturacion" data-tip="Facturación" onclick="nav(this)">
+      <i class="bi bi-receipt sb-icon"></i><span class="sb-text">Facturación</span>
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Inteligencia</div>
+    <div class="sb-item" data-view="ocupacion" data-tip="Mapa de Ocupación" onclick="nav(this)">
+      <i class="bi bi-bar-chart sb-icon"></i><span class="sb-text">Mapa de Ocupación</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Marketing</div>
+    <div class="sb-item" data-view="marketing" data-tip="Marketing & RRSS" onclick="nav(this)">
+      <i class="bi bi-megaphone sb-icon"></i><span class="sb-text">Marketing & RRSS</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Sistema</div>
+    <div class="sb-item" data-view="conexiones" data-tip="Conexiones" onclick="nav(this)">
+      <i class="bi bi-plug sb-icon"></i><span class="sb-text">Conexiones</span>
+    </div>
+    <div class="sb-item" data-view="cuenta" data-tip="Mi Plan & Tokens" onclick="nav(this)">
+      <i class="bi bi-wallet2 sb-icon"></i><span class="sb-text">Mi Plan & Tokens</span>
+    </div>
+  </div>
+
+
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-av">SB</div>
+      <div class="sb-user-texts">
+        <div class="sb-uname">Serranías del Bosque</div>
+        <div class="sb-urole" style="display:flex;align-items:center;gap:4px;">
+          <span style="background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;">PRO</span>
+          <span style="color:rgba(255,255,255,.45);font-size:10px;">Hotel</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 0;">
+      <span style="font-size:10px;color:rgba(255,255,255,.35);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2d4c494044436d5e485f5f4c43444c5e034e4240">[email&#160;protected]</a></span>
+      <button onclick="alert('Cerrando sesión...')" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.45);font-size:12px;display:flex;align-items:center;gap:3px;transition:color .13s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">
+        <i class="bi bi-box-arrow-right"></i>
+        <span style="font-size:10px;">Salir</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <div>
+      <span class="topbar-title" id="topbar-title">Dashboard General</span>
+      <span class="topbar-sub" id="topbar-sub">Resumen operativo del día</span>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date">Lunes 16 de junio, 2025</div>
+      <div class="topbar-dot"></div>
+      <span style="font-size:12px;color:var(--muted)">Sistema activo</span>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <div class="view active" id="view-dashboard">
+      <div class="section-header">
+        <div class="section-title">Buen día, Sofía ✦</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">Asistente IA — Resumen del día</div></div>
+        <div class="ia-text">
+          Hoy tenés <strong>3 check-ins esperados</strong> (Cabaña Pino 14:00h, Suite Lago 15:00h, Habitación 7 flexible) y <strong>2 check-outs</strong> pendientes de confirmación. La ocupación actual es del <strong>78%</strong> — el fin de semana próximo ya tiene el <strong>92% comprometido</strong>. Te recomiendo habilitar la tarifa de temporada alta desde el viernes para las últimas 3 unidades disponibles. También hay una consulta de WhatsApp sin responder de hace 42 minutos sobre disponibilidad en julio.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="nav(document.querySelector('[data-view=reservas]'))">Ver reservas pendientes →</span>
+          <span class="ia-chip" onclick="nav(document.querySelector('[data-view=whatsapp]'))">Responder WhatsApp →</span>
+          <span class="ia-chip" onclick="showIAChat('¿Qué tarifas recomiendas para el próximo fin de semana?')">Sugerir tarifas IA →</span>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">Ocupación hoy</div>
+          <div class="kpi-value">78%</div>
+          <div class="kpi-sub kpi-up">↑ 12% vs semana pasada</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Huéspedes activos</div>
+          <div class="kpi-value">14</div>
+          <div class="kpi-sub">de 18 unidades</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Check-ins hoy</div>
+          <div class="kpi-value">3</div>
+          <div class="kpi-sub">próximo a las 14:00h</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Check-outs hoy</div>
+          <div class="kpi-value">2</div>
+          <div class="kpi-sub">Cabaña 3 y Hab. 12</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Ingresos del mes</div>
+          <div class="kpi-value">$1.8M</div>
+          <div class="kpi-sub kpi-up">↑ 23% vs junio 2024</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Ticket promedio</div>
+          <div class="kpi-value">$42K</div>
+          <div class="kpi-sub">por noche / unidad</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Mensajes WhatsApp</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-sub kpi-down">1 sin responder</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Rating promedio</div>
+          <div class="kpi-value">4.8</div>
+          <div class="kpi-sub">últimas 30 reseñas</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">🏠 Estado de unidades</div>
+          <div class="room-grid" style="grid-template-columns:repeat(auto-fill,minmax(90px,1fr));">
+            <div class="room-card ocupada"><div class="room-num">C1</div><div class="room-type">Cabaña Mayor</div><div class="room-guest">Rodríguez</div><div class="room-nights">2 noches</div></div>
+            <div class="room-card ocupada"><div class="room-num">C2</div><div class="room-type">Cabaña Mayor</div><div class="room-guest">Fernández</div><div class="room-nights">4 noches</div></div>
+            <div class="room-card libre"><div class="room-num">C3</div><div class="room-type">Cabaña Mayor</div><div class="room-guest">Libre</div></div>
+            <div class="room-card ocupada"><div class="room-num">C4</div><div class="room-type">Cabaña Pino</div><div class="room-guest">García</div><div class="room-nights">1 noche</div></div>
+            <div class="room-card limpieza"><div class="room-num">C5</div><div class="room-type">Cabaña Pino</div><div class="room-guest">Limpieza</div></div>
+            <div class="room-card libre"><div class="room-num">C6</div><div class="room-type">Cabaña Pino</div><div class="room-guest">Libre</div></div>
+            <div class="room-card ocupada"><div class="room-num">S1</div><div class="room-type">Suite Lago</div><div class="room-guest">Martínez</div><div class="room-nights">3 noches</div></div>
+            <div class="room-card mantenimiento"><div class="room-num">S2</div><div class="room-type">Suite Lago</div><div class="room-guest">Mantenim.</div></div>
+            <div class="room-card ocupada"><div class="room-num">H7</div><div class="room-type">Habitación</div><div class="room-guest">López</div><div class="room-nights">2 noches</div></div>
+            <div class="room-card libre"><div class="room-num">H8</div><div class="room-type">Habitación</div><div class="room-guest">Libre</div></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#c26a6a;display:inline-block"></span>Ocupada (10)</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#7ec26a;display:inline-block"></span>Libre (4)</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block"></span>Limpieza (2)</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#7aaed0;display:inline-block"></span>Mantenim. (2)</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📅 Próximas llegadas</div>
+          <div class="timeline" style="position:relative">
+            <div style="position:absolute;left:4px;top:14px;bottom:0;width:1px;background:var(--border)"></div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">Cabaña Pino — Sra. Medina</div>
+                <div class="tl-sub">Hoy 14:00h · 3 noches · 2 adultos 1 niño</div>
+                <div style="margin-top:4px"><span class="badge badge-gold">Check-in hoy</span></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">Suite Lago — Sr. y Sra. Pereira</div>
+                <div class="tl-sub">Hoy 15:00h · 5 noches · 2 adultos</div>
+                <div style="margin-top:4px"><span class="badge badge-gold">Check-in hoy</span></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot" style="background:var(--text3)"></div>
+              <div class="tl-content">
+                <div class="tl-title">Cabaña Mayor — Familia Torres</div>
+                <div class="tl-sub">Mañana 12:00h · 7 noches · 4 adultos 2 niños</div>
+                <div style="margin-top:4px"><span class="badge badge-gray">Confirmado</span></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot" style="background:var(--text3)"></div>
+              <div class="tl-content">
+                <div class="tl-title">Habitación 8 — Sr. Gómez</div>
+                <div class="tl-sub">Jueves 18:00h · 2 noches · 1 adulto</div>
+                <div style="margin-top:4px"><span class="badge badge-gray">Confirmado</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== RESERVAS ===================== -->
+    <div class="view" id="view-reservas">
+      <div class="section-header">
+        <div class="section-title">Reservas</div>
+        <div class="section-sub">Gestión y seguimiento de todas las reservas</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Análisis de reservas</div></div>
+        <div class="ia-text">
+          El <strong>próximo fin de semana largo (20–22 jun)</strong> ya tiene 16 de 18 unidades reservadas. Te quedan <strong>C3 y H8 disponibles</strong>. Basado en el comportamiento histórico, hay un <strong>85% de probabilidad</strong> de que se completen antes del miércoles. Considerá aplicar tarifa premium (+15%). Además, la reserva de Familia Torres (7 noches) es la de mayor valor del mes: <strong>$294.000</strong>.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="showIAChat('¿Qué tarifas recomiendas para el fin de semana del 20 al 22?')">Sugerir tarifas →</span>
+          <span class="ia-chip" onclick="showIAChat('Generame un mensaje de bienvenida para la Familia Torres')">Generar bienvenida →</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" placeholder="Buscar huésped o unidad..." style="width:220px;">
+            <select class="form-input form-select" style="width:140px;">
+              <option>Todos los estados</option>
+              <option>Confirmada</option>
+              <option>Pendiente</option>
+              <option>Check-in hoy</option>
+              <option>Cancelada</option>
+            </select>
+          </div>
+          <button class="btn btn-gold btn-sm">+ Nueva reserva</button>
+        </div>
+        <table>
+          <thead><tr><th>Huésped</th><th>Unidad</th><th>Entrada</th><th>Salida</th><th>Noches</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Rodríguez, M.</strong></td><td>Cabaña 1</td><td>14 jun</td><td>16 jun</td><td>2</td><td>$84.000</td><td><span class="badge badge-green">En casa</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+            <tr><td><strong>Fernández, P.</strong></td><td>Cabaña 2</td><td>13 jun</td><td>17 jun</td><td>4</td><td>$168.000</td><td><span class="badge badge-green">En casa</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+            <tr><td><strong>Medina, L.</strong></td><td>Cabaña Pino 4</td><td>16 jun</td><td>19 jun</td><td>3</td><td>$114.000</td><td><span class="badge badge-gold">Check-in hoy</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+            <tr><td><strong>Pereira, R. y S.</strong></td><td>Suite Lago</td><td>16 jun</td><td>21 jun</td><td>5</td><td>$285.000</td><td><span class="badge badge-gold">Check-in hoy</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+            <tr><td><strong>Torres, Familia</strong></td><td>Cabaña Mayor 1</td><td>17 jun</td><td>24 jun</td><td>7</td><td>$294.000</td><td><span class="badge badge-blue">Confirmada</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+            <tr><td><strong>Gómez, A.</strong></td><td>Habitación 8</td><td>19 jun</td><td>21 jun</td><td>2</td><td>$68.000</td><td><span class="badge badge-blue">Confirmada</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+            <tr><td><strong>Suárez, C.</strong></td><td>Cabaña Pino 6</td><td>20 jun</td><td>22 jun</td><td>2</td><td>$76.000</td><td><span class="badge badge-gray">Pendiente pago</span></td><td><button class="btn btn-outline btn-sm">Ver</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">+ Nueva Reserva</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nombre del huésped</label><input class="form-input" placeholder="Nombre completo"></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="correo@ejemplo.com"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Unidad</label>
+            <select class="form-input form-select">
+              <option>Cabaña Mayor 3 (libre)</option>
+              <option>Cabaña Pino 6 (libre)</option>
+              <option>Habitación 8 (libre)</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Huéspedes</label>
+            <select class="form-input form-select"><option>1 adulto</option><option>2 adultos</option><option>2 adultos + 1 niño</option><option>2 adultos + 2 niños</option><option>Familia (4+)</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Check-in</label><input class="form-input" type="date"></div>
+          <div class="form-group"><label class="form-label">Check-out</label><input class="form-input" type="date"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn btn-gold">Confirmar reserva</button>
+          <button class="btn btn-outline" onclick="showIAChat('Generame carta de confirmación para nueva reserva')">✦ IA: Generar confirmación</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== HABITACIONES ===================== -->
+    <div class="view" id="view-habitaciones">
+      <div class="section-header">
+        <div class="section-title">Habitaciones & Cabañas</div>
+        <div class="section-sub">Mapa de estado y gestión de unidades</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Gestión de unidades</div></div>
+        <div class="ia-text">
+          La <strong>Cabaña 5</strong> lleva 2 horas en limpieza — el estándar es 90 min. Podría haber un inconveniente antes del check-in de las 14hs. La <strong>Suite 2</strong> tiene un ticket de mantenimiento abierto desde ayer (pérdida en ducha). Si no se resuelve hoy, afectará la reserva del jueves. Te recomiendo enviar una alerta al equipo técnico.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="showIAChat('Redactá alerta para el equipo técnico sobre Suite 2')">Alertar equipo técnico →</span>
+          <span class="ia-chip" onclick="showIAChat('¿Qué unidades conviene asignar a la Familia Torres?')">Sugerir asignación →</span>
+        </div>
+      </div>
+
+      <div class="room-grid">
+        <div class="room-card ocupada">
+          <div class="room-num">C1</div><div class="room-type">Cabaña Mayor · 4 pax</div>
+          <div class="room-guest">Rodríguez M.</div><div class="room-nights">Sale: 16 jun</div>
+          <div style="margin-top:8px"><span class="badge badge-red">Ocupada</span></div>
+        </div>
+        <div class="room-card ocupada">
+          <div class="room-num">C2</div><div class="room-type">Cabaña Mayor · 4 pax</div>
+          <div class="room-guest">Fernández P.</div><div class="room-nights">Sale: 17 jun</div>
+          <div style="margin-top:8px"><span class="badge badge-red">Ocupada</span></div>
+        </div>
+        <div class="room-card libre">
+          <div class="room-num">C3</div><div class="room-type">Cabaña Mayor · 4 pax</div>
+          <div class="room-guest">Disponible</div>
+          <div style="margin-top:8px"><span class="badge badge-green">Libre</span></div>
+        </div>
+        <div class="room-card ocupada">
+          <div class="room-num">C4</div><div class="room-type">Cabaña Pino · 2 pax</div>
+          <div class="room-guest">García J.</div><div class="room-nights">Sale: 17 jun</div>
+          <div style="margin-top:8px"><span class="badge badge-red">Ocupada</span></div>
+        </div>
+        <div class="room-card limpieza">
+          <div class="room-num">C5</div><div class="room-type">Cabaña Pino · 2 pax</div>
+          <div class="room-guest">En limpieza</div><div class="room-nights">⚠ 2hs</div>
+          <div style="margin-top:8px"><span class="badge badge-gold">Limpieza</span></div>
+        </div>
+        <div class="room-card libre">
+          <div class="room-num">C6</div><div class="room-type">Cabaña Pino · 2 pax</div>
+          <div class="room-guest">Disponible</div>
+          <div style="margin-top:8px"><span class="badge badge-green">Libre</span></div>
+        </div>
+        <div class="room-card ocupada">
+          <div class="room-num">S1</div><div class="room-type">Suite Lago · 2 pax</div>
+          <div class="room-guest">Martínez A.</div><div class="room-nights">Sale: 19 jun</div>
+          <div style="margin-top:8px"><span class="badge badge-red">Ocupada</span></div>
+        </div>
+        <div class="room-card mantenimiento">
+          <div class="room-num">S2</div><div class="room-type">Suite Lago · 2 pax</div>
+          <div class="room-guest">Mant. ducha</div><div class="room-nights">⚠ Urgente</div>
+          <div style="margin-top:8px"><span class="badge badge-blue">Mantenim.</span></div>
+        </div>
+        <div class="room-card ocupada">
+          <div class="room-num">H7</div><div class="room-type">Habitación · 2 pax</div>
+          <div class="room-guest">López C.</div><div class="room-nights">Sale: 18 jun</div>
+          <div style="margin-top:8px"><span class="badge badge-red">Ocupada</span></div>
+        </div>
+        <div class="room-card libre">
+          <div class="room-num">H8</div><div class="room-type">Habitación · 2 pax</div>
+          <div class="room-guest">Disponible</div>
+          <div style="margin-top:8px"><span class="badge badge-green">Libre</span></div>
+        </div>
+        <div class="room-card ocupada">
+          <div class="room-num">H9</div><div class="room-type">Habitación · 2 pax</div>
+          <div class="room-guest">Díaz F.</div><div class="room-nights">Sale: 20 jun</div>
+          <div style="margin-top:8px"><span class="badge badge-red">Ocupada</span></div>
+        </div>
+        <div class="room-card libre">
+          <div class="room-num">H10</div><div class="room-type">Habitación · 2 pax</div>
+          <div class="room-guest">Disponible</div>
+          <div style="margin-top:8px"><span class="badge badge-green">Libre</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CHECK-IN/OUT ===================== -->
+    <div class="view" id="view-checkin">
+      <div class="section-header">
+        <div class="section-title">Check-in / Check-out</div>
+        <div class="section-sub">Registro de entradas y salidas del día</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Carta de bienvenida personalizada</div></div>
+        <div class="ia-text">
+          La Sra. <strong>Medina</strong> es su 3er visita — IA sugiere mencionar "bienvenida de regreso" y recordar que solicitó almohadas extra la vez pasada. Para los <strong>Pereira</strong> (primera vez): detecté que reservaron "Luna de miel" — te genero una carta especial con upgrade de amenities si lo aprobás.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="showIAChat('Generame carta de bienvenida especial para los Pereira, luna de miel, primera visita, Suite Lago')">Generar carta Pereira →</span>
+          <span class="ia-chip" onclick="showIAChat('Carta de bienvenida para Sra. Medina, 3ra visita, Cabaña Pino')">Carta Medina →</span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">🟢 Check-ins de hoy</div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:500;color:var(--text)">Sra. Laura Medina</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">Cabaña Pino 4 · 3 noches · 2 adultos 1 niño</div>
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span class="tag">Llegada estimada 14:00h</span>
+                  <span class="tag">Pago: MercadoPago ✓</span>
+                  <span class="tag">3ra visita</span>
+                </div>
+              </div>
+              <span class="badge badge-gold">Pendiente</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-gold btn-sm">Registrar Check-in</button>
+              <button class="btn btn-outline btn-sm" onclick="showIAChat('Generame carta bienvenida Medina')">✦ Carta IA</button>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:500;color:var(--text)">Sr. y Sra. Pereira</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">Suite Lago · 5 noches · 2 adultos · Luna de miel</div>
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span class="tag">Llegada estimada 15:00h</span>
+                  <span class="tag">Pago: transferencia ✓</span>
+                  <span class="tag">Primera visita</span>
+                </div>
+              </div>
+              <span class="badge badge-gold">Pendiente</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-gold btn-sm">Registrar Check-in</button>
+              <button class="btn btn-outline btn-sm" onclick="showIAChat('Carta bienvenida especial Pereira luna de miel Suite Lago')">✦ Carta IA</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔴 Check-outs de hoy</div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:500;color:var(--text)">Cabaña 3 — Sr. Núñez</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">3 noches · Saldo pendiente $0</div>
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span class="tag">Salida: antes de 11:00h</span>
+                  <span class="tag">Pago completo ✓</span>
+                </div>
+              </div>
+              <span class="badge badge-green">Listo</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-gold btn-sm">Registrar Check-out</button>
+              <button class="btn btn-outline btn-sm" onclick="showIAChat('Generame encuesta de satisfacción para enviar al Sr. Núñez')">✦ Encuesta IA</button>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:500;color:var(--text)">Hab. 12 — Sra. Villalba</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">2 noches · Saldo pendiente $14.000</div>
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span class="tag">Salida flexible</span>
+                  <span class="tag" style="background:var(--red-bg);color:#c26a6a;border-color:rgba(138,74,74,0.3)">Saldo pendiente</span>
+                </div>
+              </div>
+              <span class="badge badge-red">Con saldo</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-gold btn-sm">Registrar Check-out</button>
+              <button class="btn btn-outline btn-sm" onclick="showIAChat('Generame mensaje de cobro cordial para Sra. Villalba')">✦ Mensaje cobro IA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== WHATSAPP ===================== -->
+    <div class="view" id="view-whatsapp">
+      <div class="section-header">
+        <div class="section-title">WhatsApp Concierge</div>
+        <div class="section-sub">Atención y automatización vía Evolution API + IA</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Respuesta sugerida</div></div>
+        <div class="ia-text">
+          El mensaje de <strong>Ignacio Solano</strong> (hace 42 min) pregunta disponibilidad para julio. Basado en el estado actual del calendario, tenés <strong>6 unidades libres del 5 al 12 de julio</strong>. Te genero una respuesta personalizada con opciones y precios.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="insertReply()">✦ Usar respuesta IA →</span>
+          <span class="ia-chip" onclick="showIAChat('Generame campaña de WhatsApp para clientes que estuvieron en mayo')">Campaña reactivación →</span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card" style="max-height:520px;overflow-y:auto;">
+          <div class="card-title">💬 Conversaciones</div>
+          <div id="chat-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Chat activo — <span id="active-chat-name" style="color:var(--text2);font-size:15px">Ignacio Solano</span></div>
+          <div id="chat-messages" style="max-height:300px;overflow-y:auto;margin-bottom:12px;" class="chat-area"></div>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" id="chat-input" placeholder="Escribir mensaje..." style="flex:1" onkeydown="if(event.key==='Enter')sendMsg()">
+            <button class="btn btn-gold" onclick="sendMsg()">Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== PROVEEDORES ===================== -->
+    <div class="view" id="view-proveedores">
+      <div class="section-header">
+        <div class="section-title">Proveedores</div>
+        <div class="section-sub">Gestión de insumos, servicios y órdenes de compra</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Gestión inteligente de proveedores</div></div>
+        <div class="ia-text">
+          El stock de <strong>amenities (shampoo, jabón)</strong> está por debajo del umbral para el fin de semana largo. Con 16 unidades reservadas necesitás reponer antes del viernes. El proveedor <strong>CleanBrands</strong> tiene mejor precio histórico y entrega en 24hs. ¿Generamos la orden de compra?
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="showIAChat('Generame orden de compra de amenities a CleanBrands para 20 unidades')">Generar orden de compra →</span>
+          <span class="ia-chip" onclick="showIAChat('Comparame precios de amenities entre proveedores del último trimestre')">Comparar precios →</span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">📦 Proveedores activos</div>
+          <table>
+            <thead><tr><th>Proveedor</th><th>Categoría</th><th>Última compra</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CleanBrands SA</strong></td><td>Amenities</td><td>20 may</td><td>⭐ 4.8</td></tr>
+              <tr><td><strong>FoodServ Córdoba</strong></td><td>Alimentos y bebidas</td><td>10 jun</td><td>⭐ 4.5</td></tr>
+              <tr><td><strong>TextilHogar</strong></td><td>Ropa de cama / toallas</td><td>15 abr</td><td>⭐ 4.9</td></tr>
+              <tr><td><strong>MantenerYa</strong></td><td>Mantenimiento / técnico</td><td>12 jun</td><td>⭐ 4.2</td></tr>
+              <tr><td><strong>GasYFuego SRL</strong></td><td>Gas / combustible</td><td>1 jun</td><td>⭐ 4.6</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Órdenes recientes</div>
+          <table>
+            <thead><tr><th>Proveedor</th><th>Detalle</th><th>Total</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>FoodServ</td><td>Desayunos semana</td><td>$48.000</td><td><span class="badge badge-green">Entregado</span></td></tr>
+              <tr><td>TextilHogar</td><td>12 juegos de toallas</td><td>$72.000</td><td><span class="badge badge-green">Entregado</span></td></tr>
+              <tr><td>CleanBrands</td><td>Amenities x50</td><td>$23.000</td><td><span class="badge badge-gold">En camino</span></td></tr>
+              <tr><td>MantenerYa</td><td>Reparación Suite 2</td><td>$18.000</td><td><span class="badge badge-red">Pendiente</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:12px"><button class="btn btn-gold btn-sm">+ Nueva orden de compra</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== FACTURACIÓN ===================== -->
+    <div class="view" id="view-facturacion">
+      <div class="section-header">
+        <div class="section-title">Facturación</div>
+        <div class="section-sub">Generación de facturas, cobros y control de pagos</div>
+      </div>
+
+      <div class="ia-panel" style="background:linear-gradient(135deg,#445A73,#3A5065);border:1px solid rgba(176,138,85,.3);">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label" style="color:var(--accent);">✦ IA Pro — Facturación inteligente</div></div>
+        <div class="ia-text">
+          <strong>¿Sabías que con el plan Pro</strong> la IA consolida cada checkout automáticamente? Al cerrar la estadía de la Sra. Villalba, la IA sumaría noches + desayunos + minibar + extras en segundos, detectaría el pago parcial y generaría la factura lista para enviar. <strong>Sin errores. Sin tiempo perdido.</strong>
+        </div>
+        <div style="background:rgba(176,138,85,.15);border:1px solid rgba(176,138,85,.3);border-radius:8px;padding:10px 12px;margin-top:8px;">
+          <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:4px;">Con IA Pro también podés:</div>
+          <div style="font-size:12px;color:#fff;display:flex;flex-direction:column;gap:3px;">
+            <span><i class="bi bi-check2" style="color:var(--accent);"></i> Generar factura con un clic desde el checkout</span>
+            <span><i class="bi bi-check2" style="color:var(--accent);"></i> Detectar consumos no registrados automáticamente</span>
+            <span><i class="bi bi-check2" style="color:var(--accent);"></i> Enviar resumen mensual a contabilidad</span>
+          </div>
+        </div>
+        <div class="ia-suggestions" style="margin-top:10px;">
+          <span class="ia-chip" style="background:var(--accent);border-color:var(--accent);font-weight:600;" onclick="nav(document.querySelector('[data-view=cuenta]'))">Activar IA Pro →</span>
+          <span class="ia-chip">Ver demo de facturación IA →</span>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Facturado junio</div><div class="kpi-value">$1.8M</div><div class="kpi-sub kpi-up">↑ 23% vs jun 2024</div></div>
+        <div class="kpi"><div class="kpi-label">Cobrado</div><div class="kpi-value">$1.65M</div><div class="kpi-sub">92% del total</div></div>
+        <div class="kpi"><div class="kpi-label">Pendiente</div><div class="kpi-value">$150K</div><div class="kpi-sub kpi-down">3 facturas abiertas</div></div>
+        <div class="kpi"><div class="kpi-label">Facturas emitidas</div><div class="kpi-value">42</div><div class="kpi-sub">este mes</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">🧾 Últimas facturas</div>
+          <table>
+            <thead><tr><th>N°</th><th>Huésped</th><th>Fecha</th><th>Total</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>#0042</td><td>Rodríguez M.</td><td>14 jun</td><td>$84.000</td><td><span class="badge badge-green">Cobrada</span></td></tr>
+              <tr><td>#0041</td><td>García J.</td><td>13 jun</td><td>$38.000</td><td><span class="badge badge-green">Cobrada</span></td></tr>
+              <tr><td>#0040</td><td>Sra. Villalba</td><td>16 jun</td><td>$70.000</td><td><span class="badge badge-red">Saldo $14K</span></td></tr>
+              <tr><td>#0039</td><td>Núñez A.</td><td>16 jun</td><td>$114.000</td><td><span class="badge badge-green">Cobrada</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Detalle — Factura Villalba #0040</div>
+          <div class="invoice-row"><span>Habitación 12 — 2 noches</span><span>$56.000</span></div>
+          <div class="invoice-row"><span>Desayuno continental x2</span><span>$8.000</span></div>
+          <div class="invoice-row"><span>Minibar</span><span>$6.000</span></div>
+          <div class="invoice-row" style="color:var(--green)"><span>Pago parcial (efectivo)</span><span>–$56.000</span></div>
+          <div class="invoice-total"><span>Saldo pendiente</span><span>$14.000</span></div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-gold btn-sm">Emitir factura</button>
+            <button class="btn btn-outline btn-sm" onclick="showIAChat('Enviá mensaje de cobro cordial a Villalba por $14.000')">✦ Cobro por WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== OCUPACIÓN ===================== -->
+    <div class="view" id="view-ocupacion">
+      <div class="section-header">
+        <div class="section-title">Mapa de Ocupación</div>
+        <div class="section-sub">Análisis de ocupación histórica y proyectada</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Análisis predictivo</div></div>
+        <div class="ia-text">
+          Basado en el historial de los últimos 3 años, <strong>julio y agosto</strong> son los meses de mayor demanda (promedio 94% de ocupación). Para maximizar ingresos te recomiendo: (1) habilitar tarifa premium en cabañas mayores (+20%), (2) activar paquete "invierno romántico" para las suites, (3) cerrar descuentos para reservas de fin de semana. El <strong>ingreso proyectado de julio</strong> es de $2.4M si aplicás estas recomendaciones.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="showIAChat('Activá tarifa temporada alta para julio y agosto con +20% en cabañas')">Aplicar tarifas julio →</span>
+          <span class="ia-chip" onclick="showIAChat('Generame reporte de ocupación del primer semestre 2025')">Reporte semestral →</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Ocupación por mes — 2025</div>
+        <div id="occ-chart" style="padding:8px 0"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Ocupación por tipo de unidad</div>
+          <div style="margin-bottom:12px">
+            <div class="progress-label"><span>Cabañas Mayores (6)</span><span>83%</span></div>
+            <div class="occ-bar"><div class="occ-fill" style="width:83%"></div></div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div class="progress-label"><span>Cabañas Pino (6)</span><span>67%</span></div>
+            <div class="occ-bar"><div class="occ-fill mid" style="width:67%"></div></div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div class="progress-label"><span>Suites Lago (2)</span><span>50%</span></div>
+            <div class="occ-bar"><div class="occ-fill mid" style="width:50%"></div></div>
+          </div>
+          <div>
+            <div class="progress-label"><span>Habitaciones (4)</span><span>75%</span></div>
+            <div class="occ-bar"><div class="occ-fill" style="width:75%"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top fuentes de reserva</div>
+          <table>
+            <thead><tr><th>Canal</th><th>Reservas</th><th>% total</th><th>Ticket prom.</th></tr></thead>
+            <tbody>
+              <tr><td>Directo (web/WhatsApp)</td><td>28</td><td>67%</td><td>$52.000</td></tr>
+              <tr><td>Booking.com</td><td>8</td><td>19%</td><td>$44.000</td></tr>
+              <tr><td>Airbnb</td><td>4</td><td>10%</td><td>$38.000</td></tr>
+              <tr><td>Referidos</td><td>2</td><td>4%</td><td>$58.000</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted)">
+            ✦ IA: Las reservas directas tienen <strong style="color:var(--accent)">18% más de ticket</strong> que los canales OTA. Potenciá el canal directo con WhatsApp.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ASISTENTE IA ===================== -->
+    <div class="view" id="view-ia">
+      <div class="section-header">
+        <div class="section-title">Asistente IA ✦</div>
+        <div class="section-sub">Gestión 360 iA — powered by Claude + GPT-4o</div>
+      </div>
+
+      <div style="max-width:680px;margin:0 auto;">
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div class="ia-dot"></div>
+            <span style="font-size:13px;color:var(--accent);font-weight:500">Asistente IA — Serranías del Bosque</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--muted)">Claude API + GPT-4o</span>
+          </div>
+          <div id="ia-messages" style="padding:16px 20px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:12px 16px;max-width:85%;">
+              <div style="font-size:13px;color:var(--text2);line-height:1.6">Hola Sofía, soy tu asistente IA. Puedo ayudarte a analizar tu negocio, generar documentos, sugerir tarifas, redactar mensajes para huéspedes, o responder cualquier pregunta sobre las operaciones del hotel. ¿En qué te ayudo hoy?</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px">Asistente IA · ahora</div>
+            </div>
+          </div>
+          <div style="padding:12px 16px;border-top:1px solid var(--border);">
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;" id="ia-quick-chips"></div>
+            <div style="display:flex;gap:8px;">
+              <input class="form-input" id="ia-input" placeholder="Preguntá sobre tu negocio..." style="flex:1" onkeydown="if(event.key==='Enter')sendIA()">
+              <button class="btn btn-gold" onclick="sendIA()">✦ Preguntar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===================== MARKETING & RRSS ===================== -->
+    <div id="view-marketing" class="view">
+      <div class="section-header">
+        <div class="section-title">Marketing & RRSS</div>
+        <div class="section-sub">Creá contenido con IA y publicá en tus redes</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Sugerencia de contenido</div></div>
+        <div class="ia-text">
+          Basado en tu ocupación actual (78%) y el fin de semana largo próximo, te recomiendo publicar una historia en Instagram mostrando las cabañas libres con una oferta de <strong>última hora</strong>. El viernes a las 18hs es el mejor momento para publicar según tu audiencia histórica.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip" onclick="generatePost('instagram')">✦ Generar post IG →</span>
+          <span class="ia-chip" onclick="generatePost('facebook')">✦ Generar post FB →</span>
+          <span class="ia-chip" onclick="generatePost('whatsapp')">✦ Mensaje WhatsApp →</span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Creador de contenido -->
+        <div class="card">
+          <div class="card-title"><i class="bi bi-pencil-square" style="color:var(--pr)"></i> Crear publicación</div>
+
+          <!-- Plantillas -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Plantilla</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <div class="mkt-tpl active-tpl" onclick="selectTpl(this,'oferta')" style="border:2px solid var(--pr);background:var(--pr-pale);border-radius:8px;padding:8px 12px;cursor:pointer;text-align:center;min-width:80px;">
+                <i class="bi bi-percent" style="color:var(--pr);font-size:1.2rem;display:block;margin-bottom:4px;"></i>
+                <span style="font-size:11px;color:var(--pr);font-weight:600;">Oferta</span>
+              </div>
+              <div class="mkt-tpl" onclick="selectTpl(this,'disponibilidad')" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;text-align:center;min-width:80px;background:var(--white);">
+                <i class="bi bi-calendar-check" style="color:var(--sub);font-size:1.2rem;display:block;margin-bottom:4px;"></i>
+                <span style="font-size:11px;color:var(--sub);">Disponible</span>
+              </div>
+              <div class="mkt-tpl" onclick="selectTpl(this,'temporada')" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;text-align:center;min-width:80px;background:var(--white);">
+                <i class="bi bi-sun" style="color:var(--sub);font-size:1.2rem;display:block;margin-bottom:4px;"></i>
+                <span style="font-size:11px;color:var(--sub);">Temporada</span>
+              </div>
+              <div class="mkt-tpl" onclick="selectTpl(this,'resena')" style="border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;text-align:center;min-width:80px;background:var(--white);">
+                <i class="bi bi-star" style="color:var(--sub);font-size:1.2rem;display:block;margin-bottom:4px;"></i>
+                <span style="font-size:11px;color:var(--sub);">Reseña</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Imagen -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Imagen</div>
+            <div style="display:flex;gap:8px;">
+              <div style="width:72px;height:72px;border-radius:8px;background:linear-gradient(135deg,#506886,#445A73);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--pr);">
+                <i class="bi bi-house-door" style="color:white;font-size:1.5rem;"></i>
+              </div>
+              <div style="width:72px;height:72px;border-radius:8px;background:linear-gradient(135deg,#3A9E70,#2A7A54);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border);">
+                <i class="bi bi-tree" style="color:white;font-size:1.5rem;"></i>
+              </div>
+              <div style="width:72px;height:72px;border-radius:8px;background:linear-gradient(135deg,#B08A55,#8A6A35);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border);">
+                <i class="bi bi-cup-hot" style="color:white;font-size:1.5rem;"></i>
+              </div>
+              <div style="width:72px;height:72px;border-radius:8px;background:var(--bg);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:3px;">
+                <i class="bi bi-upload" style="color:var(--sub);font-size:1rem;"></i>
+                <span style="font-size:9px;color:var(--muted);">Subir</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Texto generado por IA -->
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Texto</div>
+              <button class="btn btn-outline btn-sm" style="font-size:11px;display:flex;align-items:center;gap:4px;" onclick="generatePost('instagram')">
+                <i class="bi bi-stars"></i> Regenerar con IA
+              </button>
+            </div>
+            <textarea id="post-text" class="form-input" rows="5" style="width:100%;resize:vertical;">🌲 ¡Últimas cabañas disponibles este fin de semana largo!
+
+Escapate a Serranías del Bosque y desconectate de todo. Cabaña con jacuzzi, desayuno incluido y naturaleza pura.
+
+📅 Quedan solo 3 unidades para el 20–22 de junio
+💰 Reservá antes del miércoles y accedé al precio especial
+
+👇 Escribinos por WhatsApp o reservá desde el link en bio.
+
+#SerraniasDelBosque #Cabañas #FinDeSemana #Naturaleza #Escapada</textarea>
+          </div>
+
+          <!-- Destino -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Publicar en</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--white);">
+                <input type="checkbox" checked style="accent-color:var(--pr)">
+                <i class="bi bi-instagram" style="color:#E1306C;"></i> Instagram
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--white);">
+                <input type="checkbox" style="accent-color:var(--pr)">
+                <i class="bi bi-facebook" style="color:#1877F2;"></i> Facebook
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--white);">
+                <input type="checkbox" checked style="accent-color:var(--pr)">
+                <i class="bi bi-whatsapp" style="color:#25D366;"></i> WA Estado
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold"><i class="bi bi-send"></i> Publicar ahora</button>
+            <button class="btn btn-outline"><i class="bi bi-clock"></i> Programar</button>
+          </div>
+        </div>
+
+        <!-- Historial y calendario -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card">
+            <div class="card-title"><i class="bi bi-calendar3" style="color:var(--pr)"></i> Próximas publicaciones</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg);border-radius:8px;">
+                <div style="width:36px;height:36px;background:var(--pr-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                  <i class="bi bi-instagram" style="color:#E1306C;"></i>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;color:var(--text);">Oferta fin de semana largo</div>
+                  <div style="font-size:11px;color:var(--muted);">Viernes 20/06 · 18:00hs</div>
+                </div>
+                <span style="font-size:10px;background:var(--accent-pale);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:600;">Programado</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg);border-radius:8px;">
+                <div style="width:36px;height:36px;background:var(--em-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                  <i class="bi bi-whatsapp" style="color:#25D366;"></i>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;color:var(--text);">Campaña reactivación clientes</div>
+                  <div style="font-size:11px;color:var(--muted);">Lunes 23/06 · 10:00hs · 28 contactos</div>
+                </div>
+                <span style="font-size:10px;background:var(--pr-pale);color:var(--pr);padding:2px 8px;border-radius:10px;font-weight:600;">Programado</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><i class="bi bi-graph-up" style="color:var(--accent)"></i> Rendimiento</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:12px;color:var(--text2);">Alcance este mes</span>
+                <span style="font-size:13px;font-weight:600;color:var(--text);">1.240 personas</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:12px;color:var(--text2);">Consultas generadas</span>
+                <span style="font-size:13px;font-weight:600;color:var(--em);">18</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:12px;color:var(--text2);">Mejor post del mes</span>
+                <span style="font-size:12px;font-weight:600;color:var(--accent);">Oferta invierno IG</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
+                <span style="font-size:12px;color:var(--text2);">Publicaciones enviadas</span>
+                <span style="font-size:13px;font-weight:600;color:var(--text);">12</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CONEXIONES ===================== -->
+    <div id="view-conexiones" class="view">
+      <div class="section-header">
+        <div class="section-title">Conexiones</div>
+        <div class="section-sub">Integraciones activas del portal</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Estado de integraciones</div></div>
+        <div class="ia-text">Tu conexión de WhatsApp lleva <strong>32 días activa</strong> sin interrupciones. Meta Business no está conectado — si lo conectás podés publicar en Instagram y Facebook directamente desde el módulo de Marketing.</div>
+        <div class="ia-suggestions">
+          <span class="ia-chip">✦ Conectar Meta →</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+        <!-- WhatsApp -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:44px;height:44px;background:#E8F8EF;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-whatsapp" style="color:#25D366;font-size:1.4rem;"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);">WhatsApp Business</div>
+              <div style="font-size:12px;color:var(--muted);">Evolution API</div>
+            </div>
+            <span style="font-size:11px;background:var(--em-pale);color:var(--em);padding:3px 10px;border-radius:20px;font-weight:600;border:1px solid rgba(58,158,112,.3);">● Conectado</span>
+          </div>
+          <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Número: +54 9 11 5555-0001 · Activo hace 32 días</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm"><i class="bi bi-arrow-repeat"></i> Reconectar</button>
+            <button class="btn btn-outline btn-sm"><i class="bi bi-gear"></i> Configurar</button>
+          </div>
+        </div>
+
+        <!-- Meta -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:44px;height:44px;background:#EEF3FB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-meta" style="color:#1877F2;font-size:1.4rem;"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);">Meta Business</div>
+              <div style="font-size:12px;color:var(--muted);">Instagram · Facebook</div>
+            </div>
+            <span style="font-size:11px;background:var(--bg);color:var(--muted);padding:3px 10px;border-radius:20px;font-weight:600;border:1px solid var(--border);">○ Sin conectar</span>
+          </div>
+          <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Conectá tu cuenta de Meta para publicar directamente desde el módulo de Marketing.</div>
+          <button class="btn btn-gold" style="width:100%;"><i class="bi bi-plug"></i> Conectar con Meta</button>
+        </div>
+
+        <!-- Email -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:44px;height:44px;background:var(--pr-pale);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-envelope" style="color:var(--pr);font-size:1.4rem;"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);">Email transaccional</div>
+              <div style="font-size:12px;color:var(--muted);">SendGrid / Resend</div>
+            </div>
+            <span style="font-size:11px;background:var(--bg);color:var(--muted);padding:3px 10px;border-radius:20px;font-weight:600;border:1px solid var(--border);">○ Sin conectar</span>
+          </div>
+          <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Para envío de confirmaciones, recordatorios y campañas por email.</div>
+          <button class="btn btn-outline" style="width:100%;"><i class="bi bi-plug"></i> Configurar email</button>
+        </div>
+
+        <!-- Google Maps -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:44px;height:44px;background:#FDF2F2;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-geo-alt" style="color:#EA4335;font-size:1.4rem;"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);">Google Maps</div>
+              <div style="font-size:12px;color:var(--muted);">Maps API</div>
+            </div>
+            <span style="font-size:11px;background:var(--em-pale);color:var(--em);padding:3px 10px;border-radius:20px;font-weight:600;border:1px solid rgba(58,158,112,.3);">● Activo</span>
+          </div>
+          <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">Geolocalización activa para el módulo de seguimiento y mapa de ocupación.</div>
+          <button class="btn btn-outline btn-sm"><i class="bi bi-gear"></i> Configurar</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================== MI PLAN & TOKENS ===================== -->
+    <div id="view-cuenta" class="view">
+      <div class="section-header">
+        <div class="section-title">Mi Plan & Tokens</div>
+        <div class="section-sub">Suscripción, consumo de IA y saldo disponible</div>
+      </div>
+
+      <div class="ia-panel">
+        <div class="ia-header"><div class="ia-dot"></div><div class="ia-label">IA — Resumen de consumo</div></div>
+        <div class="ia-text">
+          Este mes usaste el <strong>68% de tus tokens</strong> disponibles. A este ritmo los tokens alcanzan hasta el <strong>28 de junio</strong>. El mayor consumo es el bot de WhatsApp (42%). Si necesitás más, podés cargar saldo o hacer upgrade al plan Pro.
+        </div>
+        <div class="ia-suggestions">
+          <span class="ia-chip">✦ Cargar tokens →</span>
+          <span class="ia-chip">✦ Ver plan Pro →</span>
+        </div>
+      </div>
+
+      <!-- Plan actual -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div class="card" style="border-left:3px solid var(--pr);">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Plan actual</div>
+          <div style="font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:4px;">Pro Hotel</div>
+          <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">$15.000 ARS / mes · Vence 30 jun 2025</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><i class="bi bi-check-circle-fill" style="color:var(--em);"></i> WhatsApp Bot activo</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><i class="bi bi-check-circle-fill" style="color:var(--em);"></i> Módulos Hotel completos</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><i class="bi bi-check-circle-fill" style="color:var(--em);"></i> Asistente IA incluido</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);"><i class="bi bi-x-circle" style="color:var(--border2);"></i> Marketing RRSS (próximo)</div>
+          </div>
+          <button class="btn btn-outline" style="width:100%;"><i class="bi bi-arrow-up-circle"></i> Upgrade a Enterprise</button>
+        </div>
+
+        <!-- Tokens -->
+        <div class="card">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Consumo de tokens IA</div>
+          <!-- Barra principal -->
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:4px;">
+            <span>Usado este mes</span><span style="font-weight:600;color:var(--text);">340.000 / 500.000</span>
+          </div>
+          <div style="background:var(--bg);border-radius:4px;height:10px;overflow:hidden;margin-bottom:14px;">
+            <div style="width:68%;height:100%;background:linear-gradient(90deg,var(--pr),var(--pr-l));border-radius:4px;"></div>
+          </div>
+          <!-- Desglose -->
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px;"><span><i class="bi bi-whatsapp" style="color:#25D366;"></i> WhatsApp Bot</span><span>42%</span></div>
+              <div style="background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:42%;height:100%;background:#25D366;border-radius:3px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px;"><span><i class="bi bi-stars" style="color:var(--accent);"></i> Asistente IA</span><span>31%</span></div>
+              <div style="background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:31%;height:100%;background:var(--accent);border-radius:3px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px;"><span><i class="bi bi-file-text" style="color:var(--pr);"></i> Documentos</span><span>27%</span></div>
+              <div style="background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:27%;height:100%;background:var(--pr);border-radius:3px;"></div></div>
+            </div>
+          </div>
+          <button class="btn btn-gold" style="width:100%;"><i class="bi bi-plus-circle"></i> Cargar tokens adicionales</button>
+        </div>
+      </div>
+
+      <!-- Cargar saldo -->
+      <div class="card">
+        <div class="card-title"><i class="bi bi-wallet2" style="color:var(--accent)"></i> Cargar tokens adicionales</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+          <div onclick="selectPack(this)" style="border:2px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .15s;">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--text);">100K</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">tokens</div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-top:6px;">$2.500</div>
+          </div>
+          <div onclick="selectPack(this)" style="border:2px solid var(--pr);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:var(--pr-pale);position:relative;">
+            <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;">MÁS POPULAR</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--pr);">500K</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">tokens</div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-top:6px;">$9.000</div>
+          </div>
+          <div onclick="selectPack(this)" style="border:2px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--text);">1M</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">tokens</div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-top:6px;">$15.000</div>
+          </div>
+        </div>
+        <button class="btn btn-gold" style="width:100%;"><i class="bi bi-credit-card"></i> Pagar con MercadoPago</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+// NAV
+const titles = {
+  dashboard:    ['Dashboard General', 'Resumen operativo del día'],
+  reservas:     ['Reservas', 'Gestión y seguimiento'],
+  habitaciones: ['Habitaciones & Cabañas', 'Mapa de estado'],
+  checkin:      ['Check-in / Check-out', 'Registro del día'],
+  whatsapp:     ['WhatsApp Concierge', 'Atención y automatización'],
+  proveedores:  ['Proveedores', 'Insumos y órdenes de compra'],
+  facturacion:  ['Facturación', 'Cobros y control de pagos'],
+  ocupacion:    ['Mapa de Ocupación', 'Análisis predictivo'],
+  ia:           ['Asistente IA ✦', 'Gestión 360 iA'],
+  marketing:    ['Marketing & RRSS', 'Contenido con IA para tus redes'],
+  conexiones:   ['Conexiones', 'Integraciones activas del portal'],
+  cuenta:       ['Mi Plan & Tokens', 'Suscripción y consumo de IA'],
+};
+
+function nav(el) {
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  el.classList.add('active');
+  const v = el.dataset.view;
+  document.getElementById('view-' + v).classList.add('active');
+  const t = titles[v];
+  document.getElementById('topbar-title').textContent = t[0];
+  document.getElementById('topbar-sub').textContent = t[1];
+  document.getElementById('sidebar').classList.add('collapsed');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+document.getElementById('sidebar').addEventListener('click', function(e) {
+  if (this.classList.contains('collapsed') && !e.target.closest('.sb-item')) {
+    this.classList.remove('collapsed');
+  }
+});
+
+// WHATSAPP MOCK
+const chats = [
+  { id: 1, name: 'Ignacio Solano', last: '¿Tienen disponible para la primera semana de julio?', time: '42 min', unread: 1, msgs: [
+    { out: false, text: '¡Hola! Vi su página, ¿tienen cabaña disponible para del 5 al 12 de julio? Somos 2 adultos y 1 nene', time: '09:38' },
+    { out: true, text: 'Buen día Ignacio! Gracias por contactarnos. Estamos verificando disponibilidad para esas fechas.', time: '09:55' },
+    { out: false, text: '¿Tienen jacuzzi en alguna cabaña?', time: '09:56' },
+    { out: false, text: 'Y cuánto saldría aproximadamente?', time: '10:02' }
+  ]},
+  { id: 2, name: 'Martina Ruiz', last: 'Muchas gracias, nos vemos el viernes!', time: '2h', unread: 0, msgs: [
+    { out: false, text: 'Hola quería confirmar mi reserva del viernes para la Suite Lago', time: '08:10' },
+    { out: true, text: 'Hola Martina! Tu reserva está confirmada ✓ Suite Lago, entrada viernes 20 junio a las 15hs. ¡Te esperamos!', time: '08:25' },
+    { out: false, text: 'Muchas gracias, nos vemos el viernes!', time: '08:30' }
+  ]},
+  { id: 3, name: 'Ricardo Palma', last: '¿A qué hora es el check-out?', time: '3h', unread: 0, msgs: [
+    { out: false, text: '¿A qué hora es el check-out?', time: '07:45' },
+    { out: true, text: 'El check-out es hasta las 11:00hs. Si necesitás late check-out podemos consultar disponibilidad.', time: '07:50' }
+  ]}
+];
+let activeChat = 0;
+
+function renderChats() {
+  const cl = document.getElementById('chat-list');
+  if (!cl) return;
+  cl.innerHTML = chats.map((c, i) => `
+    <div onclick="setChat(${i})" style="padding:10px 12px;border-radius:8px;cursor:pointer;background:${i===activeChat?'var(--gold-dim)':'transparent'};border:1px solid ${i===activeChat?'var(--border2)':'transparent'};margin-bottom:6px;display:flex;align-items:center;gap:10px;transition:all 0.15s">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${c.name[0]}</div>
+      <div style="flex:1;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:500">${c.name}</span><span style="font-size:10px;color:var(--muted)">${c.time}</span></div>
+        <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.last}</div>
+      </div>
+      ${c.unread ? `<span style="background:var(--gold);color:var(--bg);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${c.unread}</span>` : ''}
+    </div>
+  `).join('');
+  renderMessages();
+}
+
+function renderMessages() {
+  const cm = document.getElementById('chat-messages');
+  if (!cm) return;
+  const c = chats[activeChat];
+  document.getElementById('active-chat-name').textContent = c.name;
+  cm.innerHTML = c.msgs.map(m => `
+    <div>
+      <div class="chat-bubble ${m.out ? 'chat-out' : 'chat-in'}" style="max-width:78%">${m.text}</div>
+      <div class="chat-meta" style="${m.out ? 'text-align:right' : ''}">${m.time}</div>
+    </div>
+  `).join('');
+  cm.scrollTop = cm.scrollHeight;
+}
+
+function setChat(i) { activeChat = i; chats[i].unread = 0; renderChats(); }
+
+function sendMsg() {
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  chats[activeChat].msgs.push({ out: true, text: txt, time: 'ahora' });
+  chats[activeChat].last = txt;
+  inp.value = '';
+  renderChats();
+}
+
+function insertReply() {
+  const inp = document.getElementById('chat-input');
+  if (inp) inp.value = '¡Hola Ignacio! Tenemos disponibilidad del 5 al 12 de julio. Contamos con Cabaña Pino (2+1 personas, $38.000/noche) y Cabaña Mayor (4+2 personas, $52.000/noche). La Cabaña Mayor tiene jacuzzi exterior ✓. ¿Te envío fotos y confirmamos?';
+}
+
+// OCCUPANCY CHART
+function buildOccChart() {
+  const el = document.getElementById('occ-chart');
+  if (!el) return;
+  const data = [
+    { m: 'Ene', v: 45 }, { m: 'Feb', v: 62 }, { m: 'Mar', v: 58 },
+    { m: 'Abr', v: 70 }, { m: 'May', v: 74 }, { m: 'Jun', v: 78 },
+    { m: 'Jul', v: 94 }, { m: 'Ago', v: 91 }, { m: 'Sep', v: 67 },
+    { m: 'Oct', v: 55 }, { m: 'Nov', v: 61 }, { m: 'Dic', v: 88 }
+  ];
+  const max = 100;
+  const h = 160;
+  el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:6px;height:${h}px;padding-bottom:0">` +
+    data.map((d,i) => {
+      const barH = Math.round((d.v / max) * h);
+      const isFuture = i >= 6;
+      const isNow = i === 5;
+      const color = isFuture ? 'rgba(201,168,76,0.3)' : isNow ? 'var(--gold)' : 'rgba(201,168,76,0.6)';
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-size:10px;color:var(--muted)">${d.v}%</div>
+        <div style="width:100%;height:${barH}px;background:${color};border-radius:4px 4px 0 0;position:relative;transition:opacity 0.15s" title="${d.m}: ${d.v}%">
+          ${isNow ? `<div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--gold)"></div>` : ''}
+        </div>
+        <div style="font-size:10px;color:var(--muted)">${d.m}</div>
+      </div>`;
+    }).join('') +
+  `</div><div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:right">Proyectado ▓ | Real █</div>`;
+}
+
+// IA CHAT
+const iaPresets = [
+  '¿Cómo me fue este mes comparado con junio 2024?',
+  'Qué tarifas recomendás para el próximo fin de semana',
+  'Generame carta de bienvenida para los Pereira',
+  '¿Cuáles son mis unidades más rentables?',
+  'Redactá mensaje de seguimiento post-checkout',
+  'Análisis de canales de reserva este mes',
+];
+
+const iaResponses = {
+  default: [
+    'Analizando tu pregunta con los datos del hotel... En base al historial de Serranías del Bosque, puedo decirte que <strong>junio 2025 es el mejor junio en 3 años</strong> con un 23% más de ingresos y una ocupación promedio del 78%. Las cabañas mayores son las unidades más demandadas (83% de ocupación).',
+    'Basado en los patrones históricos y la demanda actual, <strong>recomiendo subir tarifas un 15-20%</strong> para el próximo fin de semana largo. Los últimos 2 fines de semana largos tuvieron 100% de ocupación con lista de espera.',
+    'Carta generada ✦: <em>"Estimados Sofía y Rodrigo, es un placer recibirlos en Serranías del Bosque para celebrar este momento tan especial. Hemos preparado la Suite Lago con detalles especiales para su estadía. Los esperamos con una copa de bienvenida al llegar."</em>',
+    'Tus unidades más rentables son: 1) Suite Lago ($57.000/noche promedio), 2) Cabaña Mayor ($42.000/noche), 3) Cabaña Pino ($38.000/noche). Las habitaciones tienen el ticket más bajo pero la mayor rotación.',
+  ]
+};
+let iaIdx = 0;
+
+function buildIAChips() {
+  const el = document.getElementById('ia-quick-chips');
+  if (!el) return;
+  el.innerHTML = iaPresets.map(p => `<span class="ia-chip" onclick="askIA('${p.replace(/'/g,"\\'")}') ">${p}</span>`).join('');
+}
+
+function askIA(q) {
+  document.getElementById('ia-input').value = q;
+  sendIA();
+}
+
+function sendIA() {
+  const inp = document.getElementById('ia-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const msgs = document.getElementById('ia-messages');
+  msgs.innerHTML += `<div style="align-self:flex-end;background:rgba(90,138,74,0.15);border:1px solid rgba(90,138,74,0.3);border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:82%"><div style="font-size:13px;color:var(--text);line-height:1.5">${txt}</div><div style="font-size:10px;color:var(--muted);margin-top:3px;text-align:right">Vos · ahora</div></div>`;
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    const resp = iaResponses.default[iaIdx % iaResponses.default.length];
+    iaIdx++;
+    msgs.innerHTML += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:12px 16px;max-width:85%"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><div class="ia-dot"></div><span style="font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase">Asistente IA</span></div><div style="font-size:13px;color:var(--text2);line-height:1.6">${resp}</div></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 900);
+}
+
+function showIAChat(q) {
+  const iaItem = document.querySelector('[data-view=ia]');
+  nav(iaItem);
+  setTimeout(() => askIA(q), 200);
+}
+
+// INIT
+renderChats();
+buildOccChart();
+buildIAChips();
+
+function setCommTab(el, tabId) {
+  document.querySelectorAll('.comm-tab').forEach(t => {
+    t.style.borderBottomColor = 'transparent';
+    t.style.color = 'var(--sub)';
+    t.style.fontWeight = '400';
+  });
+  el.style.borderBottomColor = 'var(--pr)';
+  el.style.color = 'var(--pr)';
+  el.style.fontWeight = '600';
+  document.querySelectorAll('#tab-whatsapp, #tab-email, #tab-masivo').forEach(t => t.style.display = 'none');
+  document.getElementById(tabId).style.display = 'block';
+}
+
+function selectTpl(el, tipo) {
+  document.querySelectorAll('.mkt-tpl').forEach(t => {
+    t.style.border = '1px solid var(--border)';
+    t.style.background = 'var(--white)';
+  });
+  el.style.border = '2px solid var(--pr)';
+  el.style.background = 'var(--pr-pale)';
+}
+
+function selectPack(el) {
+  document.querySelectorAll('[onclick="selectPack(this)"]').forEach(p => {
+    p.style.border = '2px solid var(--border)';
+    p.style.background = 'var(--white)';
+  });
+  el.style.border = '2px solid var(--pr)';
+  el.style.background = 'var(--pr-pale)';
+}
+
+function generatePost(canal) {
+  const textos = {
+    instagram: '🌲 ¡Últimas cabañas disponibles este fin de semana largo!\n\nEscapate a Serranías del Bosque y desconectate de todo. Cabaña con jacuzzi, desayuno incluido y naturaleza pura.\n\n📅 Quedan solo 3 unidades para el 20–22 de junio\n💰 Reservá antes del miércoles y accedé al precio especial\n\n👇 Escribinos por WhatsApp o reservá desde el link en bio.\n\n#SerraniasDelBosque #Cabañas #FinDeSemana #Naturaleza #Escapada',
+    facebook: '🌲 ¡Fin de semana largo en las sierras!\n\nSolo quedan 3 cabañas disponibles para el 20 al 22 de junio. Jacuzzi, desayuno, naturaleza y silencio total.\n\nReservas por mensaje privado o WhatsApp. ¡No te quedes sin la tuya!',
+    whatsapp: 'Hola! 🌲 Tenemos últimas cabañas libres para el finde largo del 20–22/06. Desayuno incluido, jacuzzi y naturaleza pura. ¿Te interesa? Te paso disponibilidad y precios.'
+  };
+  const el = document.getElementById('post-text');
+  if (el) el.value = textos[canal] || textos.instagram;
+}
+
+function generateEmailIA() {
+  const ta = document.querySelector('#tab-email textarea');
+  if (ta) ta.value = 'Estimada María,\n\nMuchas gracias por contactarnos. Es un placer responderle.\n\nTenemos disponibilidad para la primera semana de julio. Le ofrecemos las siguientes opciones:\n\n• Cabaña Pino (2 personas): $38.000/noche\n• Cabaña Mayor (4 personas): $52.000/noche\n\nAmbas incluyen desayuno y tienen jacuzzi exterior.\n\nPara confirmar la reserva le pedimos una seña del 30%. Puede abonar por transferencia o MercadoPago.\n\n¿Le puedo enviar más fotos o tiene alguna consulta adicional?\n\nQuedo a disposición,\nSerranías del Bosque';
+}
+
+function generateMasivoIA() {
+  alert('✦ Campaña generada: "Hola {nombre}, te extrañamos en Serranías del Bosque 🌲 Este invierno tenemos una oferta especial para vos: 15% off en cabañas de julio. ¿Te reservamos?" — Lista: 8 huéspedes del año pasado.');
+}
+
+</script>
+
+<!-- ═══ MAIA FLOATING CHATBOT ═══ -->
+<style>
+#maia-btn {
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  width:52px; height:52px; border-radius:50%;
+  background:linear-gradient(135deg,var(--pr),var(--pr-d));
+  box-shadow:0 4px 16px rgba(80,104,134,.4);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; border:none;
+  transition:transform .2s, box-shadow .2s;
+}
+#maia-btn:hover { transform:scale(1.08); box-shadow:0 6px 22px rgba(80,104,134,.5); }
+#maia-btn svg { display:block; }
+#maia-badge { position:absolute;top:0;right:0;width:14px;height:14px;background:var(--accent);border-radius:50%;border:2px solid #fff;animation:pulse 2s infinite; }
+
+#maia-window {
+  position:fixed; bottom:88px; right:24px; z-index:998;
+  width:340px; height:480px;
+  background:var(--white); border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  display:none; flex-direction:column; overflow:hidden;
+  animation:slideUp .2s ease;
+}
+#maia-window.open { display:flex; }
+@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+
+.maia-header {
+  background:linear-gradient(135deg,var(--pr),var(--pr-d));
+  padding:14px 16px;
+  display:flex; align-items:center; gap:10px; flex-shrink:0;
+}
+.maia-av {
+  width:36px; height:36px; border-radius:50%;
+  background:rgba(255,255,255,.2);
+  display:flex; align-items:center; justify-content:center;
+}
+.maia-name { font-size:14px; font-weight:600; color:#fff; }
+.maia-sub  { font-size:11px; color:rgba(255,255,255,.65); }
+.maia-close { margin-left:auto; background:none; border:none; color:rgba(255,255,255,.7); cursor:pointer; font-size:16px; }
+.maia-close:hover { color:#fff; }
+
+.maia-msgs { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; background:#f5f7f9; }
+.maia-msg-ia  { background:var(--white); border:1px solid var(--border); border-radius:12px 12px 12px 2px; padding:8px 12px; max-width:85%; font-size:12.5px; color:var(--text); line-height:1.5; }
+.maia-msg-usr { background:var(--pr); border-radius:12px 12px 2px 12px; padding:8px 12px; max-width:85%; font-size:12.5px; color:#fff; line-height:1.5; align-self:flex-end; }
+.maia-chips  { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.maia-chip   { background:var(--pr-pale); border:1px solid var(--pr-mid); border-radius:16px; padding:4px 10px; font-size:11px; color:var(--pr); cursor:pointer; transition:background .13s; }
+.maia-chip:hover { background:var(--pr-mid); }
+
+.maia-input-bar { padding:10px 12px; border-top:1px solid var(--border); display:flex; gap:8px; background:var(--white); flex-shrink:0; }
+.maia-input { flex:1; border:1px solid var(--border); border-radius:20px; padding:7px 12px; font-size:12px; font-family:Inter,sans-serif; outline:none; }
+.maia-input:focus { border-color:var(--pr); }
+.maia-send { width:32px; height:32px; border-radius:50%; background:var(--pr); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+</style>
+
+<!-- Botón flotante -->
+<button id="maia-btn" onclick="toggleMaia()">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="20" height="17">
+    <rect x="0"  y="10" width="6" height="6" rx="1.5" fill="white" opacity=".3"/>
+    <rect x="0"  y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+    <rect x="0"  y="0"  width="6" height="6" rx="1.5" fill="white"/>
+    <rect x="8"  y="0"  width="6" height="6" rx="1.5" fill="white"/>
+    <rect x="8"  y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+    <rect x="16" y="0"  width="6" height="6" rx="1.5" fill="#B08A55"/>
+  </svg>
+  <div id="maia-badge"></div>
+</button>
+
+<!-- Ventana MAIA -->
+<div id="maia-window">
+  <div class="maia-header">
+    <div class="maia-av">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="18" height="15">
+        <rect x="0" y="10" width="6" height="6" rx="1.5" fill="white" opacity=".3"/>
+        <rect x="0" y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+        <rect x="0" y="0"  width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="8" y="0"  width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="8" y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".6"/>
+        <rect x="16" y="0" width="6" height="6" rx="1.5" fill="#B08A55"/>
+      </svg>
+    </div>
+    <div>
+      <div class="maia-name">MAIA</div>
+      <div class="maia-sub">Asistente IA · Gestión 360 iA</div>
+    </div>
+    <button class="maia-close" onclick="toggleMaia()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="maia-msgs" id="maia-msgs">
+    <div class="maia-msg-ia">
+      Hola Sofía 👋 Soy <strong>MAIA</strong>, tu asistente de Gestión 360 iA.<br><br>
+      Puedo ayudarte con reservas, estadísticas, facturación o cualquier consulta sobre tu negocio. ¿En qué te ayudo hoy?
+      <div class="maia-chips">
+        <span class="maia-chip" onclick="askMaia('¿Cuántas reservas tengo esta semana?')">📅 Reservas esta semana</span>
+        <span class="maia-chip" onclick="askMaia('¿Cuál es mi ocupación actual?')">📊 Ocupación actual</span>
+        <span class="maia-chip" onclick="askMaia('¿Qué debo hacer hoy?')">✦ Qué debo hacer hoy</span>
+      </div>
+    </div>
+  </div>
+  <div class="maia-input-bar">
+    <input class="maia-input" id="maia-input" placeholder="Preguntale algo a MAIA..." onkeydown="if(event.key==='Enter')sendMaia()">
+    <button class="maia-send" onclick="sendMaia()"><i class="bi bi-send-fill" style="color:#fff;font-size:12px;"></i></button>
+  </div>
+</div>
+
+
+<script>
+
+// ═══ MAIA CHATBOT ═══
+function toggleMaia() {
+  const w = document.getElementById('maia-window');
+  w.classList.toggle('open');
+  document.getElementById('maia-badge').style.display =
+    w.classList.contains('open') ? 'none' : 'block';
+}
+
+const maiaResponses = [
+  'Esta semana tenés <strong>7 reservas confirmadas</strong>: 3 check-ins hoy y 4 entre jueves y domingo. El fin de semana largo está al 92% de ocupación.',
+  'Tu ocupación actual es del <strong>78%</strong> (14 de 18 unidades). Las 4 libres son: C3, C6, H8 y H10. ¿Querés que genere una oferta para llenarlas?',
+  'Para hoy: 1) Registrar los 2 check-ins pendientes, 2) Responder WhatsApp de Ignacio Solano, 3) Enviar recordatorio de check-out a la Sra. Villalba.',
+  'Claro, puedo ayudarte con eso. ¿Querés un reporte completo o algo específico?',
+  '¡Listo! Lo proceso ahora y te aviso cuando esté.',
+];
+let maiaIdx = 0;
+
+function askMaia(q) {
+  document.getElementById('maia-input').value = q;
+  sendMaia();
+}
+function sendMaia() {
+  const inp = document.getElementById('maia-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const msgs = document.getElementById('maia-msgs');
+  msgs.innerHTML += '<div class="maia-msg-usr">' + txt + '</div>';
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(function() {
+    const resp = maiaResponses[maiaIdx % maiaResponses.length];
+    maiaIdx++;
+    msgs.innerHTML += '<div class="maia-msg-ia">' + resp + '</div>';
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 700);
+}
+
+// ═══ COMM TABS ═══
+function setCommTab2(tab) {
+  const wsp = document.getElementById('comm-wsp');
+  const email = document.getElementById('comm-email');
+  if (wsp) wsp.style.display = tab === 'wsp' ? 'flex' : 'none';
+  if (email) email.style.display = tab === 'email' ? 'block' : 'none';
+  document.querySelectorAll('.comm-tab-btn').forEach(function(b) {
+    b.style.borderBottomColor = 'transparent';
+    b.style.color = 'var(--sub)';
+    b.style.fontWeight = '400';
+  });
+  const active = document.getElementById('ctab-' + tab);
+  if (active) {
+    active.style.borderBottomColor = 'var(--pr)';
+    active.style.color = 'var(--pr)';
+    active.style.fontWeight = '600';
+  }
+}
+
+// ═══ AGENT MODE ═══
+function toggleAgentMode() {
+  const dot = document.getElementById('agent-dot');
+  const lbl = document.getElementById('agent-label');
+  const bar = document.getElementById('ia-suggest-bar');
+  const isIA = lbl.textContent.trim() === 'Asistente IA';
+  lbl.textContent = isIA ? 'Operador humano' : 'Asistente IA';
+  dot.style.background = isIA ? '#f59e0b' : '#4ade80';
+  if (bar) bar.style.display = isIA ? 'none' : 'flex';
+}
+
+// ═══ CHAT ACTIONS MENU ═══
+function toggleChatActions() {
+  const m = document.getElementById('chat-actions-menu');
+  if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#chat-actions-menu') && !e.target.closest('[onclick="toggleChatActions()"]')) {
+    const m = document.getElementById('chat-actions-menu');
+    if (m) m.style.display = 'none';
+  }
+});
+
+// ═══ SEND NEW MSG ═══
+function sendMsgNew() {
+  const inp = document.getElementById('chat-input-new');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const msgs = document.getElementById('chat-messages-new');
+  msgs.innerHTML += '<div style="align-self:flex-end;background:#d9fdd3;border-radius:12px 12px 2px 12px;padding:7px 11px;max-width:75%;font-size:13px;color:#1a1a1a;line-height:1.4;">' + txt + '<span style="display:block;font-size:10px;color:#aaa;text-align:right;margin-top:2px;">ahora</span></div>';
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function useIASuggestion() {
+  const inp = document.getElementById('chat-input-new');
+  if (inp) inp.value = '\u00a1Hola Ignacio! Tenemos disponibilidad del 5 al 12 de julio. Caba\u00f1a Pino (2+1, $38.000/noche) o Caba\u00f1a Mayor ($52.000/noche, jacuzzi). \u00bfTe env\u00edo fotos?';
+  const bar = document.getElementById('ia-suggest-bar');
+  if (bar) bar.style.display = 'none';
+}
+function selectChatNew(name, av) {
+  const n = document.getElementById('chat-name-new');
+  const a = document.getElementById('chat-av-new');
+  if (n) n.textContent = name;
+  if (a) a.textContent = av;
+}
+
+// ═══ MARKETING ═══
+function selectTpl(el, tipo) {
+  document.querySelectorAll('.mkt-tpl').forEach(function(t) {
+    t.style.border = '1px solid var(--border)';
+    t.style.background = 'var(--white)';
+  });
+  el.style.border = '2px solid var(--pr)';
+  el.style.background = 'var(--pr-pale)';
+}
+function selectPack(el) {
+  document.querySelectorAll('[onclick^="selectPack"]').forEach(function(p) {
+    p.style.border = '2px solid var(--border)';
+    p.style.background = 'var(--white)';
+  });
+  el.style.border = '2px solid var(--pr)';
+  el.style.background = 'var(--pr-pale)';
+}
+function generatePost(canal) {
+  var textos = {
+    instagram: '\uD83C\uDF32 \u00a1\u00daLTIMAS CABA\u00d1AS DISPONIBLES este fin de semana largo!\n\nEscap\u00e1te a Serra\u00edas del Bosque. Jacuzzi, desayuno, naturaleza pura.\n\n\uD83D\uDCC5 Solo 3 unidades para el 20\u201322/06\n\uD83D\uDCB0 Reserv\u00e1 antes del mi\u00e9rcoles y accedé al precio especial\n\n#SerraniasDelBosque #Caba\u00f1as #FinDeSemana #Naturaleza',
+    facebook: '\uD83C\uDF32 \u00a1Fin de semana largo en las sierras!\n\nSolo quedan 3 caba\u00f1as disponibles para el 20 al 22 de junio. Jacuzzi, desayuno y silencio total.\n\nReservas por mensaje privado.',
+    whatsapp: 'Hola! \uD83C\uDF32 Tenemos \u00faltimas caba\u00f1as libres para el finde largo del 20\u201322/06. Desayuno incluido, jacuzzi y naturaleza pura. \u00bfTe interesa?'
+  };
+  var el = document.getElementById('post-text');
+  if (el) el.value = textos[canal] || textos.instagram;
+}
+function generateMasivoIA() {
+  alert('\u2714 Campa\u00f1a generada para 8 hu\u00e9spedes del a\u00f1o pasado.');
+}
+function generateEmailIA() {
+  var ta = document.getElementById('email-reply-ta');
+  if (ta) ta.value = 'Estimada Mar\u00eda,\n\nMuchas gracias por su consulta. Tenemos disponibilidad para la primera semana de julio:\n\n\u2022 Caba\u00f1a Pino (2 adultos + 1 ni\u00f1o): $38.000/noche, desayuno inclu\u00eddo\n\u2022 Caba\u00f1a Mayor (hasta 4 personas): $52.000/noche, con jacuzzi\n\nPara confirmar solicitamos se\u00f1a del 30%.\n\n\u00bfLe puedo enviar fotos?\n\nSaludos,\nSerran\u00edas del Bosque';
+}
+
+// ═══ INIT CHAT ═══
+(function initChat() {
+  var cl = document.getElementById('chat-list-new');
+  if (!cl) return;
+  var items = [
+    { av:'IS', name:'Ignacio Solano', last:'\u00bfTienen disponible para julio?', time:'42 min', unread:1, color:'#506886' },
+    { av:'MR', name:'Martina Ruiz', last:'Perfecto, nos vemos el viernes', time:'2h', unread:0, color:'#3A9E70' },
+    { av:'RP', name:'Ricardo Palma', last:'\u00bfA qu\u00e9 hora es el check-out?', time:'3h', unread:0, color:'#B08A55' },
+  ];
+  cl.innerHTML = items.map(function(c,i) {
+    return '<div onclick="selectChatNew(\'' + c.name + '\',\'' + c.av + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);background:' + (i===0?'#fff':'transparent') + ';" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'' + (i===0?'#fff':'transparent') + '\'">' +
+      '<div style="width:40px;height:40px;border-radius:50%;background:' + c.color + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">' + c.av + '</div>' +
+      '<div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:600;color:#111;">' + c.name + '</span><span style="font-size:11px;color:#aaa;">' + c.time + '</span></div>' +
+      '<div style="font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + c.last + '</div></div>' +
+      (c.unread ? '<div style="width:18px;height:18px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">' + c.unread + '</div>' : '') +
+      '</div>';
+  }).join('');
+
+  var msgs = document.getElementById('chat-messages-new');
+  if (msgs) {
+    msgs.innerHTML =
+      '<div style="text-align:center;font-size:11px;color:#aaa;padding:4px 0;">Hoy</div>' +
+      '<div style="background:#fff;border-radius:12px 12px 12px 2px;padding:8px 11px;max-width:75%;font-size:13px;color:#111;line-height:1.4;">\u00a1Hola! Vi su p\u00e1gina, \u00bftienen caba\u00f1a disponible del 5 al 12 de julio?<span style="display:block;font-size:10px;color:#aaa;margin-top:2px;">09:38</span></div>' +
+      '<div style="align-self:flex-end;background:#d9fdd3;border-radius:12px 12px 2px 12px;padding:8px 11px;max-width:75%;font-size:13px;color:#111;line-height:1.4;">Buen d\u00eda Ignacio! Gracias por contactarnos. Verificando disponibilidad.<span style="display:block;font-size:10px;color:#aaa;text-align:right;margin-top:2px;">09:55 \u2713\u2713</span></div>' +
+      '<div style="background:#fff;border-radius:12px 12px 12px 2px;padding:8px 11px;max-width:75%;font-size:13px;color:#111;line-height:1.4;">\u00bfTienen jacuzzi en alguna caba\u00f1a?<span style="display:block;font-size:10px;color:#aaa;margin-top:2px;">09:56</span></div>' +
+      '<div style="background:#fff;border-radius:12px 12px 12px 2px;padding:8px 11px;max-width:75%;font-size:13px;color:#111;line-height:1.4;">\u00bfY cu\u00e1nto saldr\u00eda aproximadamente?<span style="display:block;font-size:10px;color:#aaa;margin-top:2px;">10:02</span></div>';
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+})();
+
+</script>
+</body>
+</html>

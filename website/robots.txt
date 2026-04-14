@@ -1,0 +1,26 @@
+# robots.txt — Gestión 360 iA
+# https://g360ia.com.ar/robots.txt
+
+User-agent: *
+Allow: /
+
+# Bloquear rutas de administración y archivos internos
+Disallow: /admin/
+Disallow: /wp-admin/
+Disallow: /includes/
+
+# Bloquear archivos PHP internos (excepto el index)
+Disallow: /*.php$
+Allow: /index.php
+
+# Permitir assets para renderizado correcto por Google
+Allow: /assets/*.css
+Allow: /assets/*.js
+Allow: /assets/*.png
+Allow: /assets/*.jpg
+Allow: /assets/*.ico
+Allow: /assets/*.webp
+Allow: /assets/*.svg
+
+# Sitemap
+Sitemap: https://g360ia.com.ar/sitemap.xml

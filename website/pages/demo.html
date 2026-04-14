@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="/g360ia/assets/gestion360ia.ico" type="image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión 360 iA — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root {
+  /* ── Fondo general ── */
+  --bg:         #F2F4F6;
+
+  /* ── Sidebar ── */
+  --sb-bg:      #506886;
+  --sb-brd:     #3E5270;
+  --sb-active:  #445A73;
+  --sb-badge:   #B08A55;
+
+  /* ── Primario ── */
+  --pr:         #506886;
+  --pr-d:       #445A73;
+  --pr-l:       #6B86A0;
+  --pr-pale:    #EDF1F6;
+  --pr-mid:     #C2CFD9;
+  --pr-bg:      #F4F7FA;
+
+  /* ── Acento dorado ── */
+  --accent:     #B08A55;
+  --accent-l:   #C8A472;
+  --accent-pale:#F7F0E6;
+  --accent-bg:  rgba(176,138,85,.15);
+
+  /* ── Esmeralda (semántico positivo) ── */
+  --em:         #3A9E70;
+  --em-l:       #4AB880;
+  --em-d:       #2A7A54;
+  --em-pale:    #E8F7F1;
+  --em-mid:     #B8E0D0;
+  --em-bg:      #F2FAF6;
+
+  /* ── Neutros ── */
+  --white:      #FFFFFF;
+  --border:     #E5E7EB;
+  --border2:    #D1D5DB;
+
+  /* ── Tipografía ── */
+  --text:       #1F2937;
+  --text2:      #4B5563;
+  --sub:        #6B7280;
+  --muted:      #9CA3AF;
+
+  /* ── Semáforos ── */
+  --red:        #D9534F;
+  --red-bg:     #FDF2F2;
+  --amber:      #B08A55;
+  --amber-bg:   #FBF6EE;
+  --blue:       #506886;
+  --blue-bg:    #EDF1F6;
+
+  /* ── Moonlight ── */
+  --moon:       #B8C8D4;
+  --moon-l:     #E5E7EB;
+  --moon-d:     #7A96A8;
+
+  /* ── Pino / Madera ── */
+  --pine:       #B08A55;
+  --pine-l:     #C8A472;
+  --pine-d:     #8A6A3A;
+  --pine-bg:    #F7F0E6;
+  --pine-pale:  #F0E6D4;
+
+  /* ── Dorado ── */
+  --gold:       #B08A55;
+  --gold-bg:    rgba(176,138,85,.09);
+  --gold-l:     #C8A472;
+
+  /* ── Sombras ── */
+  --sh:         0 1px 3px rgba(30,50,80,.06), 0 4px 14px rgba(30,50,80,.05);
+  --sh-md:      0 4px 20px rgba(30,50,80,.10);
+  --sh-lg:      0 8px 32px rgba(30,50,80,.14);
+
+  --r:          11px;
+  --r-sm:       7px;
+  --sb-w:       230px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+/* ══════════════ SIDEBAR ══════════════ */
+#sb {
+  width: var(--sb-w);
+  min-width: var(--sb-w);
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-brd);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+#sb::-webkit-scrollbar { width: 3px; }
+#sb::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.sb-logo {
+  height: 56px;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--sb-brd);
+  display: flex; align-items: center; gap: 0.7rem;
+  flex-shrink: 0; overflow: hidden;
+}
+.sb-logo-mark {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--pr), var(--pr-l));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(80,104,134,.3);
+  transition: opacity .14s;
+}
+.sb-brand {
+  font-family: 'Fraunces', serif;
+  font-size: 1.05rem; font-weight: 600;
+  color: #ffffff; letter-spacing: -0.02em; line-height: 1.2;
+}
+.sb-brand-sub {
+  font-size: 0.58rem; font-weight: 500;
+  color: rgba(255,255,255,.5); letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sb-sec {
+  padding: 1rem 0.8rem 0.25rem;
+  font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+  flex-shrink: 0;
+}
+
+.ni {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.48rem 0.75rem;
+  margin: 1px 0.5rem;
+  border-radius: var(--r-sm);
+  color: rgba(255,255,255,.85);
+  cursor: pointer;
+  font-size: 0.8rem; font-weight: 500;
+  transition: all 0.14s;
+  user-select: none;
+}
+.ni:hover { background: rgba(255,255,255,.12); color: #ffffff; }
+.ni.on {
+  background: var(--sb-active);
+  color: #ffffff;
+  font-weight: 600;
+}
+.ni.on .ni-ic { color: #ffffff; }
+.ni-ic { font-size: 0.9rem; width: 17px; text-align: center; flex-shrink: 0; }
+.ni-txt { flex: 1; }
+.ni-badge {
+  margin-left: auto;
+  background: var(--em);
+  color: #fff;
+  font-size: 0.57rem; font-weight: 700;
+  padding: 0.1rem 0.4rem; border-radius: 9px; flex-shrink: 0;
+}
+.ni-badge.amber { background: var(--amber); }
+.ni-badge.red   { background: var(--red); }
+
+.sb-divider {
+  height: 1px;
+  background: rgba(255,255,255,.12);
+  margin: 0.6rem 0.8rem;
+}
+
+.sb-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--sb-brd);
+  padding: 0.75rem 0.5rem;
+  flex-shrink: 0;
+}
+.sb-user {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--r-sm);
+  cursor: pointer; transition: background 0.14s;
+}
+.sb-user:hover { background: rgba(255,255,255,.08); }
+.sb-av {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--pr-d), var(--pr));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.sb-uname { font-size: 0.78rem; font-weight: 600; color: #ffffff; }
+.sb-urole  { font-size: 0.6rem; color: rgba(255,255,255,.5); }
+
+/* ══════════════ MAIN ══════════════ */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+#topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+  height: 50px;
+  display: flex; align-items: center; gap: 0.8rem;
+  flex-shrink: 0;
+}
+.tb-toggle-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  background: none; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1rem; color: var(--sub);
+  flex-shrink: 0;
+  transition: background .14s, color .14s, border-color .14s;
+}
+.tb-toggle-btn:hover { background: var(--pr-pale); color: var(--pr); border-color: var(--pr); }
+.tb-toggle-btn.active { background: var(--pr-pale); color: var(--pr); border-color: var(--pr); }
+.tb-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem; font-weight: 600;
+  color: var(--text); letter-spacing: -0.02em;
+}
+.tb-sub { font-size: 0.69rem; color: var(--muted); margin-left: 0.25rem; }
+.tb-sp { flex: 1; }
+.tb-search {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 0.35rem 0.7rem;
+  width: 195px; transition: border-color 0.2s;
+}
+.tb-search:focus-within { border-color: var(--pr); background: #fff; }
+.tb-search input {
+  border: none; background: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem; color: var(--text); width: 100%; outline: none;
+}
+.tb-search input::placeholder { color: var(--muted); }
+.tb-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border); background: none;
+  border-radius: var(--r-sm); color: var(--sub);
+  cursor: pointer; font-size: 0.88rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.14s; position: relative;
+}
+.tb-btn:hover { border-color: #506886; color: #506886; background: #EDF1F6; }
+.tb-btn .dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 6px; height: 6px;
+  background: var(--red); border-radius: 50%;
+  border: 1.5px solid #fff;
+}
+
+#content { flex: 1; overflow-y: auto; padding: 1.3rem 1.4rem; }
+#content::-webkit-scrollbar { width: 4px; }
+#content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.view { display: none; animation: fadeIn 0.18s ease; }
+.view.on { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ══════════════ BOTONES ══════════════ */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.14s;
+}
+.btn-em   { background: #506886; color: #fff; box-shadow: 0 2px 8px rgba(80,104,134,.25); }
+.btn-em:hover { background: #445A73; }
+.btn-out  { background: none; border: 1px solid var(--border2); color: var(--text2); }
+.btn-out:hover { border-color: var(--pr); color: var(--pr); background: var(--pr-pale); }
+.btn-pine { background: var(--pine); color: #fff; }
+.btn-pine:hover { background: var(--pine-d); }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-red  { background: var(--red); color: #fff; }
+.btn-ghost { background: none; color: var(--sub); border: none; }
+.btn-ghost:hover { color: var(--pr); background: var(--pr-pale); border-radius: var(--r-sm); }
+.btn-sm  { padding: 0.3rem 0.65rem; font-size: 0.73rem; }
+.btn-xs  { padding: 0.18rem 0.5rem; font-size: 0.67rem; }
+
+/* ══════════════ CARDS ══════════════ */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow: hidden;
+}
+.card-tinted { background: var(--em-bg); border-color: var(--em-mid); }
+
+.ch {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.55rem;
+}
+.ch-title { font-weight: 700; font-size: 0.84rem; color: var(--text); }
+.ch-sub   { font-size: 0.68rem; color: var(--muted); margin-left: 0.2rem; }
+.ch-act   { margin-left: auto; display: flex; gap: 0.35rem; }
+.cb { padding: 1rem; }
+
+/* ══════════════ GRIDS ══════════════ */
+.g2  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-bottom: 0.9rem; }
+.g3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.9rem; margin-bottom: 0.9rem; }
+.g4  { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.9rem; margin-bottom: 0.9rem; }
+.g32 { display: grid; grid-template-columns: 2fr 1fr; gap: 0.9rem; margin-bottom: 0.9rem; }
+.g23 { display: grid; grid-template-columns: 1fr 2fr; gap: 0.9rem; margin-bottom: 0.9rem; }
+
+/* ══════════════ KPI ══════════════ */
+.kpi {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 0.9rem 1rem;
+  box-shadow: var(--sh);
+}
+.kpi-ico {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; margin-bottom: 0.6rem;
+}
+.kpi-val {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.85rem; line-height: 1; color: #2C2C2C;
+  letter-spacing: -0.02em; font-weight: 700;
+}
+.kpi-lbl {
+  font-size: 0.66rem; font-weight: 600; color: #6B7280;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-top: 0.2rem;
+}
+.kpi-d { font-size: 0.67rem; font-weight: 600; margin-top: 0.18rem; display: flex; align-items: center; gap: 0.2rem; }
+.up { color: #506886; }
+.dn { color: var(--red); }
+.nu { color: var(--muted); }
+
+/* ══════════════ BADGES ══════════════ */
+.bdg {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.65rem; font-weight: 600;
+}
+.bdg-em    { background: var(--em-pale); color: var(--em-d); }
+.bdg-pine  { background: var(--pine-bg); color: var(--pine-d); border: 1px solid var(--pine-pale); }
+.bdg-gold  { background: var(--gold-bg); color: #7A5800; }
+.bdg-red   { background: var(--red-bg); color: var(--red); }
+.bdg-amber { background: var(--amber-bg); color: var(--amber); }
+.bdg-moon  { background: var(--moon-l); color: var(--sub); }
+.bdg-blue  { background: var(--blue-bg); color: var(--blue); }
+.bdg-pro   { background: var(--em-pale); color: var(--em-d); border: 1px solid var(--em-mid); }
+.bdg-str   { background: var(--pine-bg); color: var(--pine-d); border: 1px solid var(--pine-l); }
+.bdg-ent   { background: var(--gold-bg); color: #7A5800; border: 1px solid var(--gold-l); }
+
+.sdot { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; }
+.sd   { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sd-on   { background: var(--pr); }
+.sd-off  { background: var(--muted); }
+.sd-warn { background: var(--amber); }
+.sd-red  { background: var(--red); }
+
+/* ══════════════ TABLE ══════════════ */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th {
+  text-align: left; font-size: 0.63rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.tbl td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem; color: var(--text);
+  vertical-align: middle;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tbody tr { cursor: pointer; transition: background 0.12s; }
+.tbl tbody tr:hover td { background: #F4F7FA; }
+
+/* ══════════════ ACTIVIDAD ══════════════ */
+.act-row {
+  display: flex; align-items: flex-start; gap: 0.65rem;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+}
+.act-row:last-child { border-bottom: none; }
+.act-ico {
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+}
+.act-txt  { font-size: 0.78rem; color: var(--text); line-height: 1.45; }
+.act-time { font-size: 0.66rem; color: var(--muted); margin-top: 0.12rem; }
+
+/* ══════════════ BARRA STAT ══════════════ */
+.st-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.55rem; }
+.st-lbl { font-size: 0.74rem; color: var(--sub); min-width: 90px; }
+.st-track { flex: 1; height: 6px; background: var(--moon-l); border-radius: 3px; overflow: hidden; }
+.st-fill  { height: 100%; border-radius: 3px; background: #506886; }
+.st-val   { font-size: 0.71rem; font-weight: 600; color: var(--text); min-width: 32px; text-align: right; }
+
+/* ══════════════ MINI BARS ══════════════ */
+.bc { display: flex; align-items: flex-end; gap: 4px; height: 64px; }
+.bc-c { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bc-b { width: 100%; border-radius: 3px 3px 0 0; background: var(--moon-l); min-height: 3px; }
+.bc-b.on   { background: #506886; }
+.bc-b.pine { background: var(--pine); }
+.bc-l { font-size: 0.58rem; color: var(--muted); }
+
+/* ══════════════ AI CARD ══════════════ */
+.ai-card {
+  background: #445A73;
+  border: 1px solid rgba(80,104,134,.22);
+  border-radius: var(--r);
+  padding: 0.9rem 1rem;
+}
+.ai-hdr {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 0.75rem; font-weight: 600;
+  color: #ffffff; margin-bottom: 0.6rem;
+}
+.ai-pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #B08A55; animation: pulse 2s infinite; flex-shrink: 0;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.65)} }
+.ai-txt { font-size: 0.76rem; color: rgba(255,255,255,.8); line-height: 1.6; margin-bottom: 0.65rem; }
+.ai-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ai-chip {
+  padding: 0.22rem 0.6rem;
+  background: rgba(80,104,134,.1); border: 1px solid rgba(80,104,134,.2);
+  border-radius: 20px; font-size: 0.68rem; color: #8EC8B0;
+  cursor: pointer; transition: background 0.14s;
+}
+.ai-chip:hover { background: rgba(255,255,255,.2); }
+
+/* ══════════════ RIESGO ══════════════ */
+.risk-row {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 0; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.risk-row:last-child { border-bottom: none; }
+.risk-name { flex: 1; font-size: 0.79rem; font-weight: 500; }
+.risk-track { width: 54px; height: 4px; background: var(--moon-l); border-radius: 2px; overflow: hidden; }
+.risk-fill  { height: 100%; border-radius: 2px; }
+
+/* ══════════════ TOGGLE ══════════════ */
+.tog {
+  width: 32px; height: 17px;
+  background: var(--border2); border-radius: 9px;
+  position: relative; cursor: pointer;
+  transition: background 0.2s; flex-shrink: 0;
+}
+.tog.on { background: #506886; }
+.tog-k {
+  position: absolute; top: 2px; left: 2px;
+  width: 13px; height: 13px;
+  border-radius: 50%; background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.tog.on .tog-k { transform: translateX(15px); }
+
+/* ══════════════ FORM ══════════════ */
+.fg { margin-bottom: 0.75rem; }
+.fl {
+  display: block; font-size: 0.66rem; font-weight: 700;
+  color: var(--sub); margin-bottom: 0.3rem;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.fi {
+  width: 100%; padding: 0.48rem 0.7rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem; color: var(--text);
+  outline: none; transition: all 0.18s;
+}
+.fi:focus { border-color: #506886; background: #fff; box-shadow: 0 0 0 3px rgba(80,104,134,.08); }
+.fi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+
+/* ══════════════ VISTA HEADER ══════════════ */
+.vh {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.vh-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem; font-weight: 600; color: var(--text);
+  letter-spacing: -0.02em;
+}
+.vh-sub { font-size: 0.73rem; color: var(--muted); margin-top: 0.1rem; }
+.vh-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+/* ══════════════ SEARCH ROW ══════════════ */
+.sr { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem; }
+.sr-wrap { position: relative; flex: 1; }
+.sr-wrap i { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.8rem; pointer-events: none; }
+.sr-inp {
+  width: 100%; padding: 0.46rem 0.7rem 0.46rem 2rem;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem; color: var(--text); outline: none;
+  transition: border-color 0.18s;
+}
+.sr-inp:focus { border-color: var(--pr); }
+.flt {
+  padding: 0.44rem 0.75rem;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem; color: var(--sub);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;
+  transition: all 0.14s;
+}
+.flt:hover { border-color: var(--pr); color: var(--pr); background: var(--pr-pale); }
+
+/* ══════════════ MÓDULO TOGGLE ROW ══════════════ */
+.mod-row {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: 0.38rem;
+  background: var(--white);
+  transition: all 0.14s;
+}
+.mod-row:hover { border-color: var(--pr-mid); background: var(--pr-bg); }
+.mod-row.enabled { border-color: var(--pr-mid); background: var(--pr-pale); }
+.mod-ico {
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.82rem; background: var(--bg);
+}
+.mod-row.enabled .mod-ico { background: var(--pr-pale); }
+.mod-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.mod-desc { font-size: 0.67rem; color: var(--muted); }
+.mod-row .tog { margin-left: auto; }
+
+/* ══════════════ CLIENTE DETALLE ══════════════ */
+.det-hero {
+  background: linear-gradient(135deg, #3A5070 0%, #506886 60%, #6B86A0 100%);
+  border-radius: var(--r);
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 0.9rem;
+  display: flex; align-items: center; gap: 1rem;
+  position: relative; overflow: hidden;
+}
+.det-hero::after {
+  content: '';
+  position: absolute; right: -20px; top: -20px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+}
+.det-av {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.2);
+  border: 1px solid rgba(255,255,255,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem; font-weight: 600; color: #fff; flex-shrink: 0;
+}
+.det-name { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+.det-sub  { font-size: 0.71rem; color: rgba(255,255,255,.65); margin-top: 0.15rem; }
+.det-badges { display: flex; gap: 0.4rem; margin-top: 0.4rem; }
+.det-bdg {
+  padding: 0.15rem 0.6rem;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 20px;
+  font-size: 0.63rem; color: rgba(255,255,255,.9); font-weight: 600;
+}
+.det-actions { margin-left: auto; display: flex; gap: 0.4rem; flex-shrink: 0; }
+.det-btn {
+  padding: 0.38rem 0.75rem;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem; font-weight: 600; color: #fff;
+  cursor: pointer; transition: background 0.14s;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.det-btn:hover { background: rgba(255,255,255,.25); }
+
+/* ══════════════ KV GRID ══════════════ */
+.kv-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; }
+.kv { display: flex; flex-direction: column; gap: 0.2rem; }
+.kv-lbl { font-size: 0.62rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.kv-val { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+
+/* ══════════════ COMUNICACIONES ══════════════ */
+.conv-list {
+  width: 268px; min-width: 268px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.conv-hdr {
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.conv-hdr-title { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--text); }
+.conv-search {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 0.36rem 0.65rem;
+  margin: 0.55rem 0.9rem 0.4rem;
+}
+.conv-search input { border: none; background: none; font-family: inherit; font-size: 0.77rem; color: var(--text); width: 100%; outline: none; }
+.conv-items { overflow-y: auto; flex: 1; }
+.conv-item {
+  display: flex; align-items: flex-start; gap: 0.55rem;
+  padding: 0.62rem 0.9rem; cursor: pointer;
+  border-bottom: 1px solid rgba(226,232,228,.5);
+  transition: background 0.12s;
+}
+.conv-item:hover { background: var(--pr-bg); }
+.conv-item.on { background: #EDF1F6; border-left: 2.5px solid #506886; }
+.conv-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--moon-l), var(--pine-pale));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.74rem; font-weight: 700; color: var(--em-d); flex-shrink: 0;
+}
+.conv-name { font-size: 0.79rem; font-weight: 600; color: var(--text); }
+.conv-prev { font-size: 0.68rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conv-time { font-size: 0.62rem; color: var(--muted); flex-shrink: 0; }
+.conv-bdg { min-width: 15px; height: 15px; background: #B08A55; color: #fff; border-radius: 9px; font-size: 0.58rem; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; margin-top: 2px; }
+
+.chat-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+.chat-hdr {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.65rem; flex-shrink: 0;
+}
+.chat-msgs { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.msg {
+  max-width: 70%; padding: 0.5rem 0.7rem;
+  border-radius: 9px; font-size: 0.79rem; line-height: 1.5;
+}
+.msg-in  { background: var(--white); border: 1px solid var(--border); align-self: flex-start; border-radius: 3px 9px 9px 9px; }
+.msg-out { background: #EDF1F6; border: 1px solid #C2CFD9; align-self: flex-end; border-radius: 9px 3px 9px 9px; }
+.msg-t   { font-size: 0.6rem; color: var(--muted); margin-top: 0.15rem; }
+.chat-input-bar {
+  background: var(--white); border-top: 1px solid var(--border);
+  padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0;
+}
+.chat-inp {
+  flex: 1; padding: 0.46rem 0.7rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; font-family: inherit; font-size: 0.79rem; color: var(--text); outline: none;
+}
+
+/* ══════════════ ALERTA ROW ══════════════ */
+.alert-row {
+  display: flex; align-items: flex-start; gap: 0.65rem;
+  padding: 0.62rem 0.8rem;
+  border-left: 3px solid var(--border);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--white);
+  margin-bottom: 0.4rem;
+}
+.alert-row.em   { border-left-color: var(--em); background: var(--em-bg); }
+.alert-row.warn { border-left-color: var(--amber); background: var(--amber-bg); }
+.alert-row.red  { border-left-color: var(--red); background: var(--red-bg); }
+.alert-ico { font-size: 0.85rem; flex-shrink: 0; margin-top: 0.1rem; }
+.alert-txt { font-size: 0.77rem; color: var(--text); line-height: 1.4; flex: 1; }
+
+/* ══════════════ NOTA TAREA ══════════════ */
+.nota {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+}
+.nota:last-child { border-bottom: none; }
+.nota-check {
+  width: 15px; height: 15px; border-radius: 4px;
+  border: 1.5px solid var(--border2); flex-shrink: 0;
+  cursor: pointer; transition: all 0.14s; margin-top: 1px;
+}
+.nota-check.done { background: #506886; border-color: #506886; }
+.nota-txt { font-size: 0.78rem; color: var(--text); flex: 1; line-height: 1.4; }
+.nota-txt.done { text-decoration: line-through; color: var(--muted); }
+.nota-meta { font-size: 0.65rem; color: var(--muted); }
+
+/* ══════════════ PLANES ══════════════ */
+.plan-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--sh);
+}
+.plan-hdr {
+  padding: 1rem 1.1rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.plan-name { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 600; }
+.plan-price {
+  font-family: 'Fraunces', serif;
+  font-size: 1.9rem; line-height: 1; margin: 0.5rem 0 0.2rem;
+  letter-spacing: -0.02em;
+}
+.plan-price span { font-size: 0.8rem; font-weight: 400; color: var(--muted); font-family: 'Inter', sans-serif; }
+.plan-feature {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.38rem 1.1rem;
+  font-size: 0.77rem; color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+.plan-feature:last-of-type { border-bottom: none; }
+.plan-feature i { font-size: 0.82rem; width: 14px; flex-shrink: 0; }
+.plan-feature.off { color: var(--muted); }
+.plan-feature.off i { color: var(--border2); }
+.plan-foot { padding: 0.8rem 1.1rem; }
+
+/* ══════════════ CONFIGURACIÓN ══════════════ */
+.cfg-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 0.9rem;
+  box-shadow: var(--sh);
+}
+.cfg-hdr {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.55rem;
+  background: var(--bg);
+}
+.cfg-title { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+.cfg-body { padding: 0.9rem 1rem; }
+
+.int-card {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: 0.4rem;
+}
+.int-ico {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem;
+}
+.int-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.int-desc { font-size: 0.67rem; color: var(--muted); }
+
+
+/* ══ SIDEBAR COLLAPSIBLE ══ */
+#sb {
+  width: 230px;
+  min-width: 230px;
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-brd);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width .22s cubic-bezier(.4,0,.2,1),
+              min-width .22s cubic-bezier(.4,0,.2,1),
+              border-color .22s, opacity .22s;
+  position: relative;
+  z-index: 20;
+}
+#sb.collapsed {
+  width: 52px;
+  min-width: 52px;
+}
+
+/* Logo area */
+.sb-logo {
+  padding: 0 0.9rem;
+  height: 50px;
+  border-bottom: 1px solid var(--sb-brd);
+  display: flex; align-items: center; gap: 0.7rem;
+  flex-shrink: 0; overflow: hidden;
+}
+.sb-logo-mark {
+  width: 30px; height: 30px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--pr), var(--pr-l));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; color: #fff;
+  box-shadow: 0 2px 8px rgba(80,104,134,.3);
+}
+.sb-logo-texts {
+  overflow: hidden; white-space: nowrap;
+  transition: opacity .18s, max-width .22s;
+  max-width: 180px;
+}
+#sb.collapsed .sb-logo-texts { opacity: 0; max-width: 0; overflow: hidden; }
+#sb.collapsed .sb-logo-mark { width: 32px; height: 32px; }
+#sb.collapsed .sb-logo {
+  justify-content: center;
+  padding: 0;
+  height: 56px;
+  width: 52px;
+}
+
+/* Scroll area */
+.sb-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 6px 0;
+}
+.sb-scroll::-webkit-scrollbar { width: 3px; }
+.sb-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Section label */
+.sb-sec {
+  padding: 10px 1rem 3px;
+  font-size: 0.58rem; font-weight: 700;
+  letter-spacing: .13em; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+  overflow: hidden;
+  transition: opacity .15s, padding .22s;
+}
+#sb.collapsed .sb-sec {
+  opacity: 0; height: 0; padding: 0; overflow: hidden;
+}
+#sb.collapsed .sb-scroll { padding: 4px 0; }
+
+/* Divider */
+.sb-divider {
+  height: 1px; background: var(--sb-brd);
+  margin: 0.5rem 0.8rem;
+  transition: margin .22s;
+}
+#sb.collapsed .sb-divider { margin: 0.5rem 10px; }
+
+/* Nav item */
+.ni {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.46rem 0.7rem;
+  margin: 1px 6px;
+  border-radius: var(--r-sm);
+  color: #ffffff; cursor: pointer;
+  font-size: 0.8rem; font-weight: 500;
+  transition: background .13s, color .13s;
+  user-select: none; white-space: nowrap;
+  overflow: hidden; position: relative;
+}
+.ni:hover { background: rgba(255,255,255,.12); color: #ffffff; }
+.ni.on { background: var(--sb-active); color: #ffffff; font-weight: 600; }
+.ni.on .ni-ic { color: #ffffff; }
+.ni-ic {
+  font-size: 0.95rem; flex-shrink: 0;
+  width: 22px; text-align: center;
+  transition: margin .22s;
+}
+/* center icon when collapsed */
+#sb.collapsed .ni {
+  width: 52px;
+  margin: 2px 0;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+  border-radius: 0;
+}
+#sb.collapsed .ni-ic {
+  margin: 0;
+  width: 52px;
+  font-size: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.46rem 0;
+}
+
+.ni-txt {
+  flex: 1; overflow: hidden;
+  transition: opacity .15s, max-width .22s;
+  max-width: 160px;
+}
+#sb.collapsed .ni-txt { opacity: 0; max-width: 0; }
+
+.ni-badge {
+  background: var(--sb-badge); color: #fff;
+  font-size: 0.57rem; font-weight: 700;
+  padding: .1rem .42rem; border-radius: 9px;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.ni-badge.amber { background: var(--gold); }
+.ni-badge.red   { background: #A04040; }
+#sb.collapsed .ni-badge { opacity: 0; width: 0; padding: 0; overflow: hidden; }
+
+/* tooltip when collapsed */
+#sb.collapsed .ni[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%; transform: translateY(-50%);
+  background: var(--text); color: #fff;
+  font-size: 0.71rem; font-family: 'Inter', sans-serif;
+  padding: 4px 9px; border-radius: 6px;
+  white-space: nowrap; pointer-events: none;
+  z-index: 300;
+  box-shadow: 0 3px 10px rgba(0,0,0,.18);
+}
+
+/* Footer / user */
+.sb-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--sb-brd);
+  padding: 8px 6px; flex-shrink: 0; overflow: hidden;
+}
+.sb-user {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.44rem 0.55rem;
+  border-radius: var(--r-sm); cursor: pointer;
+  transition: background .13s; white-space: nowrap;
+}
+.sb-user:hover { background: rgba(255,255,255,.08); }
+.sb-av {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--pr-d), var(--pr));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.sb-uname { font-size: 0.78rem; font-weight: 600; color: #ffffff; }
+.sb-urole { font-size: 0.6rem; color: var(--muted); }
+.sb-user-texts {
+  overflow: hidden; white-space: nowrap;
+  transition: opacity .15s, max-width .22s;
+  max-width: 180px; flex: 1;
+}
+#sb.collapsed .sb-user-texts { opacity: 0; max-width: 0; overflow: hidden; }
+#sb.collapsed .sb-foot { padding: 0.75rem 0; }
+#sb.collapsed .sb-user { justify-content: center; padding: 0.5rem 0; }
+#sb.collapsed .sb-user-more  { opacity: 0; }
+
+
+
+
+
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<nav id="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-mark" onclick="toggleSB()" style="cursor:pointer" title="Mostrar / ocultar menú"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18" width="18" height="18">
+  <rect x="0"  y="10" width="6" height="6" rx="1.5" fill="white" opacity=".3"/>
+  <rect x="0"  y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
+  <rect x="0"  y="0"  width="6" height="6" rx="1.5" fill="white"/>
+  <rect x="8"  y="0"  width="6" height="6" rx="1.5" fill="white"/>
+  <rect x="8"  y="5"  width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
+  <rect x="16" y="0"  width="6" height="6" rx="1.5" fill="#B08A55"/>
+</svg></div>
+    <div class="sb-logo-texts">
+      <div class="sb-brand">Gestión 360 iA</div>
+      <div class="sb-brand-sub">Panel Admin</div>
+    </div>
+
+  </div>
+
+  <div class="sb-scroll">
+    <div class="sb-sec">Principal</div>
+    <div class="ni on"  data-tip="Dashboard"      onclick="nav('dashboard',this)">
+      <i class="bi bi-grid-1x2 ni-ic"></i><span class="ni-txt">Dashboard</span>
+    </div>
+    <div class="ni"     data-tip="Clientes"       onclick="nav('clientes',this)">
+      <i class="bi bi-people ni-ic"></i><span class="ni-txt">Clientes</span>
+      <span class="ni-badge">24</span>
+    </div>
+    <div class="ni"     data-tip="Módulos"        onclick="nav('modulos',this)">
+      <i class="bi bi-puzzle ni-ic"></i><span class="ni-txt">Módulos</span>
+    </div>
+    <div class="ni"     data-tip="Planes"         onclick="nav('planes',this)">
+      <i class="bi bi-tag ni-ic"></i><span class="ni-txt">Planes</span>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="sb-sec">Comunicaciones</div>
+    <div class="ni"     data-tip="Conversaciones" onclick="nav('comunicaciones',this)">
+      <i class="bi bi-chat-dots ni-ic"></i><span class="ni-txt">Conversaciones</span>
+      <span class="ni-badge amber">3</span>
+    </div>
+    <div class="ni"     data-tip="Seguimiento"    onclick="nav('seguimiento',this)">
+      <i class="bi bi-check2-square ni-ic"></i><span class="ni-txt">Seguimiento</span>
+    </div>
+    <div class="ni"     data-tip="Alertas IA"     onclick="nav('alertas',this)">
+      <i class="bi bi-bell ni-ic"></i><span class="ni-txt">Alertas IA</span>
+      <span class="ni-badge red">5</span>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="sb-sec">Sistema</div>
+    <div class="ni"     data-tip="Integraciones"  onclick="nav('integraciones',this)">
+      <i class="bi bi-plug ni-ic"></i><span class="ni-txt">Integraciones</span>
+    </div>
+    <div class="ni"     data-tip="Auditoría"      onclick="nav('auditoria',this)">
+      <i class="bi bi-journal-text ni-ic"></i><span class="ni-txt">Auditoría</span>
+    </div>
+    <div class="ni"     data-tip="Configuración"  onclick="nav('configuracion',this)">
+      <i class="bi bi-gear ni-ic"></i><span class="ni-txt">Configuración</span>
+    </div>
+  </div>
+
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-av">A</div>
+      <div class="sb-user-texts">
+        <div class="sb-uname">Admin G360</div>
+        <div class="sb-urole">Superadmin</div>
+      </div>
+      <i class="bi bi-three-dots-vertical sb-user-more" style="color:rgba(255,255,255,.5);font-size:0.8rem;flex-shrink:0"></i>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ═════════════════════════════════════
+     MAIN
+═════════════════════════════════════ -->
+<div id="main">
+  <div id="topbar">
+    <div>
+      <span class="tb-title" id="tb-t">Dashboard</span>
+      <span class="tb-sub"   id="tb-s">Resumen general del sistema</span>
+    </div>
+    <div class="tb-sp"></div>
+    <div class="tb-search">
+      <i class="bi bi-search" style="color:var(--muted);font-size:0.78rem"></i>
+      <input placeholder="Buscar clientes, módulos…">
+    </div>
+    <button class="tb-btn"><i class="bi bi-bell"></i><div class="dot"></div></button>
+    <button class="tb-btn"><i class="bi bi-question-circle"></i></button>
+  </div>
+
+  <div id="content">
+
+    <!-- ══════ DASHBOARD ══════ -->
+    <div id="v-dashboard" class="view on">
+      <div class="g4">
+        <div class="kpi">
+          <div class="kpi-ico" style="background:var(--accent-pale)"><i class="bi bi-people" style="color:var(--accent)"></i></div>
+          <div class="kpi-val">24</div>
+          <div class="kpi-lbl">Clientes activos</div>
+          <div class="kpi-d up"><i class="bi bi-arrow-up"></i>+3 este mes</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico" style="background:var(--pine-bg)"><i class="bi bi-cash-coin" style="color:var(--pine-d)"></i></div>
+          <div class="kpi-val">$312k</div>
+          <div class="kpi-lbl">Ingresos mensuales</div>
+          <div class="kpi-d up"><i class="bi bi-arrow-up"></i>+18%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico" style="background:var(--moon-l)"><i class="bi bi-puzzle" style="color:var(--sub)"></i></div>
+          <div class="kpi-val">87</div>
+          <div class="kpi-lbl">Módulos activos</div>
+          <div class="kpi-d nu"><i class="bi bi-dash"></i>sin cambios</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico" style="background:var(--red-bg)"><i class="bi bi-exclamation-triangle" style="color:var(--red)"></i></div>
+          <div class="kpi-val">3</div>
+          <div class="kpi-lbl">Riesgo de churn</div>
+          <div class="kpi-d dn"><i class="bi bi-arrow-up"></i>+1 esta semana</div>
+        </div>
+      </div>
+
+      <div class="g32">
+        <div class="card">
+          <div class="ch">
+            <i class="bi bi-activity" style="color:var(--accent)"></i>
+            <span class="ch-title">Actividad reciente</span>
+            <span class="ch-sub">últimas 24 hs</span>
+            <div class="ch-act"><button class="btn btn-out btn-sm">Ver todo</button></div>
+          </div>
+          <div class="cb">
+            <div class="act-row">
+              <div class="act-ico" style="background:var(--accent-pale)"><i class="bi bi-building" style="color:var(--accent)"></i></div>
+              <div>
+                <div class="act-txt"><strong>Hotel Alvear</strong> activó módulo Reservas</div>
+                <div class="act-time"><i class="bi bi-clock" style="font-size:0.6rem"></i> hace 12 min</div>
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-ico" style="background:#EAF8EE"><i class="bi bi-whatsapp" style="color:#1A7A3A"></i></div>
+              <div>
+                <div class="act-txt">IA procesó <strong>142 mensajes</strong> — Salón Versailles</div>
+                <div class="act-time"><i class="bi bi-clock" style="font-size:0.6rem"></i> hace 1h</div>
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-ico" style="background:var(--pine-bg)"><i class="bi bi-receipt" style="color:var(--pine-d)"></i></div>
+              <div>
+                <div class="act-txt"><strong>Consultorio Dra. López</strong> renovó plan Pro</div>
+                <div class="act-time"><i class="bi bi-clock" style="font-size:0.6rem"></i> hace 3h</div>
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-ico" style="background:var(--red-bg)"><i class="bi bi-exclamation-circle" style="color:var(--red)"></i></div>
+              <div>
+                <div class="act-txt"><strong>Inmobiliaria Palermo</strong> sin actividad hace 12 días</div>
+                <div class="act-time" style="color:var(--red)"><i class="bi bi-robot" style="font-size:0.6rem"></i> Alerta IA</div>
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-ico" style="background:var(--gold-bg)"><i class="bi bi-star" style="color:var(--gold)"></i></div>
+              <div>
+                <div class="act-txt">Nuevo cliente <strong>Spa Zen Recoleta</strong> dado de alta</div>
+                <div class="act-time"><i class="bi bi-clock" style="font-size:0.6rem"></i> hace 5h</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.9rem">
+          <div class="card">
+            <div class="ch"><i class="bi bi-graph-down-arrow" style="color:var(--red)"></i><span class="ch-title">Clientes en riesgo</span></div>
+            <div class="cb" style="padding:0.65rem 1rem">
+              <div class="risk-row" onclick="abrirCliente()">
+                <span class="sd sd-red"></span>
+                <span class="risk-name">Inmobiliaria Palermo</span>
+                <div class="risk-track"><div class="risk-fill" style="width:88%;background:var(--red)"></div></div>
+                <span class="bdg bdg-red">Alto</span>
+              </div>
+              <div class="risk-row">
+                <span class="sd sd-warn"></span>
+                <span class="risk-name">Gestor Seguros BA</span>
+                <div class="risk-track"><div class="risk-fill" style="width:54%;background:var(--amber)"></div></div>
+                <span class="bdg bdg-amber">Medio</span>
+              </div>
+              <div class="risk-row">
+                <span class="sd sd-warn"></span>
+                <span class="risk-name">Estudio Contable Sur</span>
+                <div class="risk-track"><div class="risk-fill" style="width:38%;background:var(--amber)"></div></div>
+                <span class="bdg bdg-amber">Medio</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-card">
+            <div class="ai-hdr"><div class="ai-pulse"></div><i class="bi bi-stars"></i>Asistente IA</div>
+            <div class="ai-txt">3 clientes con bajo engagement. Inmobiliaria Palermo lleva 12 días sin actividad — recomiendo reactivación vía WhatsApp esta semana.</div>
+            <div class="ai-chips">
+              <span class="ai-chip"><i class="bi bi-arrow-repeat"></i> Retención</span>
+              <span class="ai-chip"><i class="bi bi-person-check"></i> Reactivar</span>
+              <span class="ai-chip"><i class="bi bi-graph-up-arrow"></i> Proyección</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><i class="bi bi-bar-chart" style="color:var(--accent)"></i><span class="ch-title">Nuevos clientes por mes</span></div>
+          <div class="cb">
+            <div class="bc">
+              <div class="bc-c"><div class="bc-b" style="height:40%"></div><div class="bc-l">Jul</div></div>
+              <div class="bc-c"><div class="bc-b" style="height:55%"></div><div class="bc-l">Ago</div></div>
+              <div class="bc-c"><div class="bc-b" style="height:34%"></div><div class="bc-l">Sep</div></div>
+              <div class="bc-c"><div class="bc-b" style="height:70%"></div><div class="bc-l">Oct</div></div>
+              <div class="bc-c"><div class="bc-b" style="height:52%"></div><div class="bc-l">Nov</div></div>
+              <div class="bc-c"><div class="bc-b on" style="height:100%"></div><div class="bc-l">Dic</div></div>
+            </div>
+            <div style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.4rem">Diciembre: 8 nuevos clientes (+38% vs noviembre)</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><i class="bi bi-pie-chart" style="color:var(--pine-d)"></i><span class="ch-title">Distribución por rubro</span></div>
+          <div class="cb">
+            <div class="st-row"><div class="st-lbl">Salud / Spa</div><div class="st-track"><div class="st-fill" style="width:33%"></div></div><div class="st-val">8</div></div>
+            <div class="st-row"><div class="st-lbl">Eventos</div><div class="st-track"><div class="st-fill" style="width:21%;background:var(--pine)"></div></div><div class="st-val">5</div></div>
+            <div class="st-row"><div class="st-lbl">Inmobiliaria</div><div class="st-track"><div class="st-fill" style="width:17%;background:var(--gold)"></div></div><div class="st-val">4</div></div>
+            <div class="st-row"><div class="st-lbl">Restaurante</div><div class="st-track"><div class="st-fill" style="width:13%;background:var(--moon-d)"></div></div><div class="st-val">3</div></div>
+            <div class="st-row"><div class="st-lbl">Profesionales</div><div class="st-track"><div class="st-fill" style="width:17%;background:var(--sub)"></div></div><div class="st-val">4</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ CLIENTES ══════ -->
+    <div id="v-clientes" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Clientes</div><div class="vh-sub">24 clientes registrados en el sistema</div></div>
+        <div class="vh-actions">
+          <button class="btn btn-out btn-sm"><i class="bi bi-download"></i> Exportar</button>
+          <button class="btn btn-em btn-sm"><i class="bi bi-plus-lg"></i> Nuevo cliente</button>
+        </div>
+      </div>
+      <div class="sr">
+        <div class="sr-wrap"><i class="bi bi-search"></i><input class="sr-inp" placeholder="Buscar por nombre, rubro, subdominio…"></div>
+        <button class="flt"><i class="bi bi-building"></i> Rubro <i class="bi bi-chevron-down"></i></button>
+        <button class="flt"><i class="bi bi-tag"></i> Plan <i class="bi bi-chevron-down"></i></button>
+        <button class="flt"><i class="bi bi-circle-half"></i> Estado <i class="bi bi-chevron-down"></i></button>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead>
+            <tr><th>Cliente</th><th>Rubro</th><th>Plan</th><th>Estado</th><th>Módulos activos</th><th>Última actividad</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr onclick="abrirCliente('Hotel Alvear','HA','Hotel','Pro','on')">
+              <td><div style="font-weight:700">Hotel Alvear</div><div style="font-size:0.68rem;color:var(--muted)">hotel-alvear.g360.ai</div></td>
+              <td><span class="bdg bdg-moon"><i class="bi bi-building"></i> Hotel</span></td>
+              <td><span class="bdg bdg-pro">Pro</span></td>
+              <td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td>
+              <td><strong style="color:var(--accent)">8</strong> <span style="color:var(--muted);font-size:0.7rem">/ 12</span></td>
+              <td style="color:var(--muted);font-size:0.77rem">hace 12 min</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+            <tr onclick="abrirCliente('Salón Versailles','SV','Eventos','Enterprise','on')">
+              <td><div style="font-weight:700">Salón Versailles</div><div style="font-size:0.68rem;color:var(--muted)">versailles.g360.ai</div></td>
+              <td><span class="bdg bdg-pine"><i class="bi bi-stars"></i> Eventos</span></td>
+              <td><span class="bdg bdg-ent">Enterprise</span></td>
+              <td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td>
+              <td><strong style="color:var(--accent)">11</strong> <span style="color:var(--muted);font-size:0.7rem">/ 12</span></td>
+              <td style="color:var(--muted);font-size:0.77rem">hace 1h</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+            <tr onclick="abrirCliente('Consultorio Dra. López','DL','Salud','Pro','on')">
+              <td><div style="font-weight:700">Consultorio Dra. López</div><div style="font-size:0.68rem;color:var(--muted)">dra-lopez.g360.ai</div></td>
+              <td><span class="bdg bdg-em"><i class="bi bi-heart-pulse"></i> Salud</span></td>
+              <td><span class="bdg bdg-pro">Pro</span></td>
+              <td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td>
+              <td><strong style="color:var(--accent)">6</strong> <span style="color:var(--muted);font-size:0.7rem">/ 10</span></td>
+              <td style="color:var(--muted);font-size:0.77rem">hoy</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+            <tr style="background:var(--amber-bg)" onclick="abrirCliente('Inmobiliaria Palermo','IP','Inmobiliaria','Starter','warn')">
+              <td><div style="font-weight:700">Inmobiliaria Palermo</div><div style="font-size:0.68rem;color:var(--muted)">palermo.g360.ai</div></td>
+              <td><span class="bdg bdg-moon"><i class="bi bi-house-door"></i> Inmobiliaria</span></td>
+              <td><span class="bdg bdg-str">Starter</span></td>
+              <td><span class="sdot"><span class="sd sd-warn"></span>En riesgo</span></td>
+              <td><strong style="color:var(--muted)">3</strong> <span style="color:var(--muted);font-size:0.7rem">/ 6</span></td>
+              <td style="color:var(--red);font-size:0.77rem;font-weight:700">hace 12 días ⚠</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+            <tr onclick="abrirCliente('Estudio Contable Sur','ES','Contador','Pro','on')">
+              <td><div style="font-weight:700">Estudio Contable Sur</div><div style="font-size:0.68rem;color:var(--muted)">estudio-sur.g360.ai</div></td>
+              <td><span class="bdg bdg-moon"><i class="bi bi-calculator"></i> Contador</span></td>
+              <td><span class="bdg bdg-pro">Pro</span></td>
+              <td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td>
+              <td><strong style="color:var(--accent)">7</strong> <span style="color:var(--muted);font-size:0.7rem">/ 10</span></td>
+              <td style="color:var(--muted);font-size:0.77rem">ayer</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+            <tr onclick="abrirCliente('Gestor Seguros BA','GB','Seguros','Starter','off')">
+              <td><div style="font-weight:700">Gestor Seguros BA</div><div style="font-size:0.68rem;color:var(--muted)">seguros-ba.g360.ai</div></td>
+              <td><span class="bdg bdg-moon"><i class="bi bi-shield-check"></i> Seguros</span></td>
+              <td><span class="bdg bdg-str">Starter</span></td>
+              <td><span class="sdot"><span class="sd sd-off"></span>Inactivo</span></td>
+              <td><strong style="color:var(--muted)">2</strong> <span style="color:var(--muted);font-size:0.7rem">/ 6</span></td>
+              <td style="color:var(--amber);font-size:0.77rem;font-weight:700">hace 8 días</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+            <tr onclick="abrirCliente('Spa Zen Recoleta','SZ','Spa','Pro','on')">
+              <td><div style="font-weight:700">Spa Zen Recoleta</div><div style="font-size:0.68rem;color:var(--muted)">spa-zen.g360.ai</div></td>
+              <td><span class="bdg bdg-em"><i class="bi bi-flower2"></i> Spa</span></td>
+              <td><span class="bdg bdg-pro">Pro</span></td>
+              <td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td>
+              <td><strong style="color:var(--accent)">5</strong> <span style="color:var(--muted);font-size:0.7rem">/ 10</span></td>
+              <td style="color:var(--muted);font-size:0.77rem">hace 5h</td>
+              <td><button class="btn btn-out btn-xs"><i class="bi bi-pencil"></i> Gestionar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ DETALLE CLIENTE ══════ -->
+    <div id="v-cliente-detalle" class="view">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.9rem">
+        <button class="btn btn-out btn-sm" onclick="go('clientes',null);document.querySelector('.ni:nth-child(3)').classList.add('on')">
+          <i class="bi bi-arrow-left"></i> Volver a clientes
+        </button>
+      </div>
+
+      <div class="det-hero">
+        <div class="det-av" id="det-av">IP</div>
+        <div style="flex:1;min-width:0">
+          <div class="det-name" id="det-name">Inmobiliaria Palermo</div>
+          <div class="det-sub" id="det-sub"><i class="bi bi-globe" style="font-size:0.68rem"></i> palermo.g360.ai · Inmobiliaria</div>
+          <div class="det-badges">
+            <span class="det-bdg" id="det-plan">Starter</span>
+            <span class="det-bdg" id="det-estado">⚠ En riesgo</span>
+          </div>
+        </div>
+        <div class="det-actions">
+          <button class="det-btn"><i class="bi bi-box-arrow-up-right"></i> Ver portal</button>
+          <button class="det-btn"><i class="bi bi-pencil"></i> Editar</button>
+        </div>
+      </div>
+
+      <div class="g32">
+        <!-- Columna izquierda -->
+        <div style="display:flex;flex-direction:column;gap:0.9rem">
+
+          <!-- Info general -->
+          <div class="card">
+            <div class="ch"><i class="bi bi-info-circle" style="color:var(--accent)"></i><span class="ch-title">Información general</span></div>
+            <div class="cb">
+              <div class="kv-grid">
+                <div class="kv"><div class="kv-lbl">Rubro</div><div class="kv-val" id="det-rubro">Inmobiliaria</div></div>
+                <div class="kv"><div class="kv-lbl">Subdominio</div><div class="kv-val">palermo.g360.ai</div></div>
+                <div class="kv"><div class="kv-lbl">Contacto</div><div class="kv-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec85828a83ac85829c8d80899e8183c28f8381">[email&#160;protected]</a></div></div>
+                <div class="kv"><div class="kv-lbl">Módulos activos</div><div class="kv-val" style="color:var(--accent)">3 de 6</div></div>
+                <div class="kv"><div class="kv-lbl">Última actividad</div><div class="kv-val" style="color:var(--red)">hace 12 días</div></div>
+                <div class="kv"><div class="kv-lbl">Alta en sistema</div><div class="kv-val">15 Nov 2024</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Módulos — la pieza clave -->
+          <div class="card">
+            <div class="ch">
+              <i class="bi bi-puzzle" style="color:var(--accent)"></i>
+              <span class="ch-title">Módulos habilitados</span>
+              <span class="ch-sub">activá o desactivá según su plan</span>
+              <div class="ch-act"><button class="btn btn-em btn-sm"><i class="bi bi-floppy"></i> Guardar</button></div>
+            </div>
+            <div class="cb">
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.5rem">Universales</div>
+              <div class="mod-row enabled">
+                <div class="mod-ico"><i class="bi bi-speedometer2" style="color:var(--accent)"></i></div>
+                <div><div class="mod-name">Dashboard</div><div class="mod-desc">Estadísticas e indicadores del negocio</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row enabled">
+                <div class="mod-ico"><i class="bi bi-person-lines-fill" style="color:var(--accent)"></i></div>
+                <div><div class="mod-name">CRM / Clientes</div><div class="mod-desc">Gestión de contactos y seguimiento</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row enabled">
+                <div class="mod-ico"><i class="bi bi-calendar-check" style="color:var(--accent)"></i></div>
+                <div><div class="mod-name">Agenda / Turnos</div><div class="mod-desc">Calendario y gestión de citas</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-whatsapp" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">WhatsApp + IA</div><div class="mod-desc">Bot inteligente y gestión de conversaciones</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-receipt" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">Facturación</div><div class="mod-desc">Presupuestos y facturas con IA</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-bar-chart-line" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">Estadísticas IA</div><div class="mod-desc">Análisis en lenguaje natural</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin:0.85rem 0 0.5rem">Módulos del rubro · Inmobiliaria</div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-house" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">Propiedades</div><div class="mod-desc">Listado, ficha y gestión de propiedades</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-calendar2-check" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">Agenda de visitas</div><div class="mod-desc">Coordinación de visitas a propiedades</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-robot" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">Valuación IA</div><div class="mod-desc">Estimación de precio por zona y m²</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div class="mod-row">
+                <div class="mod-ico"><i class="bi bi-file-earmark" style="color:var(--muted)"></i></div>
+                <div><div class="mod-name">Documentos</div><div class="mod-desc">Contratos, boletos y escrituras</div></div>
+                <div class="tog" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha -->
+        <div style="display:flex;flex-direction:column;gap:0.9rem">
+          <div class="card">
+            <div class="ch"><i class="bi bi-activity" style="color:var(--accent)"></i><span class="ch-title">Uso del sistema</span></div>
+            <div class="cb">
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.6rem">
+                <span style="color:var(--sub)">Sesiones este mes</span><strong>4</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.6rem">
+                <span style="color:var(--sub)">Módulos usados</span><strong style="color:var(--amber)">1 de 3</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.6rem">
+                <span style="color:var(--sub)">Última sesión</span><strong style="color:var(--red)">hace 12 días</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem">
+                <span style="color:var(--sub)">Consultas IA</span><strong>0 este mes</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-card">
+            <div class="ai-hdr"><div class="ai-pulse"></div><i class="bi bi-stars"></i> Análisis IA de este cliente</div>
+            <div class="ai-txt">Sin actividad en 12 días. Solo usa 3 módulos básicos — no usó WhatsApp IA ni estadísticas. <br><br>Recomendación: activar WhatsApp IA para reenganche inmediato y ofrecer upgrade a Pro con período de prueba.</div>
+            <div class="ai-chips">
+              <span class="ai-chip"><i class="bi bi-whatsapp"></i> Activar WhatsApp</span>
+              <span class="ai-chip"><i class="bi bi-arrow-up-circle"></i> Upgrade a Pro</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch"><i class="bi bi-cash-coin" style="color:var(--pine-d)"></i><span class="ch-title">Facturación</span></div>
+            <div class="cb">
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.5rem">
+                <span style="color:var(--sub)">Plan actual</span><span class="bdg bdg-str">Starter</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.5rem">
+                <span style="color:var(--sub)">Próximo vencimiento</span><strong>31 Mar 2026</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.8rem">
+                <span style="color:var(--sub)">Valor mensual</span><strong style="color:var(--em-d);font-family:'Fraunces',serif;font-size:1rem">$0</strong>
+              </div>
+              <button class="btn btn-pine btn-sm" style="width:100%"><i class="bi bi-arrow-up-circle"></i> Upgrade a Pro — $12.500/mes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ MÓDULOS ══════ -->
+    <div id="v-modulos" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Catálogo de módulos</div><div class="vh-sub">Módulos disponibles en el sistema</div></div>
+        <button class="btn btn-em btn-sm"><i class="bi bi-plus-lg"></i> Nuevo módulo</button>
+      </div>
+      <div class="card" style="margin-bottom:0.9rem">
+        <div class="ch"><i class="bi bi-globe" style="color:var(--accent)"></i><span class="ch-title">Módulos universales</span><span class="ch-sub">disponibles para todos los rubros</span></div>
+        <table class="tbl">
+          <thead><tr><th>Módulo</th><th>Descripción</th><th>Plan mínimo</th><th>Clientes activos</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Dashboard IA</strong></td><td style="color:var(--sub)">Estadísticas e indicadores con análisis inteligente</td><td><span class="bdg bdg-str">Starter</span></td><td><strong style="color:var(--accent)">24</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>CRM / Clientes</strong></td><td style="color:var(--sub)">Gestión de contactos, pipeline y seguimiento</td><td><span class="bdg bdg-str">Starter</span></td><td><strong style="color:var(--accent)">22</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>Agenda / Turnos</strong></td><td style="color:var(--sub)">Calendario, turnos y predicción de demanda IA</td><td><span class="bdg bdg-str">Starter</span></td><td><strong style="color:var(--accent)">20</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>WhatsApp + IA</strong></td><td style="color:var(--sub)">Bot con memoria de cliente y respuestas sugeridas</td><td><span class="bdg bdg-pro">Pro</span></td><td><strong style="color:var(--accent)">17</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>Facturación</strong></td><td style="color:var(--sub)">Presupuestos y facturas generadas con IA</td><td><span class="bdg bdg-pro">Pro</span></td><td><strong style="color:var(--accent)">15</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>Estadísticas IA</strong></td><td style="color:var(--sub)">Análisis en lenguaje natural del negocio</td><td><span class="bdg bdg-pro">Pro</span></td><td><strong style="color:var(--accent)">14</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>Notificaciones</strong></td><td style="color:var(--sub)">Comunicaciones automáticas y envío masivo</td><td><span class="bdg bdg-pro">Pro</span></td><td><strong style="color:var(--accent)">18</strong></td><td><span class="sdot"><span class="sd sd-on"></span>Activo</span></td></tr>
+            <tr><td><strong>Mapas y geolocalización</strong></td><td style="color:var(--sub)">Google Maps, seguimiento en tiempo real</td><td><span class="bdg bdg-ent">Enterprise</span></td><td><strong style="color:var(--muted)">0</strong></td><td><span class="sdot"><span class="sd sd-warn"></span>Fase 2</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><i class="bi bi-stars" style="color:var(--gold)"></i><span class="ch-title">Salón de eventos</span></div>
+          <table class="tbl">
+            <thead><tr><th>Módulo</th><th>Plan mín.</th><th>Activo en</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Configurar salón</strong></td><td><span class="bdg bdg-str">Starter</span></td><td style="color:var(--em);font-weight:600">5</td></tr>
+              <tr><td><strong>Presupuestos IA</strong></td><td><span class="bdg bdg-pro">Pro</span></td><td style="color:var(--em);font-weight:600">4</td></tr>
+              <tr><td><strong>Agenda de eventos</strong></td><td><span class="bdg bdg-str">Starter</span></td><td style="color:var(--em);font-weight:600">5</td></tr>
+              <tr><td><strong>Proveedores</strong></td><td><span class="bdg bdg-pro">Pro</span></td><td style="color:var(--em);font-weight:600">3</td></tr>
+              <tr><td><strong>Galería</strong></td><td><span class="bdg bdg-ent">Enterprise</span></td><td style="color:var(--muted);font-weight:600">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="ch"><i class="bi bi-heart-pulse" style="color:var(--red)"></i><span class="ch-title">Consultorio / Salud</span></div>
+          <table class="tbl">
+            <thead><tr><th>Módulo</th><th>Plan mín.</th><th>Activo en</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Turnos médicos</strong></td><td><span class="bdg bdg-str">Starter</span></td><td style="color:var(--em);font-weight:600">8</td></tr>
+              <tr><td><strong>Historia clínica</strong></td><td><span class="bdg bdg-pro">Pro</span></td><td style="color:var(--em);font-weight:600">6</td></tr>
+              <tr><td><strong>Gestión de pacientes</strong></td><td><span class="bdg bdg-str">Starter</span></td><td style="color:var(--em);font-weight:600">8</td></tr>
+              <tr><td><strong>Recordatorios automáticos</strong></td><td><span class="bdg bdg-pro">Pro</span></td><td style="color:var(--em);font-weight:600">7</td></tr>
+              <tr><td><strong>Stats de ocupación</strong></td><td><span class="bdg bdg-pro">Pro</span></td><td style="color:var(--em);font-weight:600">5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ PLANES ══════ -->
+    <div id="v-planes" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Planes</div><div class="vh-sub">Configuración de planes y precios</div></div>
+        <button class="btn btn-em btn-sm"><i class="bi bi-plus-lg"></i> Nuevo plan</button>
+      </div>
+      <div class="g3">
+        <!-- STARTER -->
+        <div class="plan-card">
+          <div class="plan-hdr" style="border-top:3px solid var(--moon)">
+            <div class="plan-name" style="color:var(--sub)">Starter</div>
+            <div class="plan-price" style="color:var(--sub)">$0 <span>/mes</span></div>
+            <div style="font-size:0.71rem;color:var(--muted)">Acceso demo · módulos básicos</div>
+          </div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>Dashboard básico</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>CRM hasta 50 contactos</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>Agenda básica</div>
+          <div class="plan-feature off"><i class="bi bi-x-circle"></i>WhatsApp IA</div>
+          <div class="plan-feature off"><i class="bi bi-x-circle"></i>Estadísticas IA</div>
+          <div class="plan-feature off"><i class="bi bi-x-circle"></i>Facturación</div>
+          <div class="plan-feature off"><i class="bi bi-x-circle"></i>Módulos del rubro</div>
+          <div class="plan-foot"><button class="btn btn-out" style="width:100%"><i class="bi bi-pencil"></i> Editar plan</button></div>
+        </div>
+        <!-- PRO -->
+        <div class="plan-card" style="border:2px solid #506886;box-shadow:var(--sh-md)">
+          <div class="plan-hdr" style="border-top:3px solid var(--em);background:var(--pr-pale)">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <div class="plan-name" style="color:var(--em-d)">Pro</div>
+              <span class="bdg bdg-em" style="font-size:0.6rem">Más elegido</span>
+            </div>
+            <div class="plan-price" style="color:var(--em-d)">$12.500 <span>/mes</span></div>
+            <div style="font-size:0.71rem;color:var(--sub)">Módulos completos del rubro</div>
+          </div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>Todo lo de Starter</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>WhatsApp con IA activo</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>Estadísticas en lenguaje natural</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>Facturación completa</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--accent)"></i>Módulos del rubro completos</div>
+          <div class="plan-feature off"><i class="bi bi-x-circle"></i>White label</div>
+          <div class="plan-feature off"><i class="bi bi-x-circle"></i>Multi-cuenta</div>
+          <div class="plan-foot"><button class="btn btn-em" style="width:100%"><i class="bi bi-pencil"></i> Editar plan</button></div>
+        </div>
+        <!-- ENTERPRISE -->
+        <div class="plan-card" style="border:1px solid var(--pine-l)">
+          <div class="plan-hdr" style="border-top:3px solid var(--pine);background:var(--pine-bg)">
+            <div class="plan-name" style="color:var(--pine-d)">Enterprise</div>
+            <div class="plan-price" style="color:var(--pine-d)">Custom <span>/mes</span></div>
+            <div style="font-size:0.71rem;color:var(--sub)">Solución a medida · consultoría incluida</div>
+          </div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>Todo lo de Pro</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>White label completo</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>Módulos custom</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>Consultoría incluida</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>Multi-cuenta</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>SLA garantizado</div>
+          <div class="plan-feature"><i class="bi bi-check-circle-fill" style="color:var(--pine-d)"></i>API pública</div>
+          <div class="plan-foot"><button class="btn btn-pine" style="width:100%"><i class="bi bi-pencil"></i> Editar plan</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ COMUNICACIONES ══════ -->
+    <div id="v-comunicaciones" class="view" style="margin:-1.3rem -1.4rem;height:calc(100vh - 50px);display:none;flex-direction:row;">
+      <div style="display:flex;height:100%">
+        <div class="conv-list">
+          <div class="conv-hdr">
+            <div class="conv-hdr-title">Conversaciones</div>
+            <div style="font-size:0.69rem;color:var(--muted);margin-top:0.1rem">Con tus clientes</div>
+          </div>
+          <div class="conv-search">
+            <i class="bi bi-search" style="color:var(--muted);font-size:0.78rem"></i>
+            <input placeholder="Buscar conversación…">
+          </div>
+          <div class="conv-items">
+            <div class="conv-item on">
+              <div class="conv-av">IP</div>
+              <div style="flex:1;min-width:0">
+                <div class="conv-name">Inmobiliaria Palermo</div>
+                <div class="conv-prev">¿Cuándo vence mi plan?</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.2rem">
+                <div class="conv-time">10:24</div>
+                <div class="conv-bdg">2</div>
+              </div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-av" style="background:linear-gradient(135deg,var(--em-pale),var(--moon-l))">HA</div>
+              <div style="flex:1;min-width:0">
+                <div class="conv-name">Hotel Alvear</div>
+                <div class="conv-prev">Perfecto, quedamos para el jueves</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                <div class="conv-time">ayer</div>
+              </div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-av" style="background:linear-gradient(135deg,var(--pine-pale),var(--moon-l))">SV</div>
+              <div style="flex:1;min-width:0">
+                <div class="conv-name">Salón Versailles</div>
+                <div class="conv-prev">Necesito agregar un módulo extra</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.2rem">
+                <div class="conv-time">lun</div>
+                <div class="conv-bdg">1</div>
+              </div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-av" style="background:linear-gradient(135deg,var(--gold-bg),var(--pine-pale))">DL</div>
+              <div style="flex:1;min-width:0">
+                <div class="conv-name">Consultorio Dra. López</div>
+                <div class="conv-prev">Gracias! Renovamos el plan</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                <div class="conv-time">vie</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-panel">
+          <div class="chat-hdr">
+            <div class="conv-av">IP</div>
+            <div>
+              <div style="font-weight:700;font-size:0.84rem">Inmobiliaria Palermo</div>
+              <div style="font-size:0.67rem;color:var(--muted)">palermo.g360.ai · Plan Starter</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:0.4rem">
+              <button class="btn btn-out btn-sm" onclick="abrirCliente('Inmobiliaria Palermo','IP','Inmobiliaria','Starter','warn')"><i class="bi bi-person"></i> Ver cliente</button>
+            </div>
+          </div>
+          <div class="chat-msgs">
+            <div class="msg msg-in">Hola, quería saber cuándo vence mi plan y si puedo agregar el módulo de WhatsApp.<div class="msg-t">10:20</div></div>
+            <div class="msg msg-out">¡Hola! Tu plan Starter vence el 31 de marzo. El módulo de WhatsApp + IA está disponible desde el plan Pro. ¿Te interesa que te cuente más?<div class="msg-t">10:22 · vos</div></div>
+            <div class="msg msg-in">¿Cuánto sería el upgrade?<div class="msg-t">10:24</div></div>
+          </div>
+          <div class="chat-input-bar">
+            <input class="chat-inp" placeholder="Escribir respuesta…">
+            <button class="btn btn-em btn-sm"><i class="bi bi-send-fill"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SEGUIMIENTO ══════ -->
+    <div id="v-seguimiento" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Seguimiento de clientes</div><div class="vh-sub">Tareas y recordatorios</div></div>
+        <button class="btn btn-em btn-sm"><i class="bi bi-plus-lg"></i> Nueva tarea</button>
+      </div>
+      <div class="g32">
+        <div class="card">
+          <div class="ch"><i class="bi bi-check2-square" style="color:var(--accent)"></i><span class="ch-title">Tareas pendientes</span><span class="ch-sub">6 tareas</span></div>
+          <div class="cb">
+            <div class="nota">
+              <div class="nota-check"></div>
+              <div style="flex:1">
+                <div class="nota-txt">Llamar a <strong>Inmobiliaria Palermo</strong> — 12 días sin actividad</div>
+                <div class="nota-meta" style="color:var(--red)">Vence hoy · Alta prioridad</div>
+              </div>
+            </div>
+            <div class="nota">
+              <div class="nota-check"></div>
+              <div style="flex:1">
+                <div class="nota-txt">Enviar propuesta de upgrade a <strong>Gestor Seguros BA</strong></div>
+                <div class="nota-meta">Mañana · Media prioridad</div>
+              </div>
+            </div>
+            <div class="nota">
+              <div class="nota-check"></div>
+              <div style="flex:1">
+                <div class="nota-txt">Reunión de onboarding con <strong>Spa Zen Recoleta</strong></div>
+                <div class="nota-meta">14 Mar · 15:00 hs</div>
+              </div>
+            </div>
+            <div class="nota">
+              <div class="nota-check done"></div>
+              <div style="flex:1">
+                <div class="nota-txt done">Enviar factura a Hotel Alvear</div>
+                <div class="nota-meta" style="color:var(--accent)">Completado hoy</div>
+              </div>
+            </div>
+            <div class="nota">
+              <div class="nota-check done"></div>
+              <div style="flex:1">
+                <div class="nota-txt done">Actualizar módulos de Salón Versailles</div>
+                <div class="nota-meta" style="color:var(--accent)">Completado ayer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.9rem">
+          <div class="card">
+            <div class="ch"><i class="bi bi-calendar-week" style="color:var(--pine-d)"></i><span class="ch-title">Esta semana</span></div>
+            <div class="cb" style="padding:0.5rem 1rem">
+              <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.5rem">Miércoles 12</div>
+              <div style="font-size:0.8rem;padding:0.4rem 0;border-bottom:1px solid var(--border)">📞 Llamar Inmobiliaria Palermo</div>
+              <div style="font-size:0.77rem;color:var(--sub);margin:0.5rem 0">Viernes 14</div>
+              <div style="font-size:0.8rem;padding:0.4rem 0;border-bottom:1px solid var(--border)">🤝 Onboarding Spa Zen · 15:00</div>
+              <div style="font-size:0.77rem;color:var(--sub);margin:0.5rem 0">Próxima semana</div>
+              <div style="font-size:0.8rem;padding:0.4rem 0">📊 Revisión mensual de métricas</div>
+            </div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-hdr"><div class="ai-pulse"></div><i class="bi bi-stars"></i> Sugerencias IA</div>
+            <div class="ai-txt">Inmobiliaria Palermo tiene 88% de probabilidad de churn si no hay contacto esta semana. Salón Versailles podría estar listo para Enterprise — usaron 11 módulos este mes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ ALERTAS ══════ -->
+    <div id="v-alertas" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Alertas IA</div><div class="vh-sub">Detecciones automáticas del sistema</div></div>
+        <button class="btn btn-out btn-sm"><i class="bi bi-check-all"></i> Marcar todas leídas</button>
+      </div>
+      <div class="g32">
+        <div>
+          <div class="alert-row red" style="margin-bottom:0.5rem">
+            <i class="bi bi-exclamation-triangle-fill alert-ico" style="color:var(--red)"></i>
+            <div>
+              <div class="alert-txt"><strong>Churn crítico</strong> — Inmobiliaria Palermo lleva 12 días sin actividad. Probabilidad de abandono: 88%.</div>
+              <div style="font-size:0.67rem;color:var(--muted);margin-top:0.25rem">hace 10 min · IA detectó inactividad</div>
+            </div>
+            <button class="btn btn-red btn-xs" style="flex-shrink:0">Actuar</button>
+          </div>
+          <div class="alert-row warn" style="margin-bottom:0.5rem">
+            <i class="bi bi-clock alert-ico" style="color:var(--amber)"></i>
+            <div>
+              <div class="alert-txt"><strong>Bajo uso</strong> — Gestor Seguros BA sin actividad hace 8 días. Solo usa 2 de 6 módulos.</div>
+              <div style="font-size:0.67rem;color:var(--muted);margin-top:0.25rem">hace 2h · IA detectó patrón de bajo engagement</div>
+            </div>
+            <button class="btn btn-out btn-xs" style="flex-shrink:0">Ver</button>
+          </div>
+          <div class="alert-row warn" style="margin-bottom:0.5rem">
+            <i class="bi bi-receipt alert-ico" style="color:var(--amber)"></i>
+            <div>
+              <div class="alert-txt"><strong>Factura vencida</strong> — Estudio Contable Sur · FAC-2024-0215 · $12.500 · vencida hace 3 días.</div>
+              <div style="font-size:0.67rem;color:var(--muted);margin-top:0.25rem">hace 3 días · MercadoPago</div>
+            </div>
+            <button class="btn btn-out btn-xs" style="flex-shrink:0">Gestionar</button>
+          </div>
+          <div class="alert-row em" style="margin-bottom:0.5rem">
+            <i class="bi bi-graph-up-arrow alert-ico" style="color:var(--accent)"></i>
+            <div>
+              <div class="alert-txt"><strong>Oportunidad</strong> — Salón Versailles usó 11 módulos este mes. Candidato ideal para upgrade a Enterprise.</div>
+              <div style="font-size:0.67rem;color:var(--muted);margin-top:0.25rem">hoy · IA detectó uso intensivo</div>
+            </div>
+            <button class="btn btn-em btn-xs" style="flex-shrink:0">Proponer</button>
+          </div>
+          <div class="alert-row em">
+            <i class="bi bi-person-plus alert-ico" style="color:var(--accent)"></i>
+            <div>
+              <div class="alert-txt"><strong>Nuevo cliente</strong> — Spa Zen Recoleta dado de alta exitosamente en plan Pro.</div>
+              <div style="font-size:0.67rem;color:var(--muted);margin-top:0.25rem">hace 5h · Alta automática</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.9rem">
+          <div class="card">
+            <div class="ch"><i class="bi bi-graph-up" style="color:var(--accent)"></i><span class="ch-title">Resumen</span></div>
+            <div class="cb">
+              <div class="st-row"><div class="st-lbl" style="min-width:110px">Churn crítico</div><div class="st-track"><div class="st-fill" style="width:20%;background:var(--red)"></div></div><div class="st-val" style="color:var(--red)">1</div></div>
+              <div class="st-row"><div class="st-lbl" style="min-width:110px">Bajo uso</div><div class="st-track"><div class="st-fill" style="width:40%;background:var(--amber)"></div></div><div class="st-val" style="color:var(--amber)">2</div></div>
+              <div class="st-row"><div class="st-lbl" style="min-width:110px">Oportunidades</div><div class="st-track"><div class="st-fill" style="width:20%"></div></div><div class="st-val" style="color:var(--accent)">1</div></div>
+              <div class="st-row"><div class="st-lbl" style="min-width:110px">Novedades</div><div class="st-track"><div class="st-fill" style="width:20%"></div></div><div class="st-val" style="color:var(--accent)">1</div></div>
+            </div>
+          </div>
+          <div class="ai-card">
+            <div class="ai-hdr"><div class="ai-pulse"></div><i class="bi bi-stars"></i> IA recomienda</div>
+            <div class="ai-txt">Prioridad 1: contactar Inmobiliaria Palermo hoy. Prioridad 2: ofrecer upgrade a Salón Versailles esta semana. Ambas acciones tienen alto impacto en ingresos.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ INTEGRACIONES ══════ -->
+    <div id="v-integraciones" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Integraciones</div><div class="vh-sub">Conexiones activas del sistema</div></div>
+        <button class="btn btn-em btn-sm"><i class="bi bi-plus-lg"></i> Agregar integración</button>
+      </div>
+      <div class="g3">
+        <div class="card">
+          <div class="ch"><div class="int-ico" style="background:#E8F8ED"><i class="bi bi-whatsapp" style="color:#1A7A3A"></i></div><span class="ch-title">Evolution API</span><span class="bdg bdg-em" style="margin-left:auto">Activo</span></div>
+          <div class="cb">
+            <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.65rem">WhatsApp Business · 387 mensajes hoy</div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem;margin-bottom:0.35rem"><span style="color:var(--sub)">Instancia</span><strong>g360ia-main</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem"><span style="color:var(--sub)">Estado bot</span><span style="color:var(--em);font-weight:600">✓ Conectado</span></div>
+            <div style="margin-top:0.7rem"><button class="btn btn-out btn-sm" style="width:100%"><i class="bi bi-gear"></i> Configurar</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="int-ico" style="background:#FDE8EE"><i class="bi bi-diagram-3" style="color:#d63060"></i></div><span class="ch-title">n8n</span><span class="bdg bdg-em" style="margin-left:auto">Activo</span></div>
+          <div class="cb">
+            <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.65rem">Automatizaciones · 12 workflows activos</div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem;margin-bottom:0.35rem"><span style="color:var(--sub)">Ejecuciones hoy</span><strong>284</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem"><span style="color:var(--sub)">Errores</span><span style="color:var(--em);font-weight:600">0</span></div>
+            <div style="margin-top:0.7rem"><button class="btn btn-out btn-sm" style="width:100%"><i class="bi bi-gear"></i> Configurar</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="int-ico" style="background:#E8F0FD"><i class="bi bi-credit-card" style="color:#009ee3"></i></div><span class="ch-title">MercadoPago</span><span class="bdg bdg-em" style="margin-left:auto">Activo</span></div>
+          <div class="cb">
+            <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.65rem">Pagos y suscripciones · 24 activas</div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem;margin-bottom:0.35rem"><span style="color:var(--sub)">Cobros este mes</span><strong>$312k</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem"><span style="color:var(--sub)">Pendientes</span><span style="color:var(--amber);font-weight:600">$48k</span></div>
+            <div style="margin-top:0.7rem"><button class="btn btn-out btn-sm" style="width:100%"><i class="bi bi-gear"></i> Configurar</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="int-ico" style="background:var(--accent-pale)"><i class="bi bi-robot" style="color:var(--accent)"></i></div><span class="ch-title">Claude AI</span><span class="bdg bdg-em" style="margin-left:auto">Activo</span></div>
+          <div class="cb">
+            <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.65rem">IA principal · claude-sonnet-4-6</div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem;margin-bottom:0.35rem"><span style="color:var(--sub)">Tokens hoy</span><strong>1.2M</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.74rem"><span style="color:var(--sub)">Costo estimado</span><strong>$4.80 USD</strong></div>
+            <div style="margin-top:0.7rem"><button class="btn btn-out btn-sm" style="width:100%"><i class="bi bi-gear"></i> Configurar</button></div>
+          </div>
+        </div>
+        <div class="card" style="opacity:0.7">
+          <div class="ch"><div class="int-ico" style="background:var(--gold-bg)"><i class="bi bi-geo-alt" style="color:var(--gold)"></i></div><span class="ch-title">Google Maps API</span><span class="bdg bdg-amber" style="margin-left:auto">Fase 2</span></div>
+          <div class="cb">
+            <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.65rem">Mapas, geolocalización y seguimiento en tiempo real</div>
+            <button class="btn btn-em btn-sm" style="width:100%"><i class="bi bi-plug"></i> Activar en Fase 2</button>
+          </div>
+        </div>
+        <div class="card" style="opacity:0.7">
+          <div class="ch"><div class="int-ico" style="background:var(--blue-bg)"><i class="bi bi-envelope" style="color:var(--blue)"></i></div><span class="ch-title">Email transaccional</span><span class="bdg bdg-moon" style="margin-left:auto">Pendiente</span></div>
+          <div class="cb">
+            <div style="font-size:0.77rem;color:var(--sub);margin-bottom:0.65rem">SendGrid o Resend para emails del sistema</div>
+            <button class="btn btn-out btn-sm" style="width:100%"><i class="bi bi-plug"></i> Conectar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ AUDITORÍA ══════ -->
+    <div id="v-auditoria" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Auditoría</div><div class="vh-sub">Registro de actividad del sistema</div></div>
+        <button class="btn btn-out btn-sm"><i class="bi bi-download"></i> Exportar log</button>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Timestamp</th><th>Usuario</th><th>Acción</th><th>IP</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">2026-03-12 10:24:18</td><td style="font-size:0.78rem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f1e1b1216113f181a0c0b1610114c494f161e511c1012">[email&#160;protected]</a></td><td style="font-size:0.78rem">LOGIN · Panel Admin</td><td style="font-family:monospace;font-size:0.72rem">181.45.32.11</td><td><span class="bdg bdg-em">OK</span></td></tr>
+            <tr><td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">2026-03-12 10:22:04</td><td style="font-size:0.78rem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5b3a3f3632351b3c3e282f323435686d6b323a75383436">[email&#160;protected]</a></td><td style="font-size:0.78rem">EDIT · Módulos hotel-alvear</td><td style="font-family:monospace;font-size:0.72rem">181.45.32.11</td><td><span class="bdg bdg-em">OK</span></td></tr>
+            <tr><td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">2026-03-12 09:45:33</td><td style="font-size:0.78rem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="78191c151116381f1d0b0c1117164b4e481119561b1715">[email&#160;protected]</a></td><td style="font-size:0.78rem">CREATE · Tenant spa-zen</td><td style="font-family:monospace;font-size:0.72rem">181.45.32.11</td><td><span class="bdg bdg-em">OK</span></td></tr>
+            <tr><td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">2026-03-12 09:12:01</td><td style="font-size:0.78rem">sistema@ia</td><td style="font-size:0.78rem">ALERT · Churn detectado · palermo</td><td style="font-family:monospace;font-size:0.72rem">interno</td><td><span class="bdg bdg-amber">Alerta</span></td></tr>
+            <tr><td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">2026-03-11 18:34:12</td><td style="font-size:0.78rem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f9989d949097b99e9c8a8d909697cacfc99098d79a9694">[email&#160;protected]</a></td><td style="font-size:0.78rem">UPDATE · Plan dra-lopez → Pro</td><td style="font-family:monospace;font-size:0.72rem">181.45.32.11</td><td><span class="bdg bdg-em">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ CONFIGURACIÓN ══════ -->
+    <div id="v-configuracion" class="view">
+      <div class="vh">
+        <div><div class="vh-title">Configuración</div><div class="vh-sub">Ajustes del sistema</div></div>
+        <button class="btn btn-em btn-sm"><i class="bi bi-floppy"></i> Guardar cambios</button>
+      </div>
+      <div class="g2">
+        <div class="cfg-section">
+          <div class="cfg-hdr"><i class="bi bi-building" style="color:var(--accent)"></i><span class="cfg-title">Información de la empresa</span></div>
+          <div class="cfg-body">
+            <div class="fg"><label class="fl">Nombre</label><input class="fi" value="Gestión 360 iA"></div>
+            <div class="fg"><label class="fl">Dominio base</label><input class="fi" value="g360.ai"></div>
+            <div class="fi-row">
+              <div class="fg"><label class="fl">Email soporte</label><input class="fi" value="soporte@gestion360ia.com"></div>
+              <div class="fg"><label class="fl">WhatsApp soporte</label><input class="fi" value="+54 11 5555-0000"></div>
+            </div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-hdr"><i class="bi bi-shield-check" style="color:var(--accent)"></i><span class="cfg-title">Seguridad</span></div>
+          <div class="cfg-body">
+            <div style="display:flex;flex-direction:column;gap:0.5rem">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border)">
+                <div><div style="font-size:0.8rem;font-weight:600">JWT + Refresh tokens</div><div style="font-size:0.67rem;color:var(--muted)">Autenticación segura</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border)">
+                <div><div style="font-size:0.8rem;font-weight:600">HTTPS forzado</div><div style="font-size:0.67rem;color:var(--muted)">Redirigir HTTP → HTTPS</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border)">
+                <div><div style="font-size:0.8rem;font-weight:600">Rate limiting</div><div style="font-size:0.67rem;color:var(--muted)">100 req/min por IP</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0">
+                <div><div style="font-size:0.8rem;font-weight:600">Log de auditoría</div><div style="font-size:0.67rem;color:var(--muted)">Registrar todas las acciones</div></div>
+                <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-hdr"><i class="bi bi-robot" style="color:var(--gold)"></i><span class="cfg-title">Configuración IA</span></div>
+          <div class="cfg-body">
+            <div class="fg"><label class="fl">Modelo principal</label><select class="fi"><option selected>claude-sonnet-4-6 (Anthropic)</option><option>gpt-4o (OpenAI)</option></select></div>
+            <div class="fg"><label class="fl">Límite tokens/día</label><input class="fi" value="5.000.000"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-top:1px solid var(--border)">
+              <div><div style="font-size:0.8rem;font-weight:600">Asistente IA por cliente</div><div style="font-size:0.67rem;color:var(--muted)">Chatbot en portales</div></div>
+              <div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-k"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-hdr"><i class="bi bi-palette" style="color:var(--pine-d)"></i><span class="cfg-title">Apariencia del sistema</span></div>
+          <div class="cfg-body">
+            <div class="fg"><label class="fl">Color primario</label><input class="fi" value="#2A7D5F" style="font-family:monospace"></div>
+            <div class="fg"><label class="fl">Color secundario</label><input class="fi" value="#B89468" style="font-family:monospace"></div>
+            <div class="fg"><label class="fl">Tipografía</label><select class="fi"><option selected>Fraunces + Plus Jakarta Sans</option><option>Cormorant + DM Sans</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+const TITLES = {
+  dashboard:         ['Dashboard',           'Resumen general del sistema'],
+  clientes:          ['Clientes',            '24 clientes registrados'],
+  modulos:           ['Módulos',             'Catálogo del sistema'],
+  planes:            ['Planes',              'Gestión de suscripciones'],
+  comunicaciones:    ['Comunicaciones',      'Conversaciones con clientes'],
+  seguimiento:       ['Seguimiento',         'Tareas y recordatorios'],
+  alertas:           ['Alertas IA',          'Detecciones automáticas'],
+  integraciones:     ['Integraciones',       'Conexiones externas'],
+  auditoria:         ['Auditoría',           'Registro de actividad'],
+  configuracion:     ['Configuración',       'Ajustes del sistema'],
+  'cliente-detalle': ['Detalle del cliente', 'Configuración y módulos'],
+};
+
+function nav(id, el) {
+  // hide all views
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.remove('on');
+    v.style.display = '';
+  });
+  const view = document.getElementById('v-' + id);
+  if (!view) return;
+  if (id === 'comunicaciones') view.style.display = 'flex';
+  view.classList.add('on');
+
+  if (TITLES[id]) {
+    document.getElementById('tb-t').textContent = TITLES[id][0];
+    document.getElementById('tb-s').textContent = TITLES[id][1];
+  }
+  document.getElementById('content').style.padding =
+    id === 'comunicaciones' ? '0' : '1.3rem 1.4rem';
+
+  // sidebar active
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  if (el) el.classList.add('on');
+
+  // collapse after selecting a module
+  collapseSB();
+}
+
+// alias so any existing onclick="go(...)" still works
+function go(id, el) { nav(id, el); }
+
+function toggleSB() {
+  document.getElementById('sb').classList.toggle('collapsed');
+}
+function expandSB() {
+  document.getElementById('sb').classList.remove('collapsed');
+}
+function collapseSB() {
+  document.getElementById('sb').classList.add('collapsed');
+}
+
+function abrirCliente(nombre, iniciales, rubro, plan, estado) {
+  if (nombre) {
+    document.getElementById('det-av').textContent   = iniciales || 'CL';
+    document.getElementById('det-name').textContent  = nombre;
+    document.getElementById('det-sub').innerHTML =
+      `<i class="bi bi-globe" style="font-size:.68rem"></i> ${nombre.toLowerCase().replace(/\s+/g,'-')}.g360.ai · ${rubro}`;
+    document.getElementById('det-plan').textContent  = plan;
+    document.getElementById('det-rubro').textContent = rubro;
+    const estDiv = document.getElementById('det-estado');
+    if (estado === 'on') {
+      estDiv.textContent = '● Activo';
+      estDiv.style.background = 'rgba(255,255,255,.15)';
+    } else if (estado === 'warn') {
+      estDiv.textContent = '⚠ En riesgo';
+      estDiv.style.background = 'rgba(255,200,50,.2)';
+    } else {
+      estDiv.textContent = '○ Inactivo';
+      estDiv.style.background = 'rgba(255,255,255,.1)';
+    }
+  }
+  nav('cliente-detalle', null);
+}
+
+function toggleNota(el) {
+  el.classList.toggle('done');
+  const txt = el.closest('.nota')?.querySelector('.nota-txt');
+  if (txt) txt.classList.toggle('done');
+}
+
+function selConv(el) {
+  document.querySelectorAll('.conv-item').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+</script>
+</body>
+</html>
